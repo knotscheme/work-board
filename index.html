@@ -147,7 +147,9 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
 .rep-on{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
 .rep-on .btn{margin-left:auto;padding:5px 12px;font-size:.8rem}
 .tag.rec{background:var(--accent-soft);color:var(--accent);border:1px dashed var(--accent)}
-.ev.virtual{opacity:.6;border-left-style:dashed;cursor:default}
+.ev.virtual{opacity:.6;border-left-style:dashed;cursor:default;order:1}
+.day .ev.duty{order:2}
+.day .addev{order:3}
 .seg.wide.rc3{grid-template-columns:repeat(4,1fr)}
 .seg.wide.rc3 button{font-size:.74rem;padding:9px 2px}
 .tag.web{background:var(--warn-soft);color:var(--warn)}
@@ -1137,13 +1139,19 @@ function recRuleLabel(r){
   return '毎週（曜日自由）';
 }
 // その日が締切の回で、まだタスクになっていないもの（毎月の分だけ）
+// その日に来る定期タスクの回のうち、まだタスクになっていないもの（カレンダーに点線で出す）
 function recurringOn(key){
-  var d = new Date(key + 'T00:00:00');
+  var d = new Date(key + 'T00:00:00'), today = dayKey(0), w = d.getDay();
+  var made = DATA.pending.concat(DATA.done || []).map(function(t){ return t.rk; });
+  function mon(){ var m = new Date(d); m.setDate(m.getDate() - ((w + 6) % 7)); return ymd(m); }
   return ((DATA.board && DATA.board.recurring) || []).filter(function(r){
-    if (r.rule.type !== 'monthly' || d.getDate() !== r.rule.day) return false;
     if (!whoMatch(r.assignee || '')) return false;
-    var rk = r.id + ':' + key.slice(0, 7);
-    return !DATA.pending.concat(DATA.done || []).some(function(t){ return t.rk === rk; });
+    var rk;
+    if (r.rule.type === 'monthly') { if (d.getDate() !== r.rule.day) return false; rk = r.id + ':' + key.slice(0, 7); }
+    else if (r.rule.type === 'daily') { if (key <= today || w === 0 || w === 6 || isDutyDay(key, r.assignee)) return false; rk = r.id + ':' + key; }
+    else if (r.rule.dow != null) { if (w !== r.rule.dow || key < today) return false; rk = r.id + ':' + mon(); }
+    else return false;
+    return made.indexOf(rk) < 0;
   });
 }
 // タスクのシートに出す「くり返し」欄。すでに定期なら設定へのボタンを出す
@@ -1360,7 +1368,7 @@ function deptStates(owner, depts){
 }
 
 /* ---------- 読み込み ---------- */
-var LAST_SIG = '', LOADING = false, BUILD = '0a23ecfbb9e0';
+var LAST_SIG = '', LOADING = false, BUILD = '446da4b0f717';
 // 新しい版が公開されていたら、キャッシュを避けて読み直す
 async function checkVersion(){
   if (BUILD.indexOf('BUILD') >= 0) return;
@@ -1491,7 +1499,7 @@ function renderBoard(){
     var key = ymd(day);
     var evs = events.filter(function(e){ return e.date === key && (e.kind === 'event' || whoMatch(whoOfEvent(e))); }).sort(evOrder(events));
     cal += '<div data-date="'+key+'" class="day'+(key === today ? ' today' : key < today ? ' past' : '')+(day.getDay()===0 ? ' sun' : '')+(day.getDay()%6===0 ? ' wkend' : '')+(evs.length ? '' : ' empty')+'"><div class="dn"><b>'+(day.getMonth()+1)+'/'+day.getDate()+'（'+W[day.getDay()]+'）</b>'+(key===today?'<span>今日</span>':'')+'</div>';
-    recurringOn(key).forEach(function(r){ cal += '<div class="ev deadline virtual" title="定期タスク（まだタスクになっていない回）">'+(r.assignee ? whoChip(r.assignee) : '')+'（定期）'+esc(r.title)+' 締切</div>'; });
+    recurringOn(key).forEach(function(r){ var daily = r.rule.type === 'daily'; cal += '<div class="ev '+(daily ? 'plan' : 'deadline')+' virtual" title="定期タスク（その日になると自動でタスクになります）">'+(r.assignee ? whoChip(r.assignee) : '')+'<span class="rtag">'+esc(recRuleLabel(r).replace('（平日）',''))+'</span>'+esc(r.title)+(daily ? '' : ' 締切')+'</div>'; });
     evs.forEach(function(e){ var who = whoOfEvent(e); var rl = recLabelOfEvent(e); cal += '<button class="ev '+esc(e.kind)+(rl ? ' recur' : '')+'" data-ei="'+events.indexOf(e)+'">'+(who ? whoChip(who) : '')+(rl ? '<span class="rtag">'+esc(rl.replace('（平日）',''))+'</span>' : '')+(e.carried ? '<span class="ctag">持ち越し</span>' : '')+(e.time?'<span class="tm">'+esc(e.time)+'</span>':'')+esc(e.title)+'</button>'; });
     if (key >= today) cal += '<button class="addev" data-date="'+key+'" aria-label="'+key+' に予定を追加">＋ 追加</button>';
     cal += '</div>';
