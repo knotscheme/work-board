@@ -175,6 +175,9 @@ footer{color:var(--muted);font-size:.78rem}
 .nm.stale{border-color:var(--urgent);animation:blink 1.1s steps(2,start) infinite}
 .nm.stale .b{background:var(--urgent);color:var(--surface)}
 .nm.idle{opacity:.75}
+.nm.person{font-size:.78rem;background:var(--ink);color:var(--surface);border-color:var(--ink)}
+.nm.person.boss{background:#9A6A0B;border-color:#9A6A0B}
+.nm.person .b{background:var(--surface);color:var(--ink)}
 .nm.today{border:2px solid #E8A800}
 .nm .b.now{background:#E8A800;color:#1D2127}
 .chip.today{color:#9A6A0B;border-color:#E8A800;background:#FFF4D1}
@@ -729,7 +732,7 @@ var Office = (function(){
   var renderer, scene, camera, raycaster, clock;
   var hemi, sun;
   var desks = {}, secretary = null, planes = [], running = false, built = false, raf = 0;
-  var cam = {az:0, el:0.62, r:20, tx:0, tz:-0.5}, camGoal = null, autoSpin = true;
+  var cam = {az:0, el:0.62, r:22, tx:0, tz:-2.6}, camGoal = null, autoSpin = true;
   var states = {}, selected = null, bubbleIdx = 0, bubbleT = 0, planeT = 0, hudCycle = {};
   var SHIRTS = [0x4F7CAC,0xC0603F,0x5B8C5A,0x8E6BB0,0xD19A3C,0x3E8E8E,0xB0507A,0x6D7F99,0x9C7A4E,0x4A6FD1,0x2F9E7A,0xC2733A];
   var HAIRS = [0x2B2118,0x5A3B22,0x1C1C1C,0x7A4E2D,0x3B2A20,0x8C6A3F];
@@ -737,7 +740,7 @@ var Office = (function(){
 
   function mount(el){
     root = el;
-    el.innerHTML = '<h2>オフィス <small>今日の予定がある社員にスポットライト・締切が近いと汗・挙手＝確認待ち・赤点滅＝放置</small></h2>' +
+    el.innerHTML = '<h2>オフィス <small>佐藤 → 白川・藤田・佐々木・鳥居 → 白川の下に工程ごとのAI社員。今日の予定＝スポットライト・締切間近＝汗・挙手＝確認待ち・赤点滅＝放置</small></h2>' +
       '<div class="office" id="office"><canvas id="office-cv" aria-label="オフィスの3D表示"></canvas><div class="labels" id="office-labels"></div>' +
       '<div class="hud" id="office-hud"></div><div class="hint">ドラッグで回転・社員をタップで詳細</div><div class="zoom"><button data-z="in" aria-label="拡大">＋</button><button data-z="out" aria-label="縮小">−</button><button data-z="all" aria-label="全体を表示">全体</button></div><div class="panel" id="office-panel" hidden></div></div>';
     canvas = el.querySelector('#office-cv'); labelsEl = el.querySelector('#office-labels');
@@ -848,13 +851,13 @@ var Office = (function(){
     var glass = new THREE.MeshStandardMaterial({color:0xBFD9F2, emissive:0x8FB8E0, emissiveIntensity:.35});
     for (var w=-15; w<=15; w+=5){ var win = box(3.6,2,.05, glass); win.position.set(w,2.8,-10.83); scene.add(win); }
     // 島のラグ
-    var rug1 = new THREE.Mesh(new THREE.PlaneGeometry(25,4.6), mat(0x9AA7B8, {roughness:1})); rug1.rotation.x = -Math.PI/2; rug1.position.set(0,.01,-1.1); rug1.receiveShadow = true; scene.add(rug1);
-    var rug2 = new THREE.Mesh(new THREE.PlaneGeometry(13,4.6), mat(0xB4A58E, {roughness:1})); rug2.rotation.x = -Math.PI/2; rug2.position.set(0,.01,-6.6); rug2.receiveShadow = true; scene.add(rug2);
+    var rug1 = new THREE.Mesh(new THREE.PlaneGeometry(25,8.6), mat(0x9AA7B8, {roughness:1})); rug1.rotation.x = -Math.PI/2; rug1.position.set(0,.01,1.6); rug1.receiveShadow = true; scene.add(rug1);
+    var rug2 = new THREE.Mesh(new THREE.PlaneGeometry(21,3.8), mat(0xB4A58E, {roughness:1})); rug2.rotation.x = -Math.PI/2; rug2.position.set(0,.01,-5.1); rug2.receiveShadow = true; scene.add(rug2);
     plant(-13.5,-9.5); plant(13.5,-9.5); plant(-13.5,4.5); plant(13.5,4.5);
 
     var depts = (DATA.board.org && DATA.board.org.depts) || [];
     depts.forEach(function(d, i){
-      var row1 = i < 8, x = row1 ? -10.5 + i*3 : -4.5 + (i-8)*3, z = row1 ? -2 : -7.5;
+      var x = -10 + (i % 6) * 4, z = i < 6 ? -.6 : 3.4;
       var g = new THREE.Group(); g.position.set(x,0,z); scene.add(g);
       var wk = makeWorker(i), dk = makeDesk(2.2);
       g.add(wk.group); g.add(dk.group);
@@ -867,34 +870,52 @@ var Office = (function(){
       g.traverse(function(o){ o.userData.dept = d.cat; });
       var lbl = document.createElement('div'); lbl.className = 'nm'; lbl.onclick = function(){ select(d.cat, true); };
       labelsEl.appendChild(lbl);
-      desks[d.cat] = {dept:d, group:g, w:wk, d:dk, ring:ring, hand:hand, alert:alert, beam:beam, spot:spot, sweat:sweat, label:lbl, phase:i*1.7, idx:i};
+      desks[d.cat] = {dept:d, title:d.cat, group:g, w:wk, d:dk, ring:ring, hand:hand, alert:alert, beam:beam, spot:spot, sweat:sweat, label:lbl, phase:i*1.7, idx:i};
       // 秘書から各席への線
     });
 
-    // 秘書
-    var sg = new THREE.Group(); sg.position.set(0,0,4.2); scene.add(sg);
-    var sw = makeWorker(3, {shirt:0x2E4C88, headset:true}), sd = makeDesk(3.2, {mug:0xC9431A});
-    sg.add(sw.group); sg.add(sd.group);
-    var srug = new THREE.Mesh(new THREE.CircleGeometry(2.6,40), mat(0x2E4C88, {roughness:1, transparent:true, opacity:.25})); srug.rotation.x = -Math.PI/2; srug.position.set(0,.015,.4); sg.add(srug);
-    sg.traverse(function(o){ o.userData.dept = '__secretary'; });
-    var slbl = document.createElement('div'); slbl.className = 'nm'; slbl.innerHTML = '秘書'; slbl.onclick = function(){ select('__secretary', true); }; labelsEl.appendChild(slbl);
+    // 人（組織図）：佐藤が奥の一段高い席、その手前にメンバー4人。白川がAI社員チームをまとめる
+    var org = DATA.board.org || {}, boss = org.boss || '佐藤', staff = org.staff || [];
+    var PERSON_SHIRT = [0x2E4C88, 0x6B4E9B, 0x2F7D4F, 0xA6512E, 0x3E6E8E];
+    var dais = box(6,.4,3.6, mat(0x8C7A66)); dais.position.set(0,.2,-8.9); scene.add(dais);
+    function addPerson(name, i, x, z, y, opts){
+      var key = '@' + name;
+      var g = new THREE.Group(); g.position.set(x, y || 0, z); scene.add(g);
+      var wk = makeWorker(i + 2, Object.assign({shirt: PERSON_SHIRT[i % PERSON_SHIRT.length]}, opts || {})), dk = makeDesk(opts && opts.big ? 3.2 : 2.6, {mug: 0xC9431A});
+      g.add(wk.group); g.add(dk.group);
+      var ring = makeRing(); g.add(ring);
+      var hand = makeSign('?', '#C98A12'); hand.position.set(.62,2.55,0); g.add(hand);
+      var alert = makeSign('!', '#C9431A'); alert.position.set(-.4,2.45,0); g.add(alert);
+      var beam = new THREE.Mesh(new THREE.CylinderGeometry(.45,1.45,5.2,28,1,true), new THREE.MeshBasicMaterial({color:0xFFE6A0, transparent:true, opacity:.2, side:THREE.DoubleSide, depthWrite:false})); beam.position.set(0,2.6,.35); g.add(beam);
+      var spot = new THREE.Mesh(new THREE.CircleGeometry(1.45,40), new THREE.MeshBasicMaterial({color:0xFFE08A, transparent:true, opacity:.35, depthWrite:false})); spot.rotation.x = -Math.PI/2; spot.position.set(0,.025,.35); g.add(spot);
+      var sweat = makeDrop(); sweat.position.set(.34,1.95,.2); g.add(sweat);
+      g.traverse(function(o){ o.userData.dept = key; });
+      var lbl = document.createElement('div'); lbl.className = 'nm person'; lbl.onclick = function(){ select(key, true); }; labelsEl.appendChild(lbl);
+      desks[key] = {person:name, title:name, isBoss: !!(opts && opts.big), group:g, w:wk, d:dk, ring:ring, hand:hand, alert:alert, beam:beam, spot:spot, sweat:sweat, label:lbl, phase:i*2.3, idx:i};
+      return desks[key];
+    }
+    addPerson(boss, 0, 0, -9.6, .4, {big:true});
+    staff.forEach(function(n, i){ addPerson(n, i+1, -7.5 + i*5, -5.6, 0, n === '白川' ? {headset:true} : {}); });
+    var hub = desks['@白川'] || desks['@' + staff[0]];
     bubbleEl = document.createElement('div'); bubbleEl.className = 'bubble'; labelsEl.appendChild(bubbleEl);
-    secretary = {group:sg, w:sw, d:sd, label:slbl, phase:0};
+    secretary = hub;
 
-    // 秘書→各席の連絡線（組織図）
-    Object.keys(desks).forEach(function(k){
-      var t = desks[k].group.position;
-      var pts = [new THREE.Vector3(0,.03,4.2), new THREE.Vector3(t.x,.03,t.z+1.6)];
-      var line = new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts), new THREE.LineDashedMaterial({color:cssColor('--accent'), dashSize:.3, gapSize:.2, transparent:true, opacity:.55}));
-      line.computeLineDistances(); scene.add(line); desks[k].line = line;
-    });
+    function link(from, to, color, op){
+      var a = from.group.position, b = to.group.position;
+      var pts = [new THREE.Vector3(a.x,.03,a.z+1.4), new THREE.Vector3(b.x,.03,b.z-.2)];
+      var line = new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts), new THREE.LineDashedMaterial({color:color, dashSize:.3, gapSize:.2, transparent:true, opacity:op}));
+      line.computeLineDistances(); scene.add(line); return line;
+    }
+    // 佐藤 → メンバー、白川 → 工程ごとのAI社員
+    staff.forEach(function(n){ if (desks['@'+n]) desks['@'+n].line = link(desks['@'+boss], desks['@'+n], cssColor('--warn'), .7); });
+    Object.keys(desks).forEach(function(k){ if (k[0] !== '@') desks[k].line = link(hub, desks[k], cssColor('--accent'), .55); });
 
     bindInput();
     window.addEventListener('resize', resize);
     resize();
   }
 
-  function defaultR(){ var r = canvas.getBoundingClientRect(); return Math.min(42, Math.max(20, 24 / Math.max(.4, r.width / r.height))); }
+  function defaultR(){ var r = canvas.getBoundingClientRect(); return Math.min(44, Math.max(22, 26 / Math.max(.4, r.width / r.height))); }
 
   function resize(){
     if (!renderer) return;
@@ -923,7 +944,7 @@ var Office = (function(){
     root.querySelectorAll('.zoom button').forEach(function(b){
       b.onclick = function(){
         var z = b.dataset.z;
-        if (z === 'all') { var rr = canvas.getBoundingClientRect(), pt = rr.width / rr.height < 1; cam.el = pt ? 1.0 : .62; camGoal = {tx:0, tz:-.5, r:defaultR() * (pt ? .85 : 1)}; autoSpin = true; select(null); return; }
+        if (z === 'all') { var rr = canvas.getBoundingClientRect(), pt = rr.width / rr.height < 1; cam.el = pt ? 1.0 : .62; camGoal = {tx:0, tz:-2.6, r:defaultR() * (pt ? .85 : 1)}; autoSpin = true; select(null); return; }
         camGoal = {tx:cam.tx, tz:cam.tz, r: Math.max(8, Math.min(44, cam.r * (z === 'in' ? .8 : 1.25)))};
       };
     });
@@ -940,7 +961,7 @@ var Office = (function(){
   }
 
   function flyTo(cat){
-    var p = cat === '__secretary' ? secretary.group.position : desks[cat].group.position;
+    var p = desks[cat].group.position;
     camGoal = {tx:p.x, tz:p.z, r: Math.min(cam.r, 13)}; autoSpin = false;
   }
 
@@ -948,16 +969,25 @@ var Office = (function(){
   function select(cat, fly){
     selected = cat;
     Object.keys(desks).forEach(function(k){ desks[k].label.classList.toggle('sel', k === cat); });
-    if (secretary) secretary.label.classList.toggle('sel', cat === '__secretary');
     if (!cat) { panelEl.hidden = true; return; }
     if (fly) flyTo(cat);
     var html = '<button class="x" aria-label="閉じる">×</button>';
-    if (cat === '__secretary') {
-      var org = DATA.board.org.head, sum = summary();
-      html += '<h3>'+esc(org.name)+'</h3><span class="state working">全体把握</span><p style="margin:0;font-size:.88rem">'+esc(org.role)+'</p>' +
-        '<div class="lbl">今日・明日の予定</div><ul>'+scheduleLines().map(function(s){ return '<li>'+esc(s)+'</li>'; }).join('')+'</ul>' +
-        '<div class="lbl">報告</div><ul>'+sum.map(function(s){ return '<li>'+esc(s)+'</li>'; }).join('')+'</ul>' +
-        '<div class="lbl">道具</div><div class="tools">'+org.tools.map(function(t){ return '<span>'+esc(t)+'</span>'; }).join('')+'</div>';
+    if (cat[0] === '@') {
+      var ps = states[cat], dk0 = desks[cat], orgB = DATA.board.org || {};
+      html += '<h3>'+esc(ps.person)+'</h3><span class="state '+(dk0.isBoss ? 'working' : ps.state)+'">'+(dk0.isBoss ? 'トップ' : STATE_JP[ps.state])+'</span>';
+      if (dk0.isBoss) {
+        html += '<div class="lbl">今日・明日の予定</div><ul>'+scheduleLines().map(function(x){ return '<li>'+esc(x)+'</li>'; }).join('')+'</ul>' +
+          '<div class="lbl">報告</div><ul>'+summary().map(function(x){ return '<li>'+esc(x)+'</li>'; }).join('')+'</ul>' +
+          '<div class="lbl">メンバー</div><ul>'+(orgB.staff || []).map(function(n){ var m = states['@'+n]; return '<li><b>'+esc(n)+'</b> <span class="meta">担当タスク '+(m ? m.tasks.length : 0)+'件'+(m && m.today.length ? '・今日の予定 '+m.today.length+'件' : '')+'</span></li>'; }).join('')+'</ul>';
+      } else {
+        if (ps.today.length) html += '<div class="lbl">今日の予定</div><ul>'+ps.today.map(function(e){ return '<li><b>'+(e.time ? esc(e.time)+' ' : '')+esc(e.title)+'</b></li>'; }).join('')+'</ul>';
+        var soon2 = ps.soon.filter(function(e){ return ps.today.indexOf(e) < 0; });
+        if (soon2.length) html += '<div class="lbl">近い締切</div><ul>'+soon2.map(function(e){ return '<li>'+jpDate(e.date+'T00:00:00')+' '+esc(e.title)+'</li>'; }).join('')+'</ul>';
+        html += '<div class="lbl">担当タスク '+ps.tasks.length+'件</div>' + (ps.tasks.length ? '<ul>'+ps.tasks.map(function(t){
+          return '<li class="task"><span class="tagrow"><span class="tag '+esc(t.label)+'">'+esc(t.label)+'</span><span class="tag cat">'+esc(t.category)+'</span></span><span>'+esc(t.content)+'</span></li>';
+        }).join('')+'</ul>' : '<p class="muted" style="margin:0;font-size:.86rem">担当タスクはありません。</p>');
+        if (ps.person === '白川') html += '<div class="lbl">チーム（工程ごとのAI社員）</div><ul>'+Object.keys(desks).filter(function(k){ return k[0] !== '@'; }).map(function(k){ var d = states[k]; return '<li>'+esc(k)+' <span class="meta">'+STATE_JP[d.state]+(d.tasks.length ? '・'+d.tasks.length+'件' : '')+'</span></li>'; }).join('')+'</ul>';
+      }
     } else {
       var s = states[cat], d = s.dept;
       html += '<h3>'+esc(d.cat)+'担当</h3><span class="state '+s.state+'">'+STATE_JP[s.state]+'</span>' +
@@ -991,14 +1021,29 @@ var Office = (function(){
 
   function count(){
     var c = {stale:0, decision:0, working:0, idle:0, today:0};
-    Object.keys(states).forEach(function(k){ c[states[k].state]++; if (states[k].today.length) c.today++; if (states[k].state === 'stale' && states[k].qs.length) c.decision++; });
+    Object.keys(states).forEach(function(k){ if (k[0] === '@' && !states[k].today.length) return; c[states[k].state]++; if (states[k].today.length) c.today++; if (states[k].state === 'stale' && states[k].qs.length) c.decision++; });
     return c;
+  }
+
+  // 人ごとの状態：担当タスク・今日の予定・近い締切
+  function personStates(){
+    var out = {}, today = dayKey(0), soonEnd = dayKey(2), now = Date.now(), org = DATA.board.org || {};
+    [org.boss || '佐藤'].concat(org.staff || []).forEach(function(n){
+      var tasks = DATA.pending.filter(function(t){ return t.assignee === n; }).sort(function(a,b){ return b.score - a.score; });
+      var mine = ((DATA.board && DATA.board.events) || []).filter(function(e){ return whoOfEvent(e) === n && e.kind !== 'duty'; });
+      var stale = tasks.filter(function(t){ return now - new Date(t.recorded) > STALE_DAYS*86400000; });
+      out['@'+n] = {person:n, tasks:tasks, qs:[], stale:stale, products:[],
+        today: mine.filter(function(e){ return e.date === today; }),
+        soon: mine.filter(function(e){ return (e.kind === 'deadline' || e.kind === 'event') && e.date >= today && e.date <= soonEnd; }),
+        state: stale.length ? 'stale' : tasks.length ? 'working' : 'idle'};
+    });
+    return out;
   }
 
   /* ---- 状態を反映（データ更新ごと） ---- */
   function update(){
     if (!DATA) return;
-    states = deptStates();
+    states = Object.assign(deptStates(), personStates());
     if (!built) return;
     var accent = cssColor('--accent'), warn = cssColor('--warn'), urgent = cssColor('--urgent'), idle = cssColor('--idle');
     Object.keys(desks).forEach(function(k){
@@ -1007,20 +1052,21 @@ var Office = (function(){
       dk.ring.material.color.copy(s.state === 'stale' ? urgent : s.state === 'decision' ? warn : dk.today ? new THREE.Color(0xE8A800) : s.state === 'working' ? accent : idle);
       dk.d.lidMat.emissive.copy(s.tasks.length ? accent : new THREE.Color(0)); dk.d.lidMat.emissiveIntensity = s.tasks.length ? .6 : 0;
       dk.d.paper.visible = s.tasks.length > 0 || s.products.length > 0;
-      dk.line.material.opacity = s.tasks.length ? .6 : .15;
+      if (dk.line) dk.line.material.opacity = dk.person ? .7 : s.tasks.length ? .6 : .15;
       dk.label.className = 'nm ' + s.state + (dk.today ? ' today' : '') + (selected === k ? ' sel' : '');
-      dk.label.innerHTML = (dk.today ? '<span class="b now">今日</span>' : '') + esc(k) + (s.tasks.length ? '<span class="b">'+s.tasks.length+'</span>' : '');
+      dk.label.className += dk.person ? ' person' + (dk.isBoss ? ' boss' : '') : '';
+      dk.label.innerHTML = (dk.today ? '<span class="b now">今日</span>' : '') + esc(dk.title) + (s.tasks.length ? '<span class="b">'+s.tasks.length+'</span>' : '');
     });
     var duty = isDutyDay(dayKey(0));
     hemi.intensity = duty ? .38 : .75; sun.intensity = duty ? .3 : .75;
     var c = count();
     hudEl.innerHTML =
       chip('today','今日の予定',c.today) + chip('stale','放置',c.stale) + chip('decision','確認待ち',c.decision) + chip('working','作業中',c.working) +
-      '<button class="chip" data-s="__secretary">秘書の報告</button>';
+      '<button class="chip" data-s="__secretary">全体の報告</button>';
     hudEl.querySelectorAll('button').forEach(function(b){
       b.onclick = function(){
         var s = b.dataset.s;
-        if (s === '__secretary') return select('__secretary', true);
+        if (s === '__secretary') return select('@' + ((DATA.board.org && DATA.board.org.boss) || '佐藤'), true);
         var list = Object.keys(states).filter(function(k){ return s === 'decision' ? states[k].qs.length : s === 'today' ? states[k].today.length : states[k].state === s; });
         if (!list.length) return;
         hudCycle[s] = ((hudCycle[s] == null ? -1 : hudCycle[s]) + 1) % list.length;
@@ -1047,17 +1093,19 @@ var Office = (function(){
   function bubbleLines(){
     var lines = scheduleLines().concat(summary().slice(1));
     Object.keys(states).forEach(function(k){ if (states[k].qs.length) lines.push(k+'担当が確認を待っています。'); });
+    lines = lines.map(function(x){ return '白川：' + x; });
     lines.push('タスクは「秘書に共有して」で受け付けます。');
     return lines;
   }
 
   function spawnPlane(){
-    var busy = Object.keys(desks).filter(function(k){ return states[k] && states[k].tasks.length; });
+    var busy = Object.keys(desks).filter(function(k){ return k[0] !== '@' && states[k] && states[k].tasks.length; });
     if (!busy.length) return;
     var k = busy[Math.floor(Math.random()*busy.length)], to = desks[k].group.position;
     var m = new THREE.Mesh(new THREE.ConeGeometry(.16,.42,3), new THREE.MeshStandardMaterial({color:0xFFFFFF, emissive:0xFFFFFF, emissiveIntensity:.25}));
     m.castShadow = true; scene.add(m);
-    planes.push({m:m, from:new THREE.Vector3(0,1.6,4.6), to:new THREE.Vector3(to.x,1.3,to.z+.8), t:0, dur:2.2 + Math.random()*.8});
+    var hp = secretary.group.position;
+    planes.push({m:m, from:new THREE.Vector3(hp.x,1.6,hp.z+.8), to:new THREE.Vector3(to.x,1.3,to.z+.8), t:0, dur:2.2 + Math.random()*.8});
   }
 
   var tmpV = new THREE.Vector3();
@@ -1106,20 +1154,13 @@ var Office = (function(){
       dk.alert.visible = dk.isStale; dk.alert.material.opacity = mo ? (Math.sin(t*7) > 0 ? 1 : .25) : 1;
       if (st === 'stale') { var on = mo ? (Math.sin(t*7) > 0) : true; w.shirtMat.emissive.setHex(on ? 0x8A1A00 : 0); dk.ring.material.opacity = on ? .85 : .25; }
       else { w.shirtMat.emissive.setHex(0); dk.ring.material.opacity = .5; }
-      var lp = project(dk.group, 3.05);
+      var lp = project(dk.group, dk.isBoss ? 3.1 : 3.05);
       dk.label.style.left = lp.x+'px'; dk.label.style.top = lp.y+'px'; dk.label.style.display = lp.vis ? '' : 'none';
     });
 
-    // 秘書（電話しながら書類を配る）
-    var s = secretary.w;
-    s.head.rotation.y = Math.sin(t*.7)*.35*mo; s.torso.rotation.x = .02;
-    s.arms[0].rotation.x = -1.1 + Math.sin(t*12)*.1*mo; s.arms[0].rotation.z = -.15;
-    s.arms[1].rotation.x = -1.6 + Math.sin(t*1.5)*.5*mo; s.arms[1].rotation.z = .1;
-    var sp = project(secretary.group, 2.6);
-    secretary.label.style.left = sp.x+'px'; secretary.label.style.top = sp.y+'px';
     bubbleT -= dt;
     if (bubbleT <= 0) { var lines = bubbleLines(); bubbleEl.textContent = lines[bubbleIdx++ % lines.length]; bubbleT = 5; }
-    var bp = project(secretary.group, 3.3);
+    var bp = project(secretary.group, 3.6);
     bubbleEl.style.left = bp.x+'px'; bubbleEl.style.top = bp.y+'px';
 
     // 書類が飛ぶ
