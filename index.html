@@ -137,7 +137,13 @@ th.st,td.st{text-align:center;width:60px}
 .note{color:var(--muted);font-size:.82rem}
 .pipe{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,330px),1fr));gap:10px}
 .pc{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 14px;display:grid;gap:8px;align-content:start}
-.pc-h{display:flex;gap:8px;align-items:baseline;flex-wrap:wrap}
+.pc-h{display:flex;gap:8px;align-items:baseline;flex-wrap:wrap;font:inherit;color:inherit;text-align:left;border:0;background:none;padding:4px;margin:-4px;border-radius:8px;cursor:pointer;width:calc(100% + 8px)}
+.pc-h:hover{background:var(--bg)}
+.pc-edit{margin-left:auto;font-size:.72rem;color:var(--accent);font-weight:700}
+.arch-row{display:flex;justify-content:space-between;align-items:center;gap:8px;background:var(--done-soft);color:var(--done);border-radius:8px;padding:6px 6px 6px 12px;font-size:.84rem;font-weight:700}
+.pdone{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px 14px}
+.pdone summary{cursor:pointer;font-weight:700;font-size:.88rem;color:var(--muted)}
+.pdone ul{list-style:none;margin:10px 0 0;padding:0;display:grid;gap:6px}
 .pc-st{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:2px}
 .dotbtn{border:0;background:none;padding:8px 0 6px;border-radius:8px;display:grid;justify-items:center;gap:4px;min-height:52px}
 .dotbtn span{font-size:.7rem;color:var(--muted);font-weight:700}
@@ -398,6 +404,7 @@ function knownWho(){
   ((DATA.board && DATA.board.members) || []).forEach(function(n){ set[n] = 1; });
   DATA.pending.forEach(function(t){ if (t.assignee) set[t.assignee] = 1; });
   ((DATA.board && DATA.board.events) || []).forEach(function(e){ if (e.assignee) set[e.assignee] = 1; });
+  ((DATA.board && DATA.board.pipeline) || []).forEach(function(p){ if (p.assignee) set[p.assignee] = 1; });
   return Object.keys(set);
 }
 function whoOfEvent(e){
@@ -680,6 +687,73 @@ function bindEventDrag(vb){
   });
 }
 
+// 進み具合を最新から読み直して mutate を当て、保存して画面に反映
+async function savePipeline(mutate, msg){
+  var res = await ghUpdate('pipeline.enc.json', function(d){
+    var base = JSON.parse(JSON.stringify((d && d.pipeline) || DATA.board.pipeline || []));
+    mutate(base);
+    return {pipeline: base, updated: new Date().toISOString()};
+  }, msg);
+  DATA.board.pipeline = res.pipeline; DATA.pipeSyncPending = true;
+  renderBoard(); Office.update();
+}
+
+function archiveProduct(item){
+  var allDone = (item.s || []).length && item.s.every(function(x){ return x === 'done'; });
+  confirmModal(item.code + ' をアーカイブしますか？', (allDone ? '全工程が完了しています。' : 'まだ完了していない工程があります。') + '一覧から非表示になり、下の「アーカイブ」にまとまります。いつでも戻せます。', 'アーカイブする', async function(){
+    try {
+      await savePipeline(function(base){ base.forEach(function(x){ if (x.code === item.code) { x.done = true; x.doneAt = new Date().toISOString(); } }); }, 'archive product');
+      Sheet.close(); toast(item.code + ' をアーカイブしました');
+    } catch(err) { toast(err.message, true); }
+  });
+}
+
+function productSheet(item){
+  if (!ghToken()) return needToken();
+  var cur = item || {code:'', name:'', note:'', assignee:''};
+  Sheet.open(
+    '<h3>'+(item ? '新商品を編集' : '新商品を登録')+'</h3>' +
+    '<div class="row2"><label class="fld"><span>品番</span><input type="text" id="pd-code" value="'+esc(cur.code)+'" placeholder="例：lw280" autocomplete="off"></label>' +
+    '<label class="fld"><span>商品名</span><input type="text" id="pd-name" value="'+esc(cur.name)+'" placeholder="例：二つ折り財布"></label></div>' +
+    whoField(cur.assignee) +
+    '<label class="fld"><span>メモ</span><textarea id="pd-note" rows="2" placeholder="例：サンプル確認済み。撮影待ち">'+esc(cur.note || '')+'</textarea></label>' +
+    '<div class="row"><button class="btn primary" id="pd-save">'+(item ? '保存' : '登録')+'</button><button class="btn" data-close>やめる</button>' +
+    (item ? (item.done ? '<button class="btn ok" id="pd-undone">一覧に戻す</button>' : '<button class="btn ok" id="pd-done">アーカイブ</button>') + '<button class="btn danger push-right" id="pd-del">削除</button>' : '') + '</div>' +
+    '<span class="status"></span><p class="meta" style="margin:0">工程ごとの状態は、カードの丸をタップして変えます。</p>',
+    function(sh){
+      var getWho = bindWho(sh, cur.assignee);
+      if (!item) sh.querySelector('#pd-code').focus();
+      async function run(mutate, msg, done){
+        st(sh, '保存中…');
+        try { await savePipeline(mutate, msg); Sheet.close(); toast(done); }
+        catch(err){ st(sh, err.message, true); }
+      }
+      sh.querySelector('#pd-save').onclick = function(){
+        var code = sh.querySelector('#pd-code').value.trim(), name = sh.querySelector('#pd-name').value.trim();
+        var note = sh.querySelector('#pd-note').value.trim(), who = getWho();
+        if (!code || !name) { st(sh, '品番と商品名を入れてください', true); return; }
+        var dup = (DATA.board.pipeline || []).some(function(x){ return x.code === code && (!item || x.code !== item.code); });
+        if (dup) { st(sh, 'この品番はもう登録されています', true); return; }
+        run(function(base){
+          if (item) base.forEach(function(x){ if (x.code === item.code) { x.code = code; x.name = name; x.note = note; if (who) x.assignee = who; else delete x.assignee; } });
+          else { var n = {code:code, name:name, s:(DATA.board.stages || []).map(function(){ return ''; }), note:note}; if (who) n.assignee = who; base.push(n); }
+        }, item ? 'edit product' : 'add product', item ? '保存しました' : code + ' を登録しました');
+      };
+      var dn = sh.querySelector('#pd-done');
+      if (dn) dn.onclick = function(){
+        archiveProduct(item);
+      };
+      var ud = sh.querySelector('#pd-undone');
+      if (ud) ud.onclick = function(){ run(function(base){ base.forEach(function(x){ if (x.code === item.code) { delete x.done; delete x.doneAt; } }); }, 'reopen product', item.code + ' を一覧に戻しました'); };
+      var dl = sh.querySelector('#pd-del');
+      if (dl) dl.onclick = function(){
+        confirmModal('本当に削除しますか？', item.code + '（' + item.name + '）を進み具合から削除します。元に戻せません。', '削除する', function(){
+          run(function(base){ var i = base.findIndex(function(x){ return x.code === item.code; }); if (i >= 0) base.splice(i, 1); }, 'delete product', item.code + ' を削除しました');
+        });
+      };
+    });
+}
+
 function st(sh, text, err){ var el = sh.querySelector('.status'); if (el) { el.textContent = text; el.classList.toggle('err', !!err); } }
 
 function fail(text){ app.innerHTML = '<div class="msg"><h1 style="font-size:1.2rem">ボードを開けません</h1><p class="muted">'+text+'</p></div>'; }
@@ -718,7 +792,8 @@ function deptStates(owner, depts){
     var mine = events.filter(function(e){ var w = whoOfEvent(e); return eventCat(e) === d.cat && (owner === '白川' ? (!w || w === '白川') : w === owner); });
     var todayEv = mine.filter(function(e){ return e.date === today && e.kind !== 'duty'; });
     var soon = mine.filter(function(e){ return (e.kind === 'deadline' || e.kind === 'event') && e.date >= today && e.date <= soonEnd; });
-    var products = owner === '白川' ? (b.pipeline || []).map(function(p){ return activeStage(p, b.stages || []); }).filter(function(a){ return a && a.cat === d.cat; }) : [];
+    var products = (b.pipeline || []).filter(function(p){ return !p.done && (owner === '白川' ? (!p.assignee || p.assignee === '白川') : p.assignee === owner); })
+      .map(function(p){ return activeStage(p, b.stages || []); }).filter(function(a){ return a && a.cat === d.cat; });
     var state = stale.length ? 'stale' : qs.length ? 'decision' : (tasks.length || products.length) ? 'working' : 'idle';
     out['T:'+d.cat] = {dept:d, tasks:tasks, qs:qs, stale:stale, state:state, today:todayEv, soon:soon, products:products};
   });
@@ -821,10 +896,12 @@ function renderBoard(){
   }
 
   var stages = b.stages || [], tip = {done:'完了', hot:'今週やる', now:'次の作業', wait:'待ち', '':'未着手／不明'}, pipe = '';
-  (b.pipeline || []).forEach(function(p){
-    pipe += '<div class="pc"><div class="pc-h"><span class="code">'+esc(p.code)+'</span><span class="name">'+esc(p.name)+'</span></div><div class="pc-st">';
+  var pipeAll = b.pipeline || [], pipeDone = pipeAll.filter(function(p){ return p.done; });
+  pipeAll.filter(function(p){ return !p.done && whoMatch(p.assignee || ''); }).forEach(function(p){
+    pipe += '<div class="pc"><button class="pc-h" data-pcode="'+esc(p.code)+'" aria-label="'+esc(p.code)+'を編集"><span class="code">'+esc(p.code)+'</span><span class="name">'+esc(p.name)+'</span>'+(p.assignee ? '<span class="tag whotag">'+esc(p.assignee)+'</span>' : '')+'<span class="pc-edit">編集</span></button><div class="pc-st">';
     stages.forEach(function(st, j){ var s = (p.s||[])[j] || ''; pipe += '<button class="dotbtn" data-code="'+esc(p.code)+'" data-j="'+j+'" aria-label="'+esc(p.code)+' '+esc(st)+'：'+tip[s]+'（タップで変更）"><i class="dot '+esc(s)+'"></i><span>'+esc(st)+'</span></button>'; });
-    pipe += '</div>'+(p.note ? '<div class="note">'+esc(p.note)+'</div>' : '')+'</div>';
+    var allDone = (p.s || []).length && p.s.every(function(x){ return x === 'done'; });
+    pipe += '</div>'+(p.note ? '<div class="note">'+esc(p.note)+'</div>' : '')+(allDone ? '<div class="arch-row"><span>全工程が完了しました</span><button class="btn ok" data-archive="'+esc(p.code)+'">アーカイブする</button></div>' : '')+'</div>';
   });
 
   var planned = {}; events.forEach(function(e){ if (e.task) (planned[e.task] = planned[e.task] || []).push(e.date); });
@@ -852,10 +929,13 @@ function renderBoard(){
       '<div class="legend"><span><i class="sw" style="background:var(--urgent)"></i>イベント</span><span><i class="sw" style="background:var(--warn)"></i>締切</span><span><i class="sw" style="background:var(--accent)"></i>作業予定</span><span><i class="sw" style="background:var(--muted)"></i>担当業務</span></div>' +
       whoFilterHtml() +
       '<div class="cal">'+cal+'</div></section>' +
-    '<section class="sec" id="sec-pipe"><h2>新商品の進み具合 <small>品番ごと・工程順・丸をタップで変更</small></h2>' +
+    '<section class="sec" id="sec-pipe"><div class="h2row"><h2>新商品の進み具合 <small>丸をタップで工程の状態・品番をタップで編集</small></h2><button class="btn primary" id="add-product">＋ 新商品を登録</button></div>' +
       '<div class="pipe-note" id="pipe-status">'+(ghToken() ? (DATA.pipeSyncPending ? 'Webでの変更があります。秘書が取り込むと、タスクの担当工程にも反映されます。' : '丸をタップすると状態を変えられます。') : '変更するには、メモタブで書き込みの設定（トークン登録）をしてください。')+'</div>' +
       '<div class="legend"><span><i class="dot done"></i>完了</span><span><i class="dot hot"></i>今週やる</span><span><i class="dot now"></i>次の作業</span><span><i class="dot wait"></i>待ち</span><span><i class="dot"></i>未着手／不明</span></div>' +
-      '<div class="pipe">'+pipe+'</div></section>' +
+      whoFilterHtml() +
+      '<div class="pipe">'+(pipe || '<p class="muted" style="margin:0">該当する商品はありません。</p>')+'</div>' +
+      (pipeDone.length ? '<details class="pdone"><summary>アーカイブ（非表示中） '+pipeDone.length+'件</summary><ul>'+pipeDone.map(function(p){ return '<li><button class="pc-h" data-pcode="'+esc(p.code)+'"><span class="code">'+esc(p.code)+'</span><span class="name">'+esc(p.name)+'</span>'+(p.assignee ? '<span class="tag whotag">'+esc(p.assignee)+'</span>' : '')+'<span class="meta">'+(p.doneAt ? jpDate(p.doneAt) : '')+'</span></button></li>'; }).join('')+'</ul></details>' : '') +
+      '</section>' +
     '<div class="dotmenu" id="dotmenu" hidden role="menu"></div>' +
     '<section class="sec" id="sec-tasks"><div class="h2row"><h2>タスク <small>タップで編集</small></h2><button class="btn primary" id="add-task">＋ タスクを追加</button></div>' +
       '<div class="row meta">並べ方 <span class="seg" id="tview"><button data-v="cat"'+(taskView === 'cat' ? ' aria-pressed="true"' : '')+'>工程別</button><button data-v="who"'+(taskView === 'who' ? ' aria-pressed="true"' : '')+'>担当別</button></span></div>' +
@@ -871,6 +951,9 @@ function renderBoard(){
   bindEventDrag(vb);
   vb.querySelectorAll('.tbtn').forEach(function(b){ b.onclick = function(){ taskSheet(DATA.pending.filter(function(x){ return x.id === b.dataset.tid; })[0]); }; });
   document.getElementById('add-task').onclick = function(){ taskSheet(null); };
+  document.getElementById('add-product').onclick = function(){ productSheet(null); };
+  vb.querySelectorAll('[data-archive]').forEach(function(b){ b.onclick = function(){ if (!ghToken()) return needToken(); archiveProduct((DATA.board.pipeline || []).filter(function(x){ return x.code === b.dataset.archive; })[0]); }; });
+  vb.querySelectorAll('[data-pcode]').forEach(function(b){ b.onclick = function(){ productSheet((DATA.board.pipeline || []).filter(function(x){ return x.code === b.dataset.pcode; })[0]); }; });
   vb.querySelectorAll('.whofilter button').forEach(function(b){ b.onclick = function(){ whoFilter = b.dataset.who; ls('wb_who', whoFilter); renderBoard(); }; });
   vb.querySelectorAll('#tview button').forEach(function(b){ b.onclick = function(){ taskView = b.dataset.v; ls('wb_tview', taskView); renderBoard(); }; });
   applyBoardSections();
@@ -1504,22 +1587,8 @@ var Pipe = (function(){
   async function save(code, j, v){
     if (busy) return; busy = true; status('保存中…');
     try {
-      for (var attempt = 0; attempt < 2; attempt++) {
-        var cur = await ghRead('pipeline.enc.json');
-        var base = JSON.parse(JSON.stringify((cur.data && cur.data.pipeline) || DATA.board.pipeline));
-        base.forEach(function(x){ if (x.code === code) { x.s = x.s.slice(); x.s[j] = v; } });
-        var body = {message:'update pipeline', content: btoa(await encryptJSON({pipeline: base, updated: new Date().toISOString()}))};
-        if (cur.sha) body.sha = cur.sha;
-        var put = await ghFile('pipeline.enc.json', 'PUT', body);
-        if (put.ok) {
-          DATA.board.pipeline = base; DATA.pipeSyncPending = true;
-          renderBoard(); Office.update();
-          status('保存しました。オフィスに反映済み。秘書が取り込むと、タスクの担当工程にも反映されます。');
-          return;
-        }
-        if (put.status !== 409 && put.status !== 422) throw new Error('保存できませんでした（'+put.status+'）。');
-      }
-      throw new Error('ほかの端末と同時に保存されました。もう一度選んでください。');
+      await savePipeline(function(base){ base.forEach(function(x){ if (x.code === code) { x.s = x.s.slice(); x.s[j] = v; } }); }, 'update pipeline');
+      status('保存しました。オフィスに反映済み。秘書が取り込むと、タスクの担当工程にも反映されます。');
     } catch(e) { status(e.message, true); }
     finally { busy = false; }
   }
