@@ -84,6 +84,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
 .ev{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
 .ev.dragging{opacity:.35}
 .dragghost{position:fixed;z-index:80;pointer-events:none;box-shadow:0 8px 24px rgb(0 0 0 / .25);transform:rotate(-2deg) scale(1.04);border-radius:6px}
+.dropline{height:3px;border-radius:2px;background:var(--accent);margin:-1px 0;box-shadow:0 0 0 2px var(--accent-soft)}
 .day.dropover{outline:3px solid var(--accent);outline-offset:-2px;background:var(--accent-soft)}
 .toast{position:fixed;left:50%;bottom:calc(92px + env(safe-area-inset-bottom, 0px));transform:translateX(-50%);z-index:90;background:var(--ink);color:var(--surface);border-radius:999px;padding:8px 18px;font-size:.86rem;font-weight:700;box-shadow:0 4px 14px rgb(0 0 0 / .25);max-width:calc(100% - 32px)}
 .toast-act{margin-left:12px;border:0;background:none;color:#9CC0FF;font-weight:700;font-size:.86rem;padding:2px 4px;text-decoration:underline}
@@ -695,6 +696,7 @@ function needToken(){
 }
 
 var KIND_JP = [['plan','作業予定'],['deadline','締切'],['event','イベント'],['duty','担当業務']];
+function evOrder(events){ return function(a, b){ return (a.time||'99').localeCompare(b.time||'99') || ((a.order == null ? 999 : a.order) - (b.order == null ? 999 : b.order)) || events.indexOf(a) - events.indexOf(b); }; }
 function sameEv(a, b){ return a.date === b.date && a.title === b.title && a.kind === b.kind && (a.time||'') === (b.time||''); }
 
 function eventSheet(orig, date){
@@ -844,22 +846,35 @@ async function reopenTask(id){
   } catch(err) { toast(err.message, true); }
 }
 
-async function moveEvent(i, date){
-  var orig = DATA.board.events[i];
-  if (!orig || orig.date === date) return;
+async function moveEvent(i, date, beforeEi){
+  var all = DATA.board.events, orig = all[i];
+  if (!orig) return;
   if (!ghToken()) return needToken();
-  var base = JSON.parse(JSON.stringify(DATA.board.events)), ne = Object.assign({}, orig, {date: date});
-  DATA.board.events[i] = ne; renderBoard(); Office.update();   // 先に見た目を動かす
+  var base = JSON.parse(JSON.stringify(all));
+  // その日の並び（動かす予定を除く）に、落とした位置で差し込む
+  var day = all.filter(function(e, k){ return e.date === date && k !== i && e.kind !== 'duty'; }).sort(evOrder(all));
+  var pos = beforeEi != null ? day.indexOf(all[beforeEi]) : -1;
+  if (pos < 0) pos = day.length;
+  var moved = Object.assign({}, orig, {date: date});
+  day.splice(pos, 0, moved);
+  var originals = day.map(function(e){ return e === moved ? orig : e; });   // 保存側で探すための元の姿
+  var updated = day.map(function(e, k){ return Object.assign({}, e, {order: k}); });
+  if (orig.date === date && day.every(function(e, k){ return (e === moved ? orig : e).order === k; }) && beforeEi == null) return;
+  // 先に見た目を動かす
+  DATA.board.events = all.map(function(e){ var k = originals.indexOf(e); return k >= 0 ? updated[k] : e; });
+  renderBoard(); Office.update();
   try {
     var res = await ghUpdate('events.enc.json', function(d){
       var evs = JSON.parse(JSON.stringify((d && d.events) || base));
-      var k = evs.findIndex(function(x){ return sameEv(x, orig); });
-      if (k >= 0) evs[k] = ne; else evs.push(ne);
+      originals.forEach(function(o, k){
+        var j = evs.findIndex(function(x){ return sameEv(x, o); });
+        if (j >= 0) evs[j] = updated[k]; else if (o === orig) evs.push(updated[k]);
+      });
       return {events: evs, updated: new Date().toISOString()};
     }, 'move event');
     DATA.board.events = res.events; renderBoard(); Office.update();
-    var d = new Date(date + 'T00:00:00');
-    toast(jpDate(d) + ' に移動しました' + ((d.getDay() === 0 || d.getDay() === 6) && (ne.kind === 'plan' || ne.kind === 'deadline') ? '（土日は休みの設定です）' : ''));
+    var dd = new Date(date + 'T00:00:00');
+    toast(orig.date === date ? '順番を入れ替えました' : jpDate(dd) + ' に移動しました' + ((dd.getDay() === 0 || dd.getDay() === 6) && (moved.kind === 'plan' || moved.kind === 'deadline') ? '（土日は休みの設定です）' : ''));
   } catch(err) {
     DATA.board.events = base; renderBoard(); Office.update();
     toast(err.message, true);
@@ -878,20 +893,29 @@ function bindEventDrag(vb){
     try { if (navigator.vibrate) navigator.vibrate(15); } catch(e) {}
     move(x, y);
   }
+  var line = document.createElement('div'); line.className = 'dropline';
   function move(x, y){
     drag.ghost.style.left = (x - drag.dx) + 'px'; drag.ghost.style.top = (y - drag.dy) + 'px';
     drag.ghost.style.display = 'none'; var d = dayAt(x, y); drag.ghost.style.display = '';
     if (drag.over && drag.over !== d) drag.over.classList.remove('dropover');
     if (d) d.classList.add('dropover');
-    drag.over = d;
+    drag.over = d; drag.before = null;
+    if (d) {
+      var cards = [].slice.call(d.querySelectorAll('.ev[data-ei]')).filter(function(c){ return c !== drag.el && c.dataset.ei; });
+      var next = cards.filter(function(c){ var r = c.getBoundingClientRect(); return y < r.top + r.height / 2; })[0];
+      drag.before = next ? +next.dataset.ei : null;
+      var anchor = next || d.querySelector('.addev');
+      if (anchor) anchor.parentNode.insertBefore(line, anchor); else d.appendChild(line);
+    } else if (line.parentNode) line.remove();
     if (y < 70) window.scrollBy(0, -14); else if (y > window.innerHeight - 110) window.scrollBy(0, 14);
   }
   function end(){
-    var d = drag.over, el = drag.el;
+    var d = drag.over, el = drag.el, before = drag.before;
     drag.ghost.remove(); el.classList.remove('dragging'); if (d) d.classList.remove('dropover');
+    if (line.parentNode) line.remove();
     drag = null;
     el.dataset.dragged = '1'; setTimeout(function(){ delete el.dataset.dragged; }, 60);
-    if (d) moveEvent(+el.dataset.ei, d.dataset.date);
+    if (d) moveEvent(+el.dataset.ei, d.dataset.date, before);
   }
   vb.querySelectorAll('.ev[data-ei]').forEach(function(el){
     el.addEventListener('mousedown', function(e){
@@ -1124,7 +1148,7 @@ function todayHtml(){
     .filter(function(n, i, a){ return a.indexOf(n) === i; });
   var total = 0;
   var cards = people.concat(extra).map(function(n){
-    var list = (items[n] || []).sort(function(a,b){ return (a.time||'99').localeCompare(b.time||'99') || (a.kind === 'deadline' ? -1 : 1); });
+    var list = (items[n] || []).sort(evOrder(evs.map(function(e, i){ return e; })));
     var od = overdue[n] || [], dt = duty[n] || [];
     total += list.length + od.length;
     var c = n === '担当なし' ? '#8A8F96' : whoColor(n);
@@ -1310,7 +1334,7 @@ function renderBoard(){
   for (var i=0;i<14;i++){
     var day = new Date(start); day.setDate(start.getDate()+i);
     var key = ymd(day);
-    var evs = events.filter(function(e){ return e.date === key && (e.kind === 'event' || whoMatch(whoOfEvent(e))); }).sort(function(a,b){ return (a.time||'99').localeCompare(b.time||'99'); });
+    var evs = events.filter(function(e){ return e.date === key && (e.kind === 'event' || whoMatch(whoOfEvent(e))); }).sort(evOrder(events));
     cal += '<div data-date="'+key+'" class="day'+(key === today ? ' today' : key < today ? ' past' : '')+(day.getDay()===0 ? ' sun' : '')+(day.getDay()%6===0 ? ' wkend' : '')+(evs.length ? '' : ' empty')+'"><div class="dn"><b>'+(day.getMonth()+1)+'/'+day.getDate()+'（'+W[day.getDay()]+'）</b>'+(key===today?'<span>今日</span>':'')+'</div>';
     recurringOn(key).forEach(function(r){ cal += '<div class="ev deadline virtual" title="定期タスク（まだタスクになっていない回）">'+(r.assignee ? whoChip(r.assignee) : '')+'（定期）'+esc(r.title)+' 締切</div>'; });
     evs.forEach(function(e){ var who = whoOfEvent(e); cal += '<button class="ev '+esc(e.kind)+'" data-ei="'+events.indexOf(e)+'">'+(who ? whoChip(who) : '')+(e.time?'<span class="tm">'+esc(e.time)+'</span>':'')+esc(e.title)+'</button>'; });
@@ -1348,7 +1372,7 @@ function renderBoard(){
   var dn = DATA.done.slice(0,10).map(function(t){ return '<li><button class="donebtn" data-reopen="'+esc(t.id)+'"><span class="mono">'+jpDate(t.done)+'</span><span class="dtxt">'+esc(t.content)+'</span><span class="undo">戻す</span></button></li>'; }).join('');
 
   document.getElementById('view-board').innerHTML = todayHtml() +
-    '<section class="sec" id="sec-sched"><h2>予定 <small>今週と来週・タップで編集・ドラッグ（スマホは長押し）で別の日へ移動</small></h2>' +
+    '<section class="sec" id="sec-sched"><h2>予定 <small>今週と来週・タップで編集・ドラッグ（スマホは長押し）で並べ替え・別の日へ移動</small></h2>' +
       '<div class="legend"><span><i class="sw" style="background:var(--urgent)"></i>イベント</span><span><i class="sw" style="background:var(--warn)"></i>締切</span><span><i class="sw" style="background:var(--accent)"></i>作業予定</span><span><i class="sw" style="background:var(--muted)"></i>担当業務</span></div>' +
       whoFilterHtml() +
       '<div class="cal">'+cal+'</div></section>' +
