@@ -143,7 +143,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
 .rep-on .btn{margin-left:auto;padding:5px 12px;font-size:.8rem}
 .tag.rec{background:var(--accent-soft);color:var(--accent);border:1px dashed var(--accent)}
 .ev.virtual{opacity:.6;border-left-style:dashed;cursor:default}
-.seg.wide.rc3{grid-template-columns:repeat(3,1fr)}
+.seg.wide.rc3{grid-template-columns:repeat(4,1fr)}
 .seg.wide.rc3 button{font-size:.74rem;padding:9px 2px}
 .tag.web{background:var(--warn-soft);color:var(--warn)}
 .tag.最優先{background:var(--urgent);color:var(--surface)}
@@ -1021,6 +1021,7 @@ function productSheet(item){
 // ---------- 定期タスク ----------
 function recRuleLabel(r){
   if (r.rule.type === 'monthly') return '毎月' + r.rule.day + '日';
+  if (r.rule.type === 'daily') return '毎日（平日）';
   if (r.rule.dow != null) return '毎週' + W[r.rule.dow] + '曜';
   return '毎週（曜日自由）';
 }
@@ -1048,7 +1049,7 @@ function repeatField(t){
       (i >= 0 ? '<button type="button" class="btn" id="tk-rec-open" data-i="'+i+'">定期の設定を開く</button>' : '') + '</div></div>';
   }
   return '<div class="fld"><span>くり返し</span><div class="row2"><select id="tk-rep">' +
-    '<option value="">なし</option><option value="monthly">毎月（締切日を指定）</option><option value="weekly">毎週（曜日自由）</option><option value="weekday">毎週（曜日指定）</option></select>' +
+    '<option value="">なし</option><option value="daily">毎日（平日）</option><option value="monthly">毎月（締切日を指定）</option><option value="weekly">毎週（曜日自由）</option><option value="weekday">毎週（曜日指定）</option></select>' +
     '<select id="tk-rep-day" hidden>'+Array.from({length:28}, function(_, i){ return '<option value="'+(i+1)+'"'+(i === 9 ? ' selected' : '')+'>毎月'+(i+1)+'日</option>'; }).join('')+'</select>' +
     '<select id="tk-rep-dow" hidden>'+[1,2,3,4,5].map(function(n){ return '<option value="'+n+'">毎週'+W[n]+'曜</option>'; }).join('')+'</select></div></div>';
 }
@@ -1059,6 +1060,7 @@ function bindRepeat(sh, t){
   var day = sh.querySelector('#tk-rep-day'), dow = sh.querySelector('#tk-rep-dow');
   sel.onchange = function(){ day.hidden = sel.value !== 'monthly'; dow.hidden = sel.value !== 'weekday'; };
   return function(){
+    if (sel.value === 'daily') return {rule: {type:'daily'}};
     if (sel.value === 'monthly') return {rule: {type:'monthly', day: +day.value}};
     if (sel.value === 'weekly') return {rule: {type:'weekly'}};
     if (sel.value === 'weekday') return {rule: {type:'weekly', dow: +dow.value}};
@@ -1086,16 +1088,17 @@ function recurringSheet(idx){
   if (!ghToken()) return needToken();
   var recs = (DATA.board && DATA.board.recurring) || [], orig = idx != null ? recs[idx] : null;
   var r = orig ? JSON.parse(JSON.stringify(orig)) : {id:'', title:'', category:'事務・受注・発注', label:'通常', assignee:'', rule:{type:'monthly', day:10}, lead:7};
-  var kind = r.rule.type === 'monthly' ? 'monthly' : (r.rule.dow != null ? 'weekday' : 'weekly');
+  var kind = r.rule.type === 'monthly' ? 'monthly' : r.rule.type === 'daily' ? 'daily' : (r.rule.dow != null ? 'weekday' : 'weekly');
   function draw(){
     Sheet.open(
       '<h3>'+(orig ? '定期タスクを編集' : '定期タスクを追加')+'</h3>' +
       '<label class="fld"><span>内容</span><input type="text" id="rc-title" value="'+esc(r.title)+'" placeholder="例：P2（革小物）発注"></label>' +
-      '<div class="fld"><span>くり返し</span><div class="seg wide rc3" id="rc-kind">'+[['monthly','毎月'],['weekly','毎週（曜日自由）'],['weekday','毎週（曜日指定）']].map(function(k){ return '<button type="button" data-v="'+k[0]+'"'+(kind === k[0] ? ' aria-pressed="true"' : '')+'>'+k[1]+'</button>'; }).join('')+'</div></div>' +
+      '<div class="fld"><span>くり返し</span><div class="seg wide rc3" id="rc-kind">'+[['daily','毎日'],['monthly','毎月'],['weekly','毎週（自由）'],['weekday','毎週（曜日）']].map(function(k){ return '<button type="button" data-v="'+k[0]+'"'+(kind === k[0] ? ' aria-pressed="true"' : '')+'>'+k[1]+'</button>'; }).join('')+'</div></div>' +
       (kind === 'monthly' ? '<div class="row2"><label class="fld"><span>締切日（毎月）</span><select id="rc-day">'+Array.from({length:28}, function(_, i){ return '<option value="'+(i+1)+'"'+((r.rule.day || 10) === i+1 ? ' selected' : '')+'>'+(i+1)+'日</option>'; }).join('')+'</select></label>' +
         '<label class="fld"><span>何日前にタスクを出す</span><select id="rc-lead">'+[3,5,7,10,14].map(function(n){ return '<option'+((r.lead == null ? 7 : r.lead) === n ? ' selected' : '')+'>'+n+'</option>'; }).join('')+'</select></label></div>' : '') +
       (kind === 'weekday' ? '<label class="fld"><span>曜日</span><select id="rc-dow">'+[1,2,3,4,5].map(function(n){ return '<option value="'+n+'"'+(r.rule.dow === n ? ' selected' : '')+'>'+W[n]+'曜</option>'; }).join('')+'</select></label>' : '') +
       (kind === 'weekly' ? '<p class="meta" style="margin:0">毎週月曜に「今週中」のタスクとして出ます。やる日は自由です。</p>' : '') +
+      (kind === 'daily' ? '<p class="meta" style="margin:0">平日の毎朝、その日のタスクと作業予定が出ます（土日と担当者の担当業務の日は出ません）。</p>' : '') +
       '<label class="fld"><span>工程</span><select id="rc-cat">'+ORDER.map(function(c){ return '<option'+(c === r.category ? ' selected' : '')+'>'+esc(c)+'</option>'; }).join('')+'</select></label>' +
       whoField(r.assignee) +
       '<div class="fld"><span>優先度</span><div class="seg wide" id="rc-label">'+['最優先','優先','通常','低'].map(function(l){ return '<button type="button" data-v="'+l+'"'+(l === r.label ? ' aria-pressed="true"' : '')+'>'+l+'</button>'; }).join('')+'</div></div>' +
@@ -1124,7 +1127,7 @@ function recurringSheet(idx){
         sh.querySelector('#rc-save').onclick = function(){
           pull();
           if (!r.title) { st(sh, '内容を入れてください', true); return; }
-          var rule = kind === 'monthly' ? {type:'monthly', day: r.rule.day || 10} : kind === 'weekday' ? {type:'weekly', dow: r.rule.dow || 1} : {type:'weekly'};
+          var rule = kind === 'daily' ? {type:'daily'} : kind === 'monthly' ? {type:'monthly', day: r.rule.day || 10} : kind === 'weekday' ? {type:'weekly', dow: r.rule.dow || 1} : {type:'weekly'};
           var item = {id: r.id || ('rec-' + newId()), title: r.title, category: r.category, label: r.label, rule: rule};
           if (r.assignee) item.assignee = r.assignee;
           if (kind === 'monthly') item.lead = r.lead == null ? 7 : r.lead;
