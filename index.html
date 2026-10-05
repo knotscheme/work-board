@@ -95,6 +95,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
 .whofilter{display:flex;flex-wrap:wrap;gap:6px}
 .whofilter button,.whopick button{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:4px 12px;font-size:.8rem;font-weight:700;color:var(--muted)}
 .whofilter button[aria-pressed="true"],.whopick button[aria-pressed="true"]{background:var(--done);border-color:var(--done);color:var(--surface)}
+.wdot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:5px;vertical-align:0;box-shadow:0 0 0 1.5px var(--surface)}
 .whopick{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:6px}
 .rep-on{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
 .rep-on .btn{margin-left:auto;padding:5px 12px;font-size:.8rem}
@@ -480,6 +481,23 @@ async function ghUpdate(file, mutate, msg){
 }
 // 担当：タスク・予定に付く人の名前。予定に担当がなければ関連タスクの担当を使う
 var whoFilter = ls('wb_who') || '', taskView = ls('wb_tview') || 'cat';
+// 担当者の色：オフィスの服の色と同じ（佐藤＝グレージュ、メンバーは並び順の色）
+var WHO_SHIRT = [0x2E4C88, 0x6B4E9B, 0x2F7D4F, 0xA6512E, 0x3E6E8E], WHO_FIXED = {'佐藤': 0xB8AC9C};
+var WHO_EXTRA = ['#7A6A2E', '#8E3B5E', '#4F6B2A', '#5B5F97'];
+function whoColor(n){
+  if (!n) return '#8A8F96';
+  if (WHO_FIXED[n] != null) return '#' + ('00000' + WHO_FIXED[n].toString(16)).slice(-6);
+  var o = (DATA && DATA.board && DATA.board.org) || {}, staff = o.staff || [], i = staff.indexOf(n);
+  if (n === (o.boss || '佐藤')) return '#' + ('00000' + WHO_SHIRT[0].toString(16)).slice(-6);
+  if (i >= 0) return '#' + ('00000' + WHO_SHIRT[(i + 1) % WHO_SHIRT.length].toString(16)).slice(-6);
+  var h = 0; for (var k = 0; k < n.length; k++) h = (h * 31 + n.charCodeAt(k)) >>> 0;
+  return WHO_EXTRA[h % WHO_EXTRA.length];
+}
+function whoInk(hex){ var v = parseInt(hex.slice(1), 16), r = v >> 16, g = (v >> 8) & 255, b = v & 255; return (r*299 + g*587 + b*114) / 1000 > 150 ? '#1D2127' : '#FFFFFF'; }
+function whoStyle(n){ var c = whoColor(n); return 'background:' + c + ';color:' + whoInk(c); }
+function whoChip(n){ return '<span class="who" style="' + whoStyle(n) + '">' + esc(n) + '</span>'; }
+function whoTag(n){ return '<span class="tag whotag" style="' + whoStyle(n) + '">' + esc(n) + '</span>'; }
+
 function knownWho(){
   var set = {};
   ((DATA.board && DATA.board.members) || []).forEach(function(n){ set[n] = 1; });
@@ -499,14 +517,14 @@ function whoFilterHtml(){
   if (!names.length) return '';
   var opts = [['', 'みんな']].concat(names.map(function(n){ return [n, n]; })).concat([['__none', '担当なし']]);
   return '<div class="whofilter" role="group" aria-label="担当で絞り込み">' + opts.map(function(o){
-    return '<button type="button" data-who="'+esc(o[0])+'"'+(whoFilter === o[0] ? ' aria-pressed="true"' : '')+'>'+esc(o[1])+'</button>';
+    return '<button type="button" data-who="'+esc(o[0])+'"'+(whoFilter === o[0] ? ' aria-pressed="true"' : '')+'>'+(o[0] && o[0] !== '__none' ? '<i class="wdot" style="background:'+whoColor(o[0])+'"></i>' : '')+esc(o[1])+'</button>';
   }).join('') + '</div>';
 }
 function whoField(cur){
   var names = knownWho();
   return '<div class="fld"><span>担当</span><div class="whopick" id="who-pick">' +
     [['', '未定']].concat(names.map(function(n){ return [n, n]; })).map(function(o){
-      return '<button type="button" data-v="'+esc(o[0])+'"'+((cur || '') === o[0] ? ' aria-pressed="true"' : '')+'>'+esc(o[1])+'</button>';
+      return '<button type="button" data-v="'+esc(o[0])+'"'+((cur || '') === o[0] ? ' aria-pressed="true"' : '')+'>'+(o[0] ? '<i class="wdot" style="background:'+whoColor(o[0])+'"></i>' : '')+esc(o[1])+'</button>';
     }).join('') + '</div><input type="text" id="who-new" placeholder="新しい担当の名前（入力するとこちらが優先）" autocomplete="off"></div>';
 }
 function bindWho(sh, cur){
@@ -908,7 +926,7 @@ function recurringCard(){
   return '<div class="card"><h3>定期タスク<span class="mono">'+recs.length+'件</span></h3>' +
     '<p class="meta" style="margin:0">毎月・毎週の分は、時期が来ると自動でタスクになります（毎月は締切の数日前、毎週は月曜）。</p>' +
     (recs.length ? '<ul>'+recs.map(function(r, i){
-      return '<li><button class="task tbtn" data-rec="'+i+'"><span class="tagrow"><span class="tag rec">'+esc(recRuleLabel(r))+'</span><span class="tag cat">'+esc(r.category)+'</span>'+(r.assignee ? '<span class="tag whotag">'+esc(r.assignee)+'</span>' : '')+'</span><span>'+esc(r.title)+'</span></button></li>';
+      return '<li><button class="task tbtn" data-rec="'+i+'"><span class="tagrow"><span class="tag rec">'+esc(recRuleLabel(r))+'</span><span class="tag cat">'+esc(r.category)+'</span>'+(r.assignee ? whoTag(r.assignee) : '')+'</span><span>'+esc(r.title)+'</span></button></li>';
     }).join('')+'</ul>' : '') +
     '<button class="btn" id="add-rec">＋ 定期タスクを追加</button></div>';
 }
@@ -1110,8 +1128,8 @@ function renderBoard(){
     var key = ymd(day);
     var evs = events.filter(function(e){ return e.date === key && (e.kind === 'event' || whoMatch(whoOfEvent(e))); }).sort(function(a,b){ return (a.time||'99').localeCompare(b.time||'99'); });
     cal += '<div data-date="'+key+'" class="day'+(key === today ? ' today' : key < today ? ' past' : '')+(day.getDay()===0 ? ' sun' : '')+(day.getDay()%6===0 ? ' wkend' : '')+(evs.length ? '' : ' empty')+'"><div class="dn"><b>'+(day.getMonth()+1)+'/'+day.getDate()+'（'+W[day.getDay()]+'）</b>'+(key===today?'<span>今日</span>':'')+'</div>';
-    recurringOn(key).forEach(function(r){ cal += '<div class="ev deadline virtual" title="定期タスク（まだタスクになっていない回）">'+(r.assignee ? '<span class="who">'+esc(r.assignee)+'</span>' : '')+'（定期）'+esc(r.title)+' 締切</div>'; });
-    evs.forEach(function(e){ var who = whoOfEvent(e); cal += '<button class="ev '+esc(e.kind)+'" data-ei="'+events.indexOf(e)+'">'+(who ? '<span class="who">'+esc(who)+'</span>' : '')+(e.time?'<span class="tm">'+esc(e.time)+'</span>':'')+esc(e.title)+'</button>'; });
+    recurringOn(key).forEach(function(r){ cal += '<div class="ev deadline virtual" title="定期タスク（まだタスクになっていない回）">'+(r.assignee ? whoChip(r.assignee) : '')+'（定期）'+esc(r.title)+' 締切</div>'; });
+    evs.forEach(function(e){ var who = whoOfEvent(e); cal += '<button class="ev '+esc(e.kind)+'" data-ei="'+events.indexOf(e)+'">'+(who ? whoChip(who) : '')+(e.time?'<span class="tm">'+esc(e.time)+'</span>':'')+esc(e.title)+'</button>'; });
     if (key >= today) cal += '<button class="addev" data-date="'+key+'" aria-label="'+key+' に予定を追加">＋ 追加</button>';
     cal += '</div>';
   }
@@ -1119,7 +1137,7 @@ function renderBoard(){
   var stages = b.stages || [], tip = {done:'完了', hot:'今週やる', now:'次の作業', wait:'待ち', '':'未着手／不明'}, pipe = '';
   var pipeAll = b.pipeline || [], pipeDone = pipeAll.filter(function(p){ return p.done; });
   pipeAll.filter(function(p){ return !p.done && whoMatch(p.assignee || ''); }).forEach(function(p){
-    pipe += '<div class="pc"><button class="pc-h" data-pcode="'+esc(p.code)+'" aria-label="'+esc(p.code)+'を編集"><span class="code">'+esc(p.code)+'</span><span class="name">'+esc(p.name)+'</span>'+(p.assignee ? '<span class="tag whotag">'+esc(p.assignee)+'</span>' : '')+'<span class="pc-edit">編集</span></button><div class="pc-st">';
+    pipe += '<div class="pc"><button class="pc-h" data-pcode="'+esc(p.code)+'" aria-label="'+esc(p.code)+'を編集"><span class="code">'+esc(p.code)+'</span><span class="name">'+esc(p.name)+'</span>'+(p.assignee ? whoTag(p.assignee) : '')+'<span class="pc-edit">編集</span></button><div class="pc-st">';
     stages.forEach(function(st, j){ var s = (p.s||[])[j] || ''; pipe += '<button class="dotbtn" data-code="'+esc(p.code)+'" data-j="'+j+'" aria-label="'+esc(p.code)+' '+esc(st)+'：'+tip[s]+'（タップで変更）"><i class="dot '+esc(s)+'"></i><span>'+esc(st)+'</span></button>'; });
     var allDone = (p.s || []).length && p.s.every(function(x){ return x === 'done'; });
     pipe += '</div>'+(p.note ? '<div class="note">'+esc(p.note)+'</div>' : '')+(allDone ? '<div class="arch-row"><span>全工程が完了しました</span><button class="btn ok" data-archive="'+esc(p.code)+'">アーカイブする</button></div>' : '')+'</div>';
@@ -1138,7 +1156,7 @@ function renderBoard(){
   var cards = keys.map(function(k){
     return '<div class="card"><h3>'+esc(k)+'<span class="mono">'+groups[k].length+'件</span></h3><ul>'+groups[k].map(function(t){
       var p = planned[t.id] ? ' ・ 予定 '+planned[t.id].sort().map(function(d){ return jpDate(d+'T00:00:00'); }).join('、') : '';
-      var sub = taskView === 'who' ? '<span class="tag cat">'+esc(t.category)+'</span>' : (t.assignee ? '<span class="tag whotag">'+esc(t.assignee)+'</span>' : '');
+      var sub = taskView === 'who' ? '<span class="tag cat">'+esc(t.category)+'</span>' : (t.assignee ? whoTag(t.assignee) : '');
       return '<li><button class="task tbtn" data-tid="'+esc(t.id)+'"><span class="tagrow"><span class="tag '+esc(t.label)+'">'+esc(t.label)+'</span>'+sub+(recLabelOf(t) ? '<span class="tag rec">'+esc(recLabelOf(t))+'</span>' : '')+(t.web ? '<span class="tag web">取り込み待ち</span>' : '')+'</span><span>'+esc(t.content)+'</span><span class="meta mono">記録 '+jpDate(t.recorded)+p+'</span></button></li>';
     }).join('')+'</ul></div>';
   }).join('') || '<p class="muted" style="margin:0">この担当のタスクはありません。</p>';
@@ -1155,7 +1173,7 @@ function renderBoard(){
       '<div class="legend"><span><i class="dot done"></i>完了</span><span><i class="dot hot"></i>今週やる</span><span><i class="dot now"></i>次の作業</span><span><i class="dot wait"></i>待ち</span><span><i class="dot"></i>未着手／不明</span></div>' +
       whoFilterHtml() +
       '<div class="pipe">'+(pipe || '<p class="muted" style="margin:0">該当する商品はありません。</p>')+'</div>' +
-      (pipeDone.length ? '<details class="pdone"><summary>アーカイブ（非表示中） '+pipeDone.length+'件</summary><ul>'+pipeDone.map(function(p){ return '<li><button class="pc-h" data-pcode="'+esc(p.code)+'"><span class="code">'+esc(p.code)+'</span><span class="name">'+esc(p.name)+'</span>'+(p.assignee ? '<span class="tag whotag">'+esc(p.assignee)+'</span>' : '')+'<span class="meta">'+(p.doneAt ? jpDate(p.doneAt) : '')+'</span></button></li>'; }).join('')+'</ul></details>' : '') +
+      (pipeDone.length ? '<details class="pdone"><summary>アーカイブ（非表示中） '+pipeDone.length+'件</summary><ul>'+pipeDone.map(function(p){ return '<li><button class="pc-h" data-pcode="'+esc(p.code)+'"><span class="code">'+esc(p.code)+'</span><span class="name">'+esc(p.name)+'</span>'+(p.assignee ? whoTag(p.assignee) : '')+'<span class="meta">'+(p.doneAt ? jpDate(p.doneAt) : '')+'</span></button></li>'; }).join('')+'</ul></details>' : '') +
       '</section>' +
     '<div class="dotmenu" id="dotmenu" hidden role="menu"></div>' +
     '<section class="sec" id="sec-tasks"><div class="h2row"><h2>タスク <small>タップで編集</small></h2><button class="btn primary" id="add-task">＋ タスクを追加</button></div>' +
