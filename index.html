@@ -382,17 +382,61 @@ async function encryptJSON(obj){
 }
 function ghToken(){ return ls('wb_token'); }
 // 共有トークン：鍵付きURLで開いた端末なら設定なしで書き込めるよう、トークンをURLの鍵で暗号化して置いておく
+// 共有トークンはパスワードでもう一段暗号化する（URLを知っているだけでは書き込めない）
+var SHARED_PW = null;   // {salt, iv, ct}：パスワードで解く共有トークン
+async function pwKey(pw, salt){
+  var base = await crypto.subtle.importKey('raw', new TextEncoder().encode(pw), 'PBKDF2', false, ['deriveKey']);
+  return crypto.subtle.deriveKey({name:'PBKDF2', salt: salt, iterations: 200000, hash: 'SHA-256'}, base, {name:'AES-GCM', length:256}, false, ['encrypt','decrypt']);
+}
 async function loadSharedToken(){
-  if (ghToken()) return;
+  SHARED_PW = null;
   try {
     var r = await fetch('token.enc.json?t=' + Date.now(), {cache:'no-store'});
     if (!r.ok) return;
     var tk = await decryptJSON(await r.json());
-    if (tk && tk.token) { ls('wb_token', tk.token); ls('wb_token_shared', '1'); }
+    if (tk && tk.pw) SHARED_PW = tk.pw;
   } catch(e) {}
 }
-async function shareToken(){
-  await ghUpdate('token.enc.json', function(){ return {token: ghToken(), updated: new Date().toISOString()}; }, 'share token');
+// パスワードが合えば、この端末でトークンを使えるようにする
+async function unlockShared(pw){
+  if (!SHARED_PW) throw new Error('共有されたトークンがありません。');
+  try {
+    var k = await pwKey(pw, fromB64(SHARED_PW.salt));
+    var buf = await crypto.subtle.decrypt({name:'AES-GCM', iv: fromB64(SHARED_PW.iv)}, k, fromB64(SHARED_PW.ct));
+    ls('wb_token', new TextDecoder().decode(buf)); ls('wb_token_shared', '1');
+  } catch(e) { throw new Error('パスワードが違います。'); }
+}
+async function shareToken(pw){
+  var salt = crypto.getRandomValues(new Uint8Array(16)), iv = crypto.getRandomValues(new Uint8Array(12));
+  var k = await pwKey(pw, salt);
+  var ct = new Uint8Array(await crypto.subtle.encrypt({name:'AES-GCM', iv: iv}, k, new TextEncoder().encode(ghToken())));
+  var pwObj = {salt: toB64(salt), iv: toB64(iv), ct: toB64(ct)};
+  await ghUpdate('token.enc.json', function(){ return {pw: pwObj, updated: new Date().toISOString()}; }, 'share token');
+  SHARED_PW = pwObj;
+}
+
+// パスワード入力つきの確認画面
+function passwordModal(title, body, okLabel, onOk){
+  var bg = document.createElement('div'); bg.className = 'modal-bg';
+  bg.innerHTML = '<div class="modal" role="dialog" aria-modal="true" aria-labelledby="pm-title"><h3 id="pm-title">'+esc(title)+'</h3>' +
+    (body ? '<p class="cm-body">'+esc(body)+'</p>' : '') +
+    '<label class="fld"><span>パスワード</span><input type="password" id="pm-pw" autocomplete="off" inputmode="text"></label>' +
+    '<span class="status" id="pm-st"></span>' +
+    '<div class="row cm-row"><button class="btn" id="pm-no">キャンセル</button><button class="btn primary" id="pm-ok">'+esc(okLabel)+'</button></div></div>';
+  document.body.appendChild(bg);
+  var inp = bg.querySelector('#pm-pw'), stEl = bg.querySelector('#pm-st');
+  function close(){ bg.remove(); }
+  bg.addEventListener('click', function(e){ if (e.target === bg) close(); });
+  bg.querySelector('#pm-no').onclick = close;
+  async function go(){
+    var pw = inp.value;
+    if (pw.length < 4) { stEl.textContent = '4文字以上で入れてください'; stEl.className = 'status err'; return; }
+    stEl.textContent = '確認中…'; stEl.className = 'status';
+    try { await onOk(pw); close(); } catch(err) { stEl.textContent = err.message; stEl.className = 'status err'; }
+  }
+  bg.querySelector('#pm-ok').onclick = go;
+  inp.addEventListener('keydown', function(e){ if (e.key === 'Enter') go(); if (e.key === 'Escape') close(); });
+  inp.focus();
 }
 async function unshareToken(){
   var cur = await ghRead('token.enc.json');
@@ -523,6 +567,11 @@ function confirmModal(title, body, okLabel, onOk){
 }
 
 function needToken(){
+  if (SHARED_PW) {
+    return passwordModal('書き込みを有効にする', 'この端末で予定やタスクを変更するには、共有パスワードを入れてください（最初の1回だけ）。', '有効にする', async function(pw){
+      await unlockShared(pw); toast('この端末で書き込めるようになりました'); renderBoard(); Memo.load();
+    });
+  }
   Sheet.open('<h3>書き込みの設定が必要です</h3><p style="margin:0;font-size:.9rem">予定やタスクを変更するには、メモタブで GitHub のトークンを一度登録してください。</p><div class="row"><button class="btn primary" id="go-memo">メモタブを開く</button><button class="btn" data-close>閉じる</button></div>',
     function(sh){ sh.querySelector('#go-memo').onclick = function(){ Sheet.close(); setTab('memo'); }; });
 }
@@ -2074,7 +2123,8 @@ var Memo = (function(){
           '<li>Permissions → Contents を「Read and write」にして作成</li>' +
           '<li>表示されたトークンを下に貼って「登録」</li></ol>' +
           '<div class="row"><input type="password" id="memo-token" placeholder="github_pat_..." autocomplete="off" style="flex:1;min-width:180px"><button class="btn primary" id="memo-token-save">登録</button></div>' +
-          '<span class="meta">トークンはこの端末のブラウザにだけ保存されます。</span></div>') +
+          '<span class="meta">トークンはこの端末のブラウザにだけ保存されます。</span>' +
+          (SHARED_PW ? '<div class="row"><button class="btn primary" id="tok-unlock">共有パスワードで有効にする</button><span class="meta">ほかの端末で共有済みならこちら</span></div>' : '') + '</div>') +
         '<div class="compose"><label for="memo-input" class="lbl" style="font-size:.8rem;font-weight:700">'+(editing ? 'メモを編集' : '新しいメモ')+'</label>' +
           '<textarea id="memo-input" placeholder="思いついたこと、電話の内容、あとで調べること…">'+esc(editing ? (memos.find(function(m){ return m.id === editing; })||{}).text : draft)+'</textarea>' +
           '<fieldset class="catpick"><legend>分類（複数選べます）</legend>' + CATS.map(function(c, i){
@@ -2085,7 +2135,7 @@ var Memo = (function(){
           '<span id="memo-status" class="status"></span></div></div>' +
         (tk ? '<div class="tokbox"><div class="row meta">書き込み：設定済み'+(ls('wb_token_shared') ? '（共有トークンを使用中）' : '')+'</div>' +
           '<div class="row"><button class="btn" id="tok-share">この端末のトークンを全端末で使う</button><button class="btn" id="tok-unshare">全端末での共有をやめる</button></div>' +
-          '<p class="meta" style="margin:0">「全端末で使う」を押すと、鍵付きURLで開いた端末は設定なしで書き込めます（URLを知っている人は書き込みもできるようになります）。</p>' +
+          '<p class="meta" style="margin:0">「全端末で使う」を押してパスワードを決めると、ほかの端末は最初に1回パスワードを入れるだけで書き込めます。</p>' +
           '<div class="row"><button class="btn" id="memo-token-clear" style="padding:2px 10px;font-size:.75rem">この端末の設定を解除</button><span class="status" id="tok-status"></span></div></div>' : '') +
       '</div><div class="sec">' +
         '<input type="search" id="memo-q" placeholder="メモを検索" value="'+esc(query)+'">' +
@@ -2109,12 +2159,11 @@ var Memo = (function(){
     if (ts) ts.onclick = function(){ var v = root.querySelector('#memo-token').value.trim(); if (!v) return; ls(TOKEN_KEY, v); load(); };
     var tc = root.querySelector('#memo-token-clear');
     if (tc) tc.onclick = function(){ ls(TOKEN_KEY, null); ls('wb_token_shared', null); draw(); };
+    var tul = root.querySelector('#tok-unlock'); if (tul) tul.onclick = function(){ needToken(); };
     var ts2 = root.querySelector('#tok-share'), tu = root.querySelector('#tok-unshare'), tst = root.querySelector('#tok-status');
     if (ts2) ts2.onclick = function(){
-      confirmModal('全端末で使えるようにしますか？', 'このトークンを、URLの鍵で暗号化してボードに置きます。鍵付きURLを知っている人は、設定なしで書き込めるようになります。', '全端末で使う', async function(){
-        tst.textContent = '保存中…'; tst.className = 'status';
-        try { await shareToken(); tst.textContent = ''; toast('全端末で使えるようにしました'); }
-        catch(err) { tst.textContent = err.message; tst.className = 'status err'; }
+      passwordModal('全端末で使えるようにしますか？', '共有パスワードを決めてください。ほかの端末では、最初に1回このパスワードを入れると書き込めるようになります（URLを知っているだけでは書き込めません）。', '全端末で使う', async function(pw){
+        await shareToken(pw); toast('全端末で使えるようにしました');
       });
     };
     if (tu) tu.onclick = function(){
