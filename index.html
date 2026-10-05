@@ -58,7 +58,8 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
 .count .num span{font-size:.9rem;margin-left:2px}
 .count .sub{font-size:.74rem}
 .tabs{display:flex;gap:4px;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:4px;justify-self:start;grid-column:1/-1}
-.tabs button{border:0;background:none;border-radius:7px;padding:6px 18px;font-weight:700;font-size:.9rem;color:var(--muted)}
+.tabs button{border:0;background:none;border-radius:8px;padding:6px 14px;font-weight:700;font-size:.86rem;color:var(--muted);display:inline-flex;align-items:center;gap:6px}
+.tabs svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;flex:none}
 .tabs button[aria-selected="true"]{background:var(--accent);color:var(--surface)}
 
 /* calendar */
@@ -245,7 +246,10 @@ textarea{min-height:140px;resize:vertical;line-height:1.6}
   .count{padding:8px 12px;grid-template-columns:1fr auto;align-items:baseline;column-gap:10px;justify-self:stretch}
   .count .num{font-size:1.35rem;grid-row:span 2}
   .tabs{position:fixed;left:0;right:0;bottom:0;z-index:40;justify-self:stretch;width:100%;border-radius:0;border:0;border-top:1px solid var(--line);padding:6px 8px calc(6px + env(safe-area-inset-bottom, 0px));justify-content:stretch;box-shadow:0 -2px 10px rgb(0 0 0 / .08)}
-  .tabs button{flex:1;padding:11px 0;font-size:.95rem}
+  .tabs{gap:2px;padding:4px 4px calc(4px + env(safe-area-inset-bottom, 0px))}
+  .tabs button{flex:1;min-width:0;flex-direction:column;gap:2px;padding:7px 0 6px;font-size:.66rem;letter-spacing:0;border-radius:10px}
+  .tabs svg{width:25px;height:25px}
+  .tabs button[aria-selected="true"]{background:var(--accent-soft);color:var(--accent)}
   .day.past{display:none}
   .office{height:64vh;min-height:380px}
   .nm{font-size:.66rem;padding:0 7px}
@@ -544,7 +548,8 @@ async function load(){
 }
 
 function shell(){
-  tab = ls('wb_tab') || 'board';
+  tab = ls('wb_tab') || 'sched';
+  if (tab === 'board') tab = 'sched';
   app.innerHTML =
     '<div class="wrap" id="shell">' +
       '<header class="top" id="hdr"></header>' +
@@ -557,9 +562,20 @@ function shell(){
   Memo.mount(document.getElementById('view-memo'));
 }
 
+// タブ → 表示する画面とセクション（予定・新発進捗・タスクはボード画面の一部）
+var TAB_SECTIONS = {sched:['sec-sched'], pipe:['sec-pipe'], tasks:['sec-tasks','sec-qa']};
+function applyBoardSections(){
+  ['sec-sched','sec-pipe','sec-tasks','sec-qa'].forEach(function(id){
+    var el = document.getElementById(id); if (el) el.hidden = !(TAB_SECTIONS[tab] && TAB_SECTIONS[tab].indexOf(id) >= 0);
+  });
+}
 function setTab(t){
+  if (!document.getElementById('view-' + (TAB_SECTIONS[t] ? 'board' : t))) t = 'sched';
   tab = t; ls('wb_tab', t);
-  ['board','office','memo'].forEach(function(k){ document.getElementById('view-'+k).hidden = k !== t; });
+  document.getElementById('view-board').hidden = !TAB_SECTIONS[t];
+  ['office','memo'].forEach(function(k){ document.getElementById('view-'+k).hidden = k !== t; });
+  applyBoardSections();
+  window.scrollTo(0, 0);
   document.querySelectorAll('.tabs button').forEach(function(b){ b.setAttribute('aria-selected', b.dataset.t === t); });
   if (t === 'office') Office.start(); else Office.stop();
 }
@@ -579,7 +595,7 @@ function renderHeader(){
   }
   document.getElementById('hdr').innerHTML =
     '<div><h1>やることボード</h1><p>DAYSARTClassic / DAYSART ・ 未完了 <span class="mono">'+DATA.pending.length+'</span> 件 ・ 更新 <span class="mono">'+jpDateTime(DATA.updated)+'</span></p></div>'+countHtml+
-    '<nav class="tabs" role="tablist"><button role="tab" data-t="board">ボード</button><button role="tab" data-t="office">オフィス</button><button role="tab" data-t="memo">メモ</button></nav>';
+    '<nav class="tabs" role="tablist" aria-label="メニュー"><button role="tab" data-t="sched"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15.5" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/><path d="M7.5 14h3M13.5 14h3M7.5 17.2h3"/></svg><span>予定</span></button><button role="tab" data-t="pipe"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 7.8L12 3.5l8.5 4.3v8.4L12 20.5l-8.5-4.3z"/><path d="M3.5 7.8L12 12l8.5-4.2M12 12v8.5"/><path d="M7.7 5.6l8.5 4.3"/></svg><span>新発進捗</span></button><button role="tab" data-t="tasks"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6.5l1.6 1.6L8.8 5"/><path d="M4 12.5l1.6 1.6L8.8 11"/><path d="M4.6 18.5h2.6"/><path d="M11.5 6.5H20M11.5 12.5H20M11.5 18.5H20"/></svg><span>タスク</span></button><button role="tab" data-t="office"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="7.5" r="2.6"/><circle cx="16.5" cy="7.5" r="2.6"/><path d="M3.5 15.5c.6-2.6 2.4-4 4.5-4s3.9 1.4 4.5 4"/><path d="M12 15.5c.6-2.6 2.4-4 4.5-4s3.9 1.4 4.5 4"/><rect x="2.5" y="15.5" width="19" height="3" rx="1"/><path d="M5 18.5v2.5M19 18.5v2.5"/></svg><span>オフィス</span></button><button role="tab" data-t="memo"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5.5 3.5h9l4 4v13h-13z"/><path d="M14.5 3.5v4h4"/><path d="M8.5 12h7M8.5 15.5h7M8.5 8.5h3"/></svg><span>メモ</span></button></nav>';
   document.querySelectorAll('.tabs button').forEach(function(b){ b.onclick = function(){ setTab(b.dataset.t); }; });
   setTab(tab);
 }
@@ -625,16 +641,16 @@ function renderBoard(){
   var dn = DATA.done.slice(0,6).map(function(t){ return '<li><span class="mono">'+jpDate(t.done)+'</span> '+esc(t.content)+'</li>'; }).join('');
 
   document.getElementById('view-board').innerHTML =
-    '<section class="sec"><h2>予定 <small>今週と来週・タップで編集</small></h2>' +
+    '<section class="sec" id="sec-sched"><h2>予定 <small>今週と来週・タップで編集</small></h2>' +
       '<div class="legend"><span><i class="sw" style="background:var(--urgent)"></i>イベント</span><span><i class="sw" style="background:var(--warn)"></i>締切</span><span><i class="sw" style="background:var(--accent)"></i>作業予定</span><span><i class="sw" style="background:var(--muted)"></i>担当業務</span></div>' +
       '<div class="cal">'+cal+'</div></section>' +
-    '<section class="sec"><h2>新商品の進み具合 <small>品番ごと・工程順・丸をタップで変更</small></h2>' +
+    '<section class="sec" id="sec-pipe"><h2>新商品の進み具合 <small>品番ごと・工程順・丸をタップで変更</small></h2>' +
       '<div class="pipe-note" id="pipe-status">'+(ghToken() ? (DATA.pipeSyncPending ? 'Webでの変更があります。秘書が取り込むと、タスクの担当工程にも反映されます。' : '丸をタップすると状態を変えられます。') : '変更するには、メモタブで書き込みの設定（トークン登録）をしてください。')+'</div>' +
       '<div class="legend"><span><i class="dot done"></i>完了</span><span><i class="dot hot"></i>今週やる</span><span><i class="dot now"></i>次の作業</span><span><i class="dot wait"></i>待ち</span><span><i class="dot"></i>未着手／不明</span></div>' +
       '<div class="pipe">'+pipe+'</div></section>' +
     '<div class="dotmenu" id="dotmenu" hidden role="menu"></div>' +
-    '<section class="sec"><div class="h2row"><h2>タスク <small>工程別・優先度順・タップで編集</small></h2><button class="btn primary" id="add-task">＋ タスクを追加</button></div><div class="cols">'+cards+'</div></section>' +
-    '<section class="sec"><h2>確認と完了</h2><div class="cols">' +
+    '<section class="sec" id="sec-tasks"><div class="h2row"><h2>タスク <small>工程別・優先度順・タップで編集</small></h2><button class="btn primary" id="add-task">＋ タスクを追加</button></div><div class="cols">'+cards+'</div></section>' +
+    '<section class="sec" id="sec-qa"><h2>確認と完了</h2><div class="cols">' +
       (qs ? '<div class="card q"><h3>確認が必要</h3><ul>'+qs+'</ul></div>' : '') +
       '<div class="card"><h3>最近の完了</h3><ul class="done-list">'+(dn || '<li>まだありません</li>')+'</ul></div>' +
     '</div></section>';
@@ -644,6 +660,7 @@ function renderBoard(){
   vb.querySelectorAll('.ev[data-ei]').forEach(function(b){ b.onclick = function(){ eventSheet(DATA.board.events[+b.dataset.ei]); }; });
   vb.querySelectorAll('.tbtn').forEach(function(b){ b.onclick = function(){ taskSheet(DATA.pending.filter(function(x){ return x.id === b.dataset.tid; })[0]); }; });
   document.getElementById('add-task').onclick = function(){ taskSheet(null); };
+  applyBoardSections();
 }
 
 /* =====================================================================
