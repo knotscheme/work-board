@@ -72,11 +72,34 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
 .day.sun .dn{color:var(--urgent)}
 .day.wkend{background:var(--bg)}
 .day .dn .off{font-size:.72rem;font-weight:700}
-.ev{font-size:.78rem;line-height:1.45;border-radius:5px;padding:4px 6px;background:var(--accent-soft);border-left:3px solid var(--accent)}
+.ev{font:inherit;color:inherit;text-align:left;width:100%;border:0;cursor:pointer;font-size:.78rem;line-height:1.45;border-radius:5px;padding:4px 6px;background:var(--accent-soft);border-left:3px solid var(--accent)}
 .ev.deadline{background:var(--warn-soft);border-left-color:var(--warn)}
 .ev.event{background:var(--urgent-soft);border-left-color:var(--urgent);font-weight:700}
 .ev.duty{background:var(--bg);border-left-color:var(--muted);color:var(--muted);font-weight:700}
 .ev .tm{font-family:var(--mono);margin-right:4px}
+.addev{border:1px dashed var(--line);background:none;border-radius:6px;font-size:.74rem;color:var(--muted);padding:3px 0;margin-top:auto}
+.addev:hover{border-color:var(--accent);color:var(--accent)}
+.tbtn{font:inherit;color:inherit;text-align:left;border:0;background:none;padding:6px;margin:-6px;border-radius:8px;width:calc(100% + 12px);cursor:pointer}
+.tbtn:hover{background:var(--bg)}
+.tagrow{display:flex;gap:4px;flex-wrap:wrap}
+.tag.web{background:var(--warn-soft);color:var(--warn)}
+.tag.最優先{background:var(--urgent);color:var(--surface)}
+.h2row{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.h2row .btn{padding:6px 14px}
+.sheet-bg{position:fixed;inset:0;background:rgb(0 0 0 / .4);z-index:60;display:flex;align-items:flex-end;justify-content:center}
+.sheet{background:var(--surface);color:var(--ink);width:100%;max-width:520px;border-radius:16px 16px 0 0;padding:18px 16px calc(18px + env(safe-area-inset-bottom, 0px));display:grid;gap:12px;max-height:88vh;overflow:auto;box-shadow:0 -6px 24px rgb(0 0 0 / .2)}
+.sheet h3{font-size:1.05rem}
+.fld{display:grid;gap:4px;min-width:0}
+.fld > span{font-size:.76rem;color:var(--muted);font-weight:700}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+select,input[type=date],input[type=time]{font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:10px 12px;width:100%}
+.seg.wide{display:grid;grid-template-columns:repeat(4,1fr);gap:4px}
+.seg.wide button{border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:9px 0;font-size:.84rem;font-weight:700;color:var(--muted)}
+.seg.wide button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--surface)}
+.btn.ok{color:var(--done);border-color:var(--done)}
+.warnline{margin:0;font-size:.8rem;color:var(--warn)}
+body.noscroll{overflow:hidden}
+@media (min-width:761px){.sheet-bg{align-items:center}.sheet{border-radius:14px}}
 .legend{display:flex;flex-wrap:wrap;gap:16px;font-size:.8rem;color:var(--muted)}
 .legend span{display:inline-flex;align-items:center;gap:6px}
 .sw{width:12px;height:12px;border-radius:3px;display:inline-block}
@@ -234,7 +257,6 @@ textarea{min-height:140px;resize:vertical;line-height:1.6}
   .cal{grid-template-columns:1fr}
   .dow{display:none}
   .day{min-height:0}
-  .day.empty{display:none}
   .memo-grid{grid-template-columns:1fr}
   .panel{top:auto;height:55%}
 }
@@ -293,6 +315,168 @@ async function ghRead(file){
   return {sha:j.sha, data: await decryptJSON(JSON.parse(atob(j.content.replace(/\n/g,''))))};
 }
 
+// Webで変更したファイルを読む（トークンがあれば GitHub API で最新、なければ公開ページから）
+async function readWeb(file){
+  if (ghToken()) return (await ghRead(file)).data;
+  var r = await fetch(file + '?t=' + Date.now(), {cache:'no-store'});
+  return r.ok ? decryptJSON(await r.json()) : null;
+}
+// 最新を読み直して mutate を当て、競合したらもう一度
+async function ghUpdate(file, mutate, msg){
+  for (var attempt = 0; attempt < 2; attempt++) {
+    var cur = await ghRead(file);
+    var next = mutate(cur.data);
+    var body = {message: msg, content: btoa(await encryptJSON(next))};
+    if (cur.sha) body.sha = cur.sha;
+    var put = await ghFile(file, 'PUT', body);
+    if (put.ok) return next;
+    if (put.status !== 409 && put.status !== 422) throw new Error('保存できませんでした（'+put.status+'）。');
+  }
+  throw new Error('ほかの端末と同時に保存されました。もう一度お試しください。');
+}
+function newId(){ return Date.now().toString(36) + Math.random().toString(36).slice(2,6); }
+
+// 秘書がまだ取り込んでいないタスク操作を一覧に重ねる
+var LABEL_SCORE = {'最優先':75, '優先':48, '通常':18, '低':6};
+function mergeOps(base, ops){
+  var list = base.map(function(t){ return Object.assign({}, t); }), seen = {};
+  ops.forEach(function(o){
+    if (seen[o.opId]) return; seen[o.opId] = 1;
+    if (o.op === 'add') { if (!list.some(function(x){ return x.id === o.id; })) list.push({id:o.id, content:o.content, category:o.category, label:o.label, score:LABEL_SCORE[o.label] || 18, recorded:o.at, web:true}); return; }
+    var t = list.filter(function(x){ return x.id === o.id; })[0]; if (!t) return;
+    if (o.op === 'edit') { if (o.content) t.content = o.content; if (o.category) t.category = o.category; if (o.label) { t.label = o.label; t.score = LABEL_SCORE[o.label]; } t.web = true; }
+    if (o.op === 'done') list = list.filter(function(x){ return x !== t; });
+  });
+  return list;
+}
+
+/* ---------- 下から出るシート（スマホ）／ダイアログ（PC） ---------- */
+var Sheet = (function(){
+  var bg = null;
+  function open(html, bind){
+    if (!bg) {
+      bg = document.createElement('div'); bg.className = 'sheet-bg'; document.body.appendChild(bg);
+      bg.addEventListener('click', function(e){ if (e.target === bg) close(); });
+    }
+    bg.innerHTML = '<div class="sheet" role="dialog" aria-modal="true">'+html+'</div>';
+    bg.hidden = false; document.body.classList.add('noscroll');
+    var sh = bg.querySelector('.sheet'); bind && bind(sh);
+    var c = sh.querySelector('[data-close]'); if (c) c.onclick = close;
+  }
+  function close(){ if (bg) { bg.hidden = true; bg.innerHTML = ''; document.body.classList.remove('noscroll'); } }
+  document.addEventListener('keydown', function(e){ if (e.key === 'Escape') close(); });
+  return {open:open, close:close};
+})();
+
+function needToken(){
+  Sheet.open('<h3>書き込みの設定が必要です</h3><p style="margin:0;font-size:.9rem">予定やタスクを変更するには、メモタブで GitHub のトークンを一度登録してください。</p><div class="row"><button class="btn primary" id="go-memo">メモタブを開く</button><button class="btn" data-close>閉じる</button></div>',
+    function(sh){ sh.querySelector('#go-memo').onclick = function(){ Sheet.close(); setTab('memo'); }; });
+}
+
+var KIND_JP = [['plan','作業予定'],['deadline','締切'],['event','イベント'],['duty','担当業務']];
+function sameEv(a, b){ return a.date === b.date && a.title === b.title && a.kind === b.kind && (a.time||'') === (b.time||''); }
+
+function eventSheet(orig, date){
+  if (!ghToken()) return needToken();
+  var e = orig || {date: date, kind: 'plan', title: ''}, confirmDel = false;
+  var taskOpts = '<option value="">（なし）</option>' + DATA.pending.map(function(t){ return '<option value="'+esc(t.id)+'"'+(t.id === e.task ? ' selected' : '')+'>'+esc(t.content.slice(0,40))+'</option>'; }).join('');
+  function draw(){
+    Sheet.open(
+      '<h3>'+(orig ? '予定を編集' : '予定を追加')+'</h3>' +
+      '<label class="fld"><span>内容</span><input type="text" id="ev-title" value="'+esc(e.title)+'" placeholder="例：lw275 撮影"></label>' +
+      '<div class="row2"><label class="fld"><span>日付</span><input type="date" id="ev-date" value="'+esc(e.date)+'"></label>' +
+      '<label class="fld"><span>時刻（任意）</span><input type="time" id="ev-time" value="'+esc(e.time||'')+'"></label></div>' +
+      '<div class="fld"><span>種類</span><div class="seg wide" id="ev-kind">'+KIND_JP.map(function(k){ return '<button type="button" data-v="'+k[0]+'"'+(k[0] === e.kind ? ' aria-pressed="true"' : '')+'>'+k[1]+'</button>'; }).join('')+'</div></div>' +
+      '<label class="fld"><span>関連するタスク（任意）</span><select id="ev-task">'+taskOpts+'</select></label>' +
+      '<p class="warnline" id="ev-warn" hidden>土日は休みの設定です（このまま保存もできます）</p>' +
+      '<div class="row"><button class="btn primary" id="ev-save">保存</button><button class="btn" data-close>やめる</button>' +
+      (orig ? (confirmDel ? '<button class="btn danger" id="ev-del2">本当に削除</button>' : '<button class="btn danger" id="ev-del">削除</button>') : '') + '</div>' +
+      '<span class="status" id="ev-status"></span>',
+      function(sh){
+        var kind = e.kind;
+        function warn(){ var d = new Date(sh.querySelector('#ev-date').value + 'T00:00:00'); sh.querySelector('#ev-warn').hidden = !((kind === 'plan' || kind === 'deadline') && (d.getDay() === 0 || d.getDay() === 6)); }
+        sh.querySelectorAll('#ev-kind button').forEach(function(b){ b.onclick = function(){ kind = b.dataset.v; sh.querySelectorAll('#ev-kind button').forEach(function(x){ x.setAttribute('aria-pressed', x === b); }); warn(); }; });
+        sh.querySelector('#ev-date').onchange = warn; warn();
+        if (!orig) sh.querySelector('#ev-title').focus();
+        function collect(){ return {title: sh.querySelector('#ev-title').value.trim(), date: sh.querySelector('#ev-date').value, time: sh.querySelector('#ev-time').value, kind: kind, task: sh.querySelector('#ev-task').value}; }
+        var del = sh.querySelector('#ev-del'); if (del) del.onclick = function(){ e = Object.assign({}, e, collect()); confirmDel = true; draw(); };
+        var del2 = sh.querySelector('#ev-del2'); if (del2) del2.onclick = function(){ commit(null, sh); };
+        sh.querySelector('#ev-save').onclick = function(){
+          var v = collect();
+          if (!v.title || !v.date) { st(sh, '内容と日付を入れてください', true); return; }
+          var ne = {date: v.date, kind: v.kind, title: v.title};
+          if (v.time) ne.time = v.time;
+          if (v.task) ne.task = v.task;
+          if (orig && orig.cat) ne.cat = orig.cat;
+          commit(ne, sh);
+        };
+      });
+  }
+  async function commit(ne, sh){
+    st(sh, '保存中…');
+    try {
+      var res = await ghUpdate('events.enc.json', function(d){
+        var evs = JSON.parse(JSON.stringify((d && d.events) || DATA.board.events || []));
+        var i = orig ? evs.findIndex(function(x){ return sameEv(x, orig); }) : -1;
+        if (ne === null) { if (i >= 0) evs.splice(i, 1); }
+        else if (i >= 0) evs[i] = ne;
+        else evs.push(ne);
+        return {events: evs, updated: new Date().toISOString()};
+      }, ne === null ? 'delete event' : 'save event');
+      DATA.board.events = res.events;
+      Sheet.close(); renderBoard(); Office.update();
+    } catch(err) { st(sh, err.message, true); }
+  }
+  draw();
+}
+
+function taskSheet(t){
+  if (!ghToken()) return needToken();
+  var LABELS = ['最優先','優先','通常','低'], confirmDone = false;
+  var cur = t || {content:'', category:'企画・サンプル', label:'通常'};
+  function draw(){
+    Sheet.open(
+      '<h3>'+(t ? 'タスクを編集' : 'タスクを追加')+'</h3>' +
+      '<label class="fld"><span>内容</span><textarea id="tk-content" rows="3" placeholder="例：gc014 グラスホルダーの撮影">'+esc(cur.content)+'</textarea></label>' +
+      '<label class="fld"><span>工程</span><select id="tk-cat">'+ORDER.map(function(c){ return '<option'+(c === cur.category ? ' selected' : '')+'>'+esc(c)+'</option>'; }).join('')+'</select></label>' +
+      '<div class="fld"><span>優先度</span><div class="seg wide" id="tk-label">'+LABELS.map(function(l){ return '<button type="button" data-v="'+l+'"'+(l === cur.label ? ' aria-pressed="true"' : '')+'>'+l+'</button>'; }).join('')+'</div></div>' +
+      '<div class="row"><button class="btn primary" id="tk-save">保存</button><button class="btn" data-close>やめる</button>' +
+      (t ? (confirmDone ? '<button class="btn ok" id="tk-done2">完了にする（確定）</button>' : '<button class="btn ok" id="tk-done">完了にする</button>') : '') + '</div>' +
+      '<span class="status" id="tk-status"></span><p class="meta" style="margin:0">変更は秘書が取り込むとタスクリスト（tasklist.md）にも反映されます。</p>',
+      function(sh){
+        var label = cur.label;
+        sh.querySelectorAll('#tk-label button').forEach(function(b){ b.onclick = function(){ label = b.dataset.v; sh.querySelectorAll('#tk-label button').forEach(function(x){ x.setAttribute('aria-pressed', x === b); }); }; });
+        if (!t) sh.querySelector('#tk-content').focus();
+        function collect(){ return {content: sh.querySelector('#tk-content').value.trim(), category: sh.querySelector('#tk-cat').value, label: label}; }
+        var d1 = sh.querySelector('#tk-done'); if (d1) d1.onclick = function(){ cur = Object.assign({}, cur, collect()); confirmDone = true; draw(); };
+        var d2 = sh.querySelector('#tk-done2'); if (d2) d2.onclick = function(){ commit({op:'done', id:t.id}, sh); };
+        sh.querySelector('#tk-save').onclick = function(){
+          var v = collect();
+          if (!v.content) { st(sh, '内容を入れてください', true); return; }
+          if (!t) return commit({op:'add', id:newId(), content:v.content, category:v.category, label:v.label}, sh);
+          var op = {op:'edit', id:t.id};
+          if (v.content !== t.content) op.content = v.content;
+          if (v.category !== t.category) op.category = v.category;
+          if (v.label !== t.label) op.label = v.label;
+          if (Object.keys(op).length === 2) { Sheet.close(); return; }
+          commit(op, sh);
+        };
+      });
+  }
+  async function commit(op, sh){
+    op.opId = newId(); op.at = new Date().toISOString();
+    st(sh, '保存中…');
+    try {
+      await ghUpdate('taskops.enc.json', function(d){ return {ops: ((d && d.ops) || []).concat([op])}; }, 'task ' + op.op);
+      DATA.webOps = (DATA.webOps || []).concat([op]);
+      DATA.pending = mergeOps(DATA.pending, [op]);
+      Sheet.close(); renderBoard(); Office.update();
+    } catch(err) { st(sh, err.message, true); }
+  }
+  draw();
+}
+function st(sh, text, err){ var el = sh.querySelector('.status'); if (el) { el.textContent = text; el.classList.toggle('err', !!err); } }
+
 function fail(text){ app.innerHTML = '<div class="msg"><h1 style="font-size:1.2rem">ボードを開けません</h1><p class="muted">'+text+'</p></div>'; }
 
 /* ---------- 部署の状態 ---------- */
@@ -346,11 +530,14 @@ async function load(){
     return fail('鍵が正しくないか、データを読み込めませんでした。URLの末尾まで正しくコピーされているか確認してください。');
   }
   try {
-    var pipe = null;
-    if (ghToken()) pipe = (await ghRead('pipeline.enc.json')).data;
-    else { var pr = await fetch('pipeline.enc.json?t=' + Date.now(), {cache:'no-store'}); if (pr.ok) pipe = await decryptJSON(await pr.json()); }
+    var pipe = await readWeb('pipeline.enc.json');
     if (pipe && pipe.pipeline) { DATA.board.pipeline = pipe.pipeline; DATA.pipeSyncPending = true; }
-  } catch(e) {}
+    var ev = await readWeb('events.enc.json');
+    if (ev && ev.events) DATA.board.events = ev.events;
+    var to = await readWeb('taskops.enc.json');
+    DATA.webOps = (to && to.ops) || [];
+  } catch(e) { DATA.webOps = DATA.webOps || []; }
+  DATA.pending = mergeOps(DATA.pending, (DATA.pendingOps || []).concat(DATA.webOps || []));
   if (!document.getElementById('shell')) shell();
   renderHeader(); renderBoard(); Office.update();
   if (!Memo.loaded) Memo.load();
@@ -409,7 +596,8 @@ function renderBoard(){
     var key = ymd(day);
     var evs = events.filter(function(e){ return e.date === key; }).sort(function(a,b){ return (a.time||'99').localeCompare(b.time||'99'); });
     cal += '<div class="day'+(key === today ? ' today' : key < today ? ' past' : '')+(day.getDay()===0 ? ' sun' : '')+(day.getDay()%6===0 ? ' wkend' : '')+(evs.length ? '' : ' empty')+'"><div class="dn"><b>'+(day.getMonth()+1)+'/'+day.getDate()+'（'+W[day.getDay()]+'）</b>'+(key===today?'<span>今日</span>':(day.getDay()%6===0?'<span class="off">休み</span>':''))+'</div>';
-    evs.forEach(function(e){ cal += '<div class="ev '+esc(e.kind)+'">'+(e.time?'<span class="tm">'+esc(e.time)+'</span>':'')+esc(e.title)+'</div>'; });
+    evs.forEach(function(e){ cal += '<button class="ev '+esc(e.kind)+'" data-ei="'+events.indexOf(e)+'">'+(e.time?'<span class="tm">'+esc(e.time)+'</span>':'')+esc(e.title)+'</button>'; });
+    if (key >= today) cal += '<button class="addev" data-date="'+key+'" aria-label="'+key+' に予定を追加">＋ 追加</button>';
     cal += '</div>';
   }
 
@@ -430,14 +618,14 @@ function renderBoard(){
   var cards = cats.map(function(c){
     return '<div class="card"><h3>'+esc(c)+'<span class="mono">'+groups[c].length+'件</span></h3><ul>'+groups[c].map(function(t){
       var p = planned[t.id] ? ' ・ 予定 '+planned[t.id].sort().map(function(d){ return jpDate(d+'T00:00:00'); }).join('、') : '';
-      return '<li class="task"><span class="tag '+esc(t.label)+'">'+esc(t.label)+'</span><span>'+esc(t.content)+'</span><span class="meta mono">記録 '+jpDate(t.recorded)+p+'</span></li>';
+      return '<li><button class="task tbtn" data-tid="'+esc(t.id)+'"><span class="tagrow"><span class="tag '+esc(t.label)+'">'+esc(t.label)+'</span>'+(t.web ? '<span class="tag web">取り込み待ち</span>' : '')+'</span><span>'+esc(t.content)+'</span><span class="meta mono">記録 '+jpDate(t.recorded)+p+'</span></button></li>';
     }).join('')+'</ul></div>';
   }).join('');
   var qs = (b.questions||[]).map(function(q){ return '<li><b>'+esc(q.cat)+'</b>：'+esc(q.text)+'</li>'; }).join('');
   var dn = DATA.done.slice(0,6).map(function(t){ return '<li><span class="mono">'+jpDate(t.done)+'</span> '+esc(t.content)+'</li>'; }).join('');
 
   document.getElementById('view-board').innerHTML =
-    '<section class="sec"><h2>予定 <small>今週と来週</small></h2>' +
+    '<section class="sec"><h2>予定 <small>今週と来週・タップで編集</small></h2>' +
       '<div class="legend"><span><i class="sw" style="background:var(--urgent)"></i>イベント</span><span><i class="sw" style="background:var(--warn)"></i>締切</span><span><i class="sw" style="background:var(--accent)"></i>作業予定</span><span><i class="sw" style="background:var(--muted)"></i>担当業務</span></div>' +
       '<div class="cal">'+cal+'</div></section>' +
     '<section class="sec"><h2>新商品の進み具合 <small>品番ごと・工程順・丸をタップで変更</small></h2>' +
@@ -445,12 +633,17 @@ function renderBoard(){
       '<div class="legend"><span><i class="dot done"></i>完了</span><span><i class="dot hot"></i>今週やる</span><span><i class="dot now"></i>次の作業</span><span><i class="dot wait"></i>待ち</span><span><i class="dot"></i>未着手／不明</span></div>' +
       '<div class="pipe">'+pipe+'</div></section>' +
     '<div class="dotmenu" id="dotmenu" hidden role="menu"></div>' +
-    '<section class="sec"><h2>タスク <small>工程別・優先度順</small></h2><div class="cols">'+cards+'</div></section>' +
+    '<section class="sec"><div class="h2row"><h2>タスク <small>工程別・優先度順・タップで編集</small></h2><button class="btn primary" id="add-task">＋ タスクを追加</button></div><div class="cols">'+cards+'</div></section>' +
     '<section class="sec"><h2>確認と完了</h2><div class="cols">' +
       (qs ? '<div class="card q"><h3>確認が必要</h3><ul>'+qs+'</ul></div>' : '') +
       '<div class="card"><h3>最近の完了</h3><ul class="done-list">'+(dn || '<li>まだありません</li>')+'</ul></div>' +
     '</div></section>';
   Pipe.bind();
+  var vb = document.getElementById('view-board');
+  vb.querySelectorAll('.addev').forEach(function(b){ b.onclick = function(){ eventSheet(null, b.dataset.date); }; });
+  vb.querySelectorAll('.ev[data-ei]').forEach(function(b){ b.onclick = function(){ eventSheet(DATA.board.events[+b.dataset.ei]); }; });
+  vb.querySelectorAll('.tbtn').forEach(function(b){ b.onclick = function(){ taskSheet(DATA.pending.filter(function(x){ return x.id === b.dataset.tid; })[0]); }; });
+  document.getElementById('add-task').onclick = function(){ taskSheet(null); };
 }
 
 /* =====================================================================
