@@ -981,7 +981,8 @@ function eventCat(e){
   return t ? t.category : null;
 }
 function eventsOn(key){ return ((DATA.board && DATA.board.events) || []).filter(function(e){ return e.date === key; }); }
-function isDutyDay(key){ return eventsOn(key).some(function(e){ return e.kind === 'duty'; }); }
+function isDutyDay(key, who){ return eventsOn(key).some(function(e){ return e.kind === 'duty' && (!who || !e.assignee || e.assignee === who); }); }
+function dutyNames(key){ return eventsOn(key).filter(function(e){ return e.kind === 'duty'; }).map(function(e){ return e.assignee || '全員'; }); }
 
 var STAGE_CAT = {'企画':'企画・サンプル','撮影':'撮影','画像':'商品画像','LP':'LP・文章','登録':'商品登録・在庫','販促':'販促・SNS・イベント'};
 // 品番がいま担当している工程：今週やる > 次の作業 > 待ち の順で最初のもの
@@ -1107,7 +1108,7 @@ function renderBoard(){
   for (var i=0;i<14;i++){
     var day = new Date(start); day.setDate(start.getDate()+i);
     var key = ymd(day);
-    var evs = events.filter(function(e){ return e.date === key && (e.kind === 'duty' || e.kind === 'event' || whoMatch(whoOfEvent(e))); }).sort(function(a,b){ return (a.time||'99').localeCompare(b.time||'99'); });
+    var evs = events.filter(function(e){ return e.date === key && (e.kind === 'event' || whoMatch(whoOfEvent(e))); }).sort(function(a,b){ return (a.time||'99').localeCompare(b.time||'99'); });
     cal += '<div data-date="'+key+'" class="day'+(key === today ? ' today' : key < today ? ' past' : '')+(day.getDay()===0 ? ' sun' : '')+(day.getDay()%6===0 ? ' wkend' : '')+(evs.length ? '' : ' empty')+'"><div class="dn"><b>'+(day.getMonth()+1)+'/'+day.getDate()+'（'+W[day.getDay()]+'）</b>'+(key===today?'<span>今日</span>':'')+'</div>';
     recurringOn(key).forEach(function(r){ cal += '<div class="ev deadline virtual" title="定期タスク（まだタスクになっていない回）">'+(r.assignee ? '<span class="who">'+esc(r.assignee)+'</span>' : '')+'（定期）'+esc(r.title)+' 締切</div>'; });
     evs.forEach(function(e){ var who = whoOfEvent(e); cal += '<button class="ev '+esc(e.kind)+'" data-ei="'+events.indexOf(e)+'">'+(who ? '<span class="who">'+esc(who)+'</span>' : '')+(e.time?'<span class="tm">'+esc(e.time)+'</span>':'')+esc(e.title)+'</button>'; });
@@ -1609,8 +1610,7 @@ var Office = (function(){
       dk.label.innerHTML = (dk.today ? '<span class="b now">今日</span>' : '') + esc(dk.title) + (s.tasks.length ? '<span class="b">'+s.tasks.length+'</span>' : '');
     });
     if (hintEl) hintEl.hidden = !!teamOwner;
-    var duty = isDutyDay(dayKey(0));
-    hemi.intensity = duty ? .38 : .75; sun.intensity = duty ? .3 : .75;
+
     var c = count();
     hudEl.innerHTML =
       chip('today','今日の予定',c.today) + chip('stale','放置',c.stale) + chip('decision','確認待ち',c.decision) + chip('working','作業中',c.working) +
@@ -1660,10 +1660,10 @@ var Office = (function(){
     var out = [], labels = ['今日', '明日'];
     [0,1].forEach(function(off){
       var key = dayKey(off), evs = eventsOn(key);
-      if (isDutyDay(key)) out.push(labels[off]+'は担当業務の日です。');
+      var dn = dutyNames(key); if (dn.length) out.push(labels[off]+'の担当業務：'+dn.join('・')+'。');
       var work = evs.filter(function(e){ return e.kind !== 'duty'; }).sort(function(a,b){ return (a.time||'99').localeCompare(b.time||'99'); });
       if (work.length) out.push(labels[off]+'は '+work.map(function(e){ var w = whoOfEvent(e); return (e.time ? e.time+' ' : '')+(w ? '【'+w+'】' : '')+e.title; }).join(' → ')+' です。');
-      else if (!off && !isDutyDay(key)) out.push('今日は決まった予定がありません。優先度の高いタスクから進めましょう。');
+      else if (!off) out.push('今日は決まった予定がありません。優先度の高いタスクから進めましょう。');
     });
     return out;
   }
@@ -1844,7 +1844,7 @@ var Bulk = (function(){
 
   function d0(){ var d = new Date(); d.setHours(0,0,0,0); return d; }
   function addDays(d, n){ var x = new Date(d); x.setDate(x.getDate() + n); return x; }
-  function isWork(d){ var w = d.getDay(); return w !== 0 && w !== 6 && !isDutyDay(ymd(d)); }
+  function isWork(d){ var w = d.getDay(); return w !== 0 && w !== 6 && !isDutyDay(ymd(d), who); }  // 担当者の当番日は外す
   function workDays(from, to){
     var out = [], t = d0(), d = new Date(Math.max(from, t));
     for (; d <= to && out.length < 40; d = addDays(d, 1)) if (isWork(d)) out.push(ymd(d));
