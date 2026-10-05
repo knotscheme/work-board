@@ -547,9 +547,20 @@ async function readWeb(file){
   return r.ok ? decryptJSON(await r.json()) : null;
 }
 // 最新を読み直して mutate を当て、競合したらもう一度
+// 予定・進み具合・定期タスクの元になる最新のボード（端末に残った古い一覧は使わない）
+var SNAP_KEY = {'events.enc.json':'events', 'pipeline.enc.json':'pipeline', 'recurring.enc.json':'recurring'};
+async function latestBoard(){
+  try { var r = await ghRead('data.enc.json'); if (r.data && r.data.board) return r.data.board; } catch(e) {}
+  return DATA.board;
+}
 async function ghUpdate(file, mutate, msg){
   for (var attempt = 0; attempt < 2; attempt++) {
     var cur = await ghRead(file);
+    if (!cur.data && SNAP_KEY[file]) {
+      var fb = await latestBoard(), o = {};
+      o[SNAP_KEY[file]] = JSON.parse(JSON.stringify(fb[SNAP_KEY[file]] || []));
+      cur.data = o;
+    }
     var next = mutate(cur.data);
     var body = {message: msg, content: btoa(await encryptJSON(next))};
     if (cur.sha) body.sha = cur.sha;
@@ -1289,7 +1300,7 @@ function deptStates(owner, depts){
 }
 
 /* ---------- 読み込み ---------- */
-var LAST_SIG = '', LOADING = false, BUILD = 'ec03ebc166f8';
+var LAST_SIG = '', LOADING = false, BUILD = '448cced096a6';
 // 新しい版が公開されていたら、キャッシュを避けて読み直す
 async function checkVersion(){
   if (BUILD.indexOf('BUILD') >= 0) return;
