@@ -36,6 +36,7 @@
 }
 *{box-sizing:border-box}
 .wrap,.sec{grid-template-columns:minmax(0,1fr)}
+.wrap .wrap{margin-inline:0;width:100%;max-width:none}
 [hidden]{display:none!important}
 body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.7;padding-inline:16px;padding-block:20px 56px}
 .wrap{max-width:1180px;margin-inline:auto;display:grid;gap:28px}
@@ -84,6 +85,27 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
 .day.dropover{outline:3px solid var(--accent);outline-offset:-2px;background:var(--accent-soft)}
 .toast{position:fixed;left:50%;bottom:calc(92px + env(safe-area-inset-bottom, 0px));transform:translateX(-50%);z-index:90;background:var(--ink);color:var(--surface);border-radius:999px;padding:8px 18px;font-size:.86rem;font-weight:700;box-shadow:0 4px 14px rgb(0 0 0 / .25);max-width:calc(100% - 32px)}
 .toast.err{background:var(--urgent)}
+.td-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,300px),1fr));gap:12px}
+.td-card{background:var(--surface);border:1px solid var(--line);border-top:5px solid var(--pc);border-radius:12px;padding:12px 14px;display:grid;gap:10px;align-content:start}
+.td-head{display:flex;align-items:center;gap:8px}
+.td-head b{font-size:1rem}
+.td-dot{width:14px;height:14px;border-radius:50%;background:var(--pc)}
+.td-duty{font-size:.7rem;font-weight:700;background:var(--bg);color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:1px 8px}
+.td-n{margin-left:auto;font-size:.78rem;color:var(--muted)}
+.td-card ul{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.td-item{display:flex;gap:6px;align-items:stretch}
+.td-main{flex:1;min-width:0;font:inherit;color:inherit;text-align:left;border:1px solid var(--line);background:var(--bg);border-radius:10px;padding:8px 10px;display:grid;gap:3px;cursor:pointer;border-left:4px solid var(--pc)}
+.td-item.late .td-main{border-left-color:var(--urgent);background:var(--urgent-soft)}
+.td-kind{justify-self:start;font-size:.68rem;font-weight:700;border-radius:999px;padding:0 7px;background:var(--accent-soft);color:var(--accent)}
+.td-kind.deadline{background:var(--warn-soft);color:var(--warn)}
+.td-kind.late{background:var(--urgent);color:#fff}
+.td-time{font-size:.8rem;color:var(--muted)}
+.td-title{font-weight:700;font-size:.92rem;overflow-wrap:anywhere}
+.td-task{font-size:.76rem;color:var(--muted);overflow-wrap:anywhere}
+.td-done{border:1px solid var(--done);background:var(--surface);color:var(--done);border-radius:10px;font-weight:700;font-size:.8rem;padding:0 10px;min-width:56px}
+.td-done:hover{background:var(--done);color:var(--surface)}
+.td-empty{margin:0;font-size:.86rem;color:var(--muted)}
+.td-event{background:var(--urgent-soft);color:var(--urgent);border-radius:10px;padding:10px 14px;font-size:.9rem}
 .addev{border:1px dashed var(--line);background:none;border-radius:6px;font-size:.74rem;color:var(--muted);padding:3px 0;margin-top:auto}
 .addev:hover{border-color:var(--accent);color:var(--accent)}
 .tbtn{font:inherit;color:inherit;text-align:left;border:0;background:none;padding:6px;margin:-6px;border-radius:8px;width:calc(100% + 12px);cursor:pointer}
@@ -1010,6 +1032,66 @@ function recurringSheet(idx){
   draw();
 }
 
+// ---------- 今日のダッシュボード：担当ごとに今日やることだけ ----------
+function todayHtml(){
+  var today = dayKey(0), evs = (DATA.board && DATA.board.events) || [], o = (DATA.board && DATA.board.org) || {};
+  var people = [o.boss || '佐藤'].concat(o.staff || []);
+  var pend = {}; DATA.pending.forEach(function(t){ pend[t.id] = t; });
+  var items = {}, duty = {}, overdue = {};
+  function add(map, who, e){ (map[who] = map[who] || []).push(e); }
+  evs.forEach(function(e, i){
+    var who = whoOfEvent(e) || '担当なし';
+    if (e.kind === 'duty') { if (e.date === today) add(duty, e.assignee || '全員', e); return; }
+    if (e.kind === 'event') return;
+    if (e.date === today) add(items, who, Object.assign({_i:i}, e));
+    else if (e.kind === 'deadline' && e.date < today && e.task && pend[e.task]) add(overdue, who, Object.assign({_i:i}, e));
+  });
+  var dayEvents = evs.filter(function(e){ return e.kind === 'event' && e.date === today; });
+  var extra = Object.keys(items).concat(Object.keys(overdue)).filter(function(n){ return people.indexOf(n) < 0; })
+    .filter(function(n, i, a){ return a.indexOf(n) === i; });
+  var total = 0;
+  var cards = people.concat(extra).map(function(n){
+    var list = (items[n] || []).sort(function(a,b){ return (a.time||'99').localeCompare(b.time||'99') || (a.kind === 'deadline' ? -1 : 1); });
+    var od = overdue[n] || [], dt = duty[n] || [];
+    total += list.length + od.length;
+    var c = n === '担当なし' ? '#8A8F96' : whoColor(n);
+    function row(e, late){
+      var t = e.task && pend[e.task];
+      return '<li class="td-item'+(late ? ' late' : '')+'"><button class="td-main" data-ei="'+e._i+'">' +
+        '<span class="td-kind '+(late ? 'late' : e.kind)+'">'+(late ? '期限切れ '+jpDate(e.date+'T00:00:00') : e.kind === 'deadline' ? '締切' : '作業')+'</span>' +
+        (e.time ? '<span class="mono td-time">'+esc(e.time)+'</span>' : '') +
+        '<span class="td-title">'+esc(e.title)+'</span>' +
+        (t ? '<span class="td-task">'+esc(t.content.slice(0,60))+(t.content.length > 60 ? '…' : '')+'</span>' : '') + '</button>' +
+        (t ? '<button class="td-done" data-done="'+esc(t.id)+'" aria-label="完了にする">完了</button>' : '') + '</li>';
+    }
+    return '<div class="td-card" style="--pc:'+c+'"><div class="td-head"><span class="td-dot"></span><b>'+esc(n)+'</b>' +
+      (dt.length ? '<span class="td-duty">担当業務</span>' : '') + '<span class="mono td-n">'+(list.length + od.length)+'件</span></div>' +
+      ((list.length || od.length) ? '<ul>'+od.map(function(e){ return row(e, true); }).join('')+list.map(function(e){ return row(e, false); }).join('')+'</ul>'
+        : '<p class="td-empty">'+(dt.length ? '今日は担当業務の日です。' : '今日の予定はありません。')+'</p>') + '</div>';
+  }).join('');
+  var d = new Date();
+  return '<section class="sec" id="sec-today"><div class="h2row"><h2>今日やること <small>'+jpDate(d)+' ・ '+total+'件</small></h2></div>' +
+    (dayEvents.length ? '<div class="td-event">'+dayEvents.map(function(e){ return '<b>'+(e.time ? esc(e.time)+' ' : '')+esc(e.title)+'</b>'; }).join('　')+'</div>' : '') +
+    '<div class="td-grid">'+cards+'</div></section>';
+}
+function bindToday(vb){
+  vb.querySelectorAll('.td-main[data-ei]').forEach(function(b){ b.onclick = function(){ eventSheet(DATA.board.events[+b.dataset.ei]); }; });
+  vb.querySelectorAll('[data-done]').forEach(function(b){
+    b.onclick = function(){
+      if (!ghToken()) return needToken();
+      var t = DATA.pending.filter(function(x){ return x.id === b.dataset.done; })[0]; if (!t) return;
+      confirmModal('完了にしますか？', '「'+t.content.slice(0,50)+(t.content.length > 50 ? '…' : '')+'」を完了にします。', '完了にする', async function(){
+        var op = {op:'done', id:t.id, opId:newId(), at:new Date().toISOString()};
+        try {
+          await ghUpdate('taskops.enc.json', function(d){ return {ops: ((d && d.ops) || []).concat([op])}; }, 'task done');
+          DATA.webOps = (DATA.webOps || []).concat([op]); DATA.pending = mergeOps(DATA.pending, [op]);
+          renderBoard(); Office.update(); toast('完了にしました');
+        } catch(err) { toast(err.message, true); }
+      });
+    };
+  });
+}
+
 function st(sh, text, err){ var el = sh.querySelector('.status'); if (el) { el.textContent = text; el.classList.toggle('err', !!err); } }
 
 function fail(text){ app.innerHTML = '<div class="msg"><h1 style="font-size:1.2rem">ボードを開けません</h1><p class="muted">'+text+'</p></div>'; }
@@ -1086,8 +1168,7 @@ async function load(){
 }
 
 function shell(){
-  tab = ls('wb_tab') || 'sched';
-  if (tab === 'board') tab = 'sched';
+  tab = 'today';  // トップは今日のダッシュボード
   app.innerHTML =
     '<div class="wrap" id="shell">' +
       '<header class="top" id="hdr"></header>' +
@@ -1102,9 +1183,9 @@ function shell(){
 }
 
 // タブ → 表示する画面とセクション（予定・新発進捗・タスクはボード画面の一部）
-var TAB_SECTIONS = {sched:['sec-sched'], pipe:['sec-pipe'], tasks:['sec-tasks','sec-qa']};
+var TAB_SECTIONS = {today:['sec-today'], sched:['sec-sched'], pipe:['sec-pipe'], tasks:['sec-tasks','sec-qa']};
 function applyBoardSections(){
-  ['sec-sched','sec-pipe','sec-tasks','sec-qa'].forEach(function(id){
+  ['sec-today','sec-sched','sec-pipe','sec-tasks','sec-qa'].forEach(function(id){
     var el = document.getElementById(id); if (el) el.hidden = !(TAB_SECTIONS[tab] && TAB_SECTIONS[tab].indexOf(id) >= 0);
   });
 }
@@ -1134,7 +1215,7 @@ function renderHeader(){
   }
   document.getElementById('hdr').innerHTML =
     '<div><h1>やることボード</h1><p>アジアンアーツ制作部 ・ 未完了 <span class="mono">'+DATA.pending.length+'</span> 件 ・ 更新 <span class="mono">'+jpDateTime(DATA.updated)+'</span></p></div>'+countHtml+
-    '<nav class="tabs" role="tablist" aria-label="メニュー"><button role="tab" data-t="sched"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15.5" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/><path d="M7.5 14h3M13.5 14h3M7.5 17.2h3"/></svg><span>予定</span></button><button role="tab" data-t="pipe"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 7.8L12 3.5l8.5 4.3v8.4L12 20.5l-8.5-4.3z"/><path d="M3.5 7.8L12 12l8.5-4.2M12 12v8.5"/><path d="M7.7 5.6l8.5 4.3"/></svg><span>新発進捗</span></button><button role="tab" data-t="tasks"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6.5l1.6 1.6L8.8 5"/><path d="M4 12.5l1.6 1.6L8.8 11"/><path d="M4.6 18.5h2.6"/><path d="M11.5 6.5H20M11.5 12.5H20M11.5 18.5H20"/></svg><span>タスク</span></button><button role="tab" data-t="office"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="7.5" r="2.6"/><circle cx="16.5" cy="7.5" r="2.6"/><path d="M3.5 15.5c.6-2.6 2.4-4 4.5-4s3.9 1.4 4.5 4"/><path d="M12 15.5c.6-2.6 2.4-4 4.5-4s3.9 1.4 4.5 4"/><rect x="2.5" y="15.5" width="19" height="3" rx="1"/><path d="M5 18.5v2.5M19 18.5v2.5"/></svg><span>オフィス</span></button><button role="tab" data-t="memo"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5.5 3.5h9l4 4v13h-13z"/><path d="M14.5 3.5v4h4"/><path d="M8.5 12h7M8.5 15.5h7M8.5 8.5h3"/></svg><span>メモ</span></button></nav>';
+    '<nav class="tabs" role="tablist" aria-label="メニュー"><button role="tab" data-t="today"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 11.2 12 4l8.5 7.2"/><path d="M6 9.6V20h12V9.6"/><path d="M10 20v-5.2h4V20"/></svg><span>今日</span></button><button role="tab" data-t="sched"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15.5" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/><path d="M7.5 14h3M13.5 14h3M7.5 17.2h3"/></svg><span>予定</span></button><button role="tab" data-t="pipe"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 7.8L12 3.5l8.5 4.3v8.4L12 20.5l-8.5-4.3z"/><path d="M3.5 7.8L12 12l8.5-4.2M12 12v8.5"/><path d="M7.7 5.6l8.5 4.3"/></svg><span>新発進捗</span></button><button role="tab" data-t="tasks"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6.5l1.6 1.6L8.8 5"/><path d="M4 12.5l1.6 1.6L8.8 11"/><path d="M4.6 18.5h2.6"/><path d="M11.5 6.5H20M11.5 12.5H20M11.5 18.5H20"/></svg><span>タスク</span></button><button role="tab" data-t="office"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="7.5" r="2.6"/><circle cx="16.5" cy="7.5" r="2.6"/><path d="M3.5 15.5c.6-2.6 2.4-4 4.5-4s3.9 1.4 4.5 4"/><path d="M12 15.5c.6-2.6 2.4-4 4.5-4s3.9 1.4 4.5 4"/><rect x="2.5" y="15.5" width="19" height="3" rx="1"/><path d="M5 18.5v2.5M19 18.5v2.5"/></svg><span>オフィス</span></button><button role="tab" data-t="memo"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5.5 3.5h9l4 4v13h-13z"/><path d="M14.5 3.5v4h4"/><path d="M8.5 12h7M8.5 15.5h7M8.5 8.5h3"/></svg><span>メモ</span></button></nav>';
   document.querySelectorAll('.tabs button').forEach(function(b){ b.onclick = function(){ setTab(b.dataset.t); }; });
   setTab(tab);
 }
@@ -1186,7 +1267,7 @@ function renderBoard(){
   var qs = (b.questions||[]).map(function(q){ return '<li><b>'+esc(q.cat)+'</b>：'+esc(q.text)+'</li>'; }).join('');
   var dn = DATA.done.slice(0,6).map(function(t){ return '<li><span class="mono">'+jpDate(t.done)+'</span> '+esc(t.content)+'</li>'; }).join('');
 
-  document.getElementById('view-board').innerHTML =
+  document.getElementById('view-board').innerHTML = todayHtml() +
     '<section class="sec" id="sec-sched"><h2>予定 <small>今週と来週・タップで編集・ドラッグ（スマホは長押し）で別の日へ移動</small></h2>' +
       '<div class="legend"><span><i class="sw" style="background:var(--urgent)"></i>イベント</span><span><i class="sw" style="background:var(--warn)"></i>締切</span><span><i class="sw" style="background:var(--accent)"></i>作業予定</span><span><i class="sw" style="background:var(--muted)"></i>担当業務</span></div>' +
       whoFilterHtml() +
@@ -1211,6 +1292,7 @@ function renderBoard(){
   vb.querySelectorAll('.addev').forEach(function(b){ b.onclick = function(){ eventSheet(null, b.dataset.date); }; });
   vb.querySelectorAll('.ev[data-ei]').forEach(function(b){ b.onclick = function(){ if (b.dataset.dragged) return; eventSheet(DATA.board.events[+b.dataset.ei]); }; });
   bindEventDrag(vb);
+  bindToday(vb);
   vb.querySelectorAll('.tbtn').forEach(function(b){ b.onclick = function(){ taskSheet(DATA.pending.filter(function(x){ return x.id === b.dataset.tid; })[0]); }; });
   document.getElementById('add-task').onclick = function(){ taskSheet(null); };
   document.getElementById('add-product').onclick = function(){ productSheet(null); };
