@@ -192,6 +192,25 @@ footer{color:var(--muted);font-size:.78rem}
 .nm.person.boss{background:#9A6A0B;border-color:#9A6A0B}
 .nm.person .b{background:var(--surface);color:var(--ink)}
 .nm.person.open{outline:3px solid #E8A800;outline-offset:1px}
+.ostrip{display:grid;gap:8px}
+.prow{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px}
+.pbtn{border:1px solid var(--line);background:var(--surface);border-radius:12px;padding:8px 4px;display:grid;justify-items:center;gap:3px;min-height:72px}
+.pbtn .av{width:24px;height:24px;border-radius:50%;border:2px solid var(--surface);box-shadow:0 0 0 1px var(--line)}
+.pbtn .pn{font-weight:700;font-size:.82rem}
+.pbtn .ps{font-size:.7rem;color:var(--muted);font-family:var(--mono)}
+.pbtn.open{border-color:#E8A800;background:#FFF4D1;color:#1D2127}
+.pbtn.sel{outline:2px solid var(--accent);outline-offset:1px}
+.tdy{font-style:normal;font-size:.62rem;font-weight:700;background:#E8A800;color:#1D2127;border-radius:999px;padding:0 5px;margin-right:3px}
+.trow{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.tlbl{font-size:.76rem;font-weight:700;color:var(--muted);width:100%}
+.tbtn2{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:7px 12px;font-size:.8rem;font-weight:700;min-height:38px}
+.tbtn2.working{border-color:var(--accent);color:var(--accent)}
+.tbtn2.decision{border-color:var(--warn);color:var(--warn)}
+.tbtn2.stale{border-color:var(--urgent);color:var(--urgent)}
+.tbtn2.idle{color:var(--muted)}
+.tbtn2.sel{background:var(--accent);border-color:var(--accent);color:var(--surface)}
+.tbtn2.close{margin-left:auto;color:var(--muted);border-style:dashed}
+.oticker{display:none;margin:0;font-size:.82rem;background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--accent);border-radius:8px;padding:8px 10px}
 .teamhint{position:absolute;left:50%;bottom:64px;transform:translateX(-50%);background:var(--surface);border:1px dashed var(--accent);color:var(--accent);border-radius:999px;padding:6px 16px;font-size:.8rem;font-weight:700;white-space:nowrap;pointer-events:none}
 .nm.today{border:2px solid #E8A800}
 .nm .b.now{background:#E8A800;color:#1D2127}
@@ -278,7 +297,13 @@ textarea{min-height:140px;resize:vertical;line-height:1.6}
   .tabs svg{width:25px;height:25px}
   .tabs button[aria-selected="true"]{background:var(--accent-soft);color:var(--accent)}
   .day.past{display:none}
-  .office{height:64vh;min-height:380px}
+  .office{height:52vh;min-height:330px}
+  .bubble.ticker{display:none}
+  .oticker{display:block}
+  .teamhint{bottom:12px;font-size:.74rem}
+  .panel{height:62%}
+  .panel .x{font-size:1.5rem;padding:8px 12px}
+  .hud .chip{padding:2px 9px;font-size:.72rem}
   .nm{font-size:.66rem;padding:0 7px}
   .hint{display:none}
   textarea{min-height:110px}
@@ -868,7 +893,8 @@ var Office = (function(){
     root = el;
     el.innerHTML = '<h2>オフィス <small>佐藤 → 白川・藤田・佐々木・鳥居。メンバーをタップすると担当チームが現れます。今日の予定＝スポットライト・締切間近＝汗・挙手＝確認待ち・赤点滅＝放置</small></h2>' +
       '<div class="office" id="office"><canvas id="office-cv" aria-label="オフィスの3D表示"></canvas><div class="labels" id="office-labels"></div>' +
-      '<div class="hud" id="office-hud"></div><div class="hint">ドラッグで回転・社員をタップで詳細</div><div class="zoom"><button data-z="in" aria-label="拡大">＋</button><button data-z="out" aria-label="縮小">−</button><button data-z="all" aria-label="全体を表示">全体</button></div><div class="panel" id="office-panel" hidden></div></div>';
+      '<div class="hud" id="office-hud"></div><div class="hint">1本指で回転・2本指で拡大縮小・社員をタップで詳細</div><div class="zoom"><button data-z="in" aria-label="拡大">＋</button><button data-z="out" aria-label="縮小">−</button><button data-z="all" aria-label="全体を表示">全体</button></div><div class="panel" id="office-panel" hidden></div></div>' +
+      '<div class="ostrip" id="office-strip" role="group" aria-label="メンバー"></div><p class="oticker" id="office-ticker"></p>';
     canvas = el.querySelector('#office-cv'); labelsEl = el.querySelector('#office-labels');
     hudEl = el.querySelector('#office-hud'); panelEl = el.querySelector('#office-panel');
   }
@@ -1005,7 +1031,7 @@ var Office = (function(){
     var sweat = makeDrop(); sweat.position.set(.34,1.95,.2); g.add(sweat);
     g.traverse(function(o){ o.userData.dept = key; });
     var lbl = document.createElement('div'); lbl.className = 'nm'; lbl.onclick = function(){ select(key, true); }; labelsEl.appendChild(lbl);
-    desks[key] = {key:key, title:title, group:g, w:wk, d:dk, ring:ring, hand:hand, alert:alert, beam:beam, spot:spot, sweat:sweat, label:lbl, phase:idx*1.7, idx:idx};
+    desks[key] = {key:key, title:title, shirtHex: opts.shirt || SHIRTS[idx % SHIRTS.length], group:g, w:wk, d:dk, ring:ring, hand:hand, alert:alert, beam:beam, spot:spot, sweat:sweat, label:lbl, phase:idx*1.7, idx:idx};
     return desks[key];
   }
 
@@ -1094,17 +1120,29 @@ var Office = (function(){
 
   /* ---- 入力 ---- */
   function bindInput(){
-    var down = null;
-    canvas.addEventListener('pointerdown', function(e){ down = {x:e.clientX, y:e.clientY, az:cam.az, el:cam.el, moved:false}; canvas.setPointerCapture(e.pointerId); });
+    var down = null, pts = {}, pinch = null;
+    function dist(){ var k = Object.keys(pts); if (k.length < 2) return 0; var a = pts[k[0]], b = pts[k[1]]; return Math.hypot(a.x - b.x, a.y - b.y); }
+    canvas.addEventListener('pointerdown', function(e){
+      pts[e.pointerId] = {x:e.clientX, y:e.clientY};
+      canvas.setPointerCapture(e.pointerId);
+      if (Object.keys(pts).length === 2) { pinch = {d: dist(), r: cam.r}; down = null; camGoal = null; autoSpin = false; return; }
+      down = {x:e.clientX, y:e.clientY, az:cam.az, el:cam.el, moved:false};
+    });
+    function lift(e){ delete pts[e.pointerId]; if (Object.keys(pts).length < 2) pinch = null; }
+    canvas.addEventListener('pointercancel', function(e){ lift(e); down = null; });
     canvas.addEventListener('pointermove', function(e){
+      if (pts[e.pointerId]) pts[e.pointerId] = {x:e.clientX, y:e.clientY};
+      if (pinch) { var d = dist(); if (d > 0) cam.r = Math.max(8, Math.min(48, pinch.r * pinch.d / d)); return; }
       if (!down) return;
       var dx = e.clientX - down.x, dy = e.clientY - down.y;
       if (Math.abs(dx) + Math.abs(dy) > 4) { down.moved = true; autoSpin = false; canvas.classList.add('drag'); }
       cam.az = down.az - dx * .006; cam.el = Math.max(.25, Math.min(1.25, down.el + dy * .004)); camGoal = null;
     });
     canvas.addEventListener('pointerup', function(e){
+      var wasPinch = !!pinch;
+      lift(e);
       canvas.classList.remove('drag');
-      if (down && !down.moved) pick(e);
+      if (down && !down.moved && !wasPinch) pick(e);
       down = null;
     });
     root.querySelectorAll('.zoom button').forEach(function(b){
@@ -1147,7 +1185,7 @@ var Office = (function(){
     if (key && !desks[key]) key = null;
     selected = key;
     Object.keys(desks).forEach(function(k){ desks[k].label.classList.toggle('sel', k === key); });
-    if (!key) { panelEl.hidden = true; return; }
+    if (!key) { panelEl.hidden = true; renderStrip(); return; }
     var u = desks[key];
     if (u.person && !u.isBoss) expand(u.person);
     if (fly) flyTo(key);
@@ -1175,6 +1213,7 @@ var Office = (function(){
       html += '<div class="lbl">道具（AI・ツール）</div><div class="tools">'+(d.tools || []).map(function(t){ return '<span>'+esc(t)+'</span>'; }).join('')+'</div>';
     }
     panelEl.innerHTML = html; panelEl.hidden = false;
+    renderStrip();
     panelEl.querySelector('.x').onclick = function(){ select(null); };
     var tc = panelEl.querySelector('#team-close');
     if (tc) tc.onclick = function(){ collapse(); select(null); update(); };
@@ -1262,7 +1301,29 @@ var Office = (function(){
       };
     });
     if (selected) select(selected, false);
+    renderStrip();
   }
+  function renderStrip(){
+    var el = root.querySelector('#office-strip'); if (!el || !built) return;
+    var o = orgInfo(), STJ = {stale:'放置あり', decision:'確認待ち', working:'作業中', idle:'待機'};
+    var html = '<div class="prow">' + [o.boss].concat(o.staff).map(function(n){
+      var k = '@'+n, s = states[k] || {tasks:[], today:[], state:'idle'}, u = desks[k];
+      var col = '#' + ('000000' + (u ? u.shirtHex : 0x888888).toString(16)).slice(-6);
+      return '<button class="pbtn'+(teamOwner === n ? ' open' : '')+(selected === k ? ' sel' : '')+'" data-k="'+esc(k)+'">' +
+        '<span class="av" style="background:'+col+'"></span><span class="pn">'+esc(n)+'</span>' +
+        '<span class="ps">'+(s.today.length ? '<i class="tdy">今日</i>' : '')+(u && u.isBoss ? '全体' : (s.tasks.length ? s.tasks.length+'件' : '—'))+'</span></button>';
+    }).join('') + '</div>';
+    if (teamOwner) {
+      html += '<div class="trow"><span class="tlbl">'+esc(teamOwner)+'チーム</span>' + teamKeys.map(function(k){
+        var s = states[k] || {tasks:[], state:'idle', today:[]};
+        return '<button class="tbtn2 '+s.state+(selected === k ? ' sel' : '')+'" data-k="'+esc(k)+'">'+(s.today.length ? '<i class="tdy">今日</i>' : '')+esc(desks[k].title)+(s.tasks.length ? ' <b>'+s.tasks.length+'</b>' : '')+'</button>';
+      }).join('') + '<button class="tbtn2 close" data-close="1">しまう</button></div>';
+    }
+    el.innerHTML = html;
+    el.querySelectorAll('button[data-k]').forEach(function(b){ b.onclick = function(){ select(b.dataset.k, true); }; });
+    var c = el.querySelector('[data-close]'); if (c) c.onclick = function(){ collapse(); select(null); update(); };
+  }
+
   function chip(s, l, n){ return '<button class="chip '+s+'" data-s="'+s+'"'+(n?'':' disabled')+'>'+l+' <span class="mono">'+n+'</span></button>'; }
 
   /* ---- アニメーション ---- */
@@ -1359,7 +1420,7 @@ var Office = (function(){
     });
 
     bubbleT -= dt;
-    if (bubbleT <= 0) { var lines = bubbleLines(); bubbleEl.textContent = lines[bubbleIdx++ % lines.length]; bubbleT = 5; }
+    if (bubbleT <= 0) { var lines = bubbleLines(); bubbleEl.textContent = lines[bubbleIdx++ % lines.length]; bubbleT = 5; var tk = root.querySelector('#office-ticker'); if (tk) tk.textContent = bubbleEl.textContent; }
     bubbleEl.style.top = (hudEl.offsetTop + hudEl.offsetHeight + 8) + 'px';
 
     if (mo) { planeT -= dt; if (planeT <= 0) { spawnPlane(); planeT = 1.4 + Math.random(); } }
