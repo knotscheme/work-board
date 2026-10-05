@@ -495,6 +495,18 @@ function whoColor(n){
 }
 function whoInk(hex){ var v = parseInt(hex.slice(1), 16), r = v >> 16, g = (v >> 8) & 255, b = v & 255; return (r*299 + g*587 + b*114) / 1000 > 150 ? '#1D2127' : '#FFFFFF'; }
 function whoStyle(n){ var c = whoColor(n); return 'background:' + c + ';color:' + whoInk(c); }
+// 担当ボタン：押されているものをその人の色で塗る（一括変換・担当欄・絞り込みの全部）
+function paintWho(scope){
+  (scope || document).querySelectorAll('.whopick button, .whofilter button').forEach(function(b){
+    var v = b.dataset.v != null ? b.dataset.v : b.dataset.who;
+    var on = b.getAttribute('aria-pressed') === 'true' && v && v !== '__none';
+    if (on) { var c = whoColor(v); b.style.background = c; b.style.borderColor = c; b.style.color = whoInk(c); }
+    else { b.style.background = ''; b.style.borderColor = ''; b.style.color = ''; }
+  });
+}
+new MutationObserver(function(ms){
+  if (ms.some(function(m){ return m.type === 'childList' || (m.target.closest && m.target.closest('.whopick, .whofilter')); })) paintWho();
+}).observe(document.documentElement, {subtree:true, childList:true, attributes:true, attributeFilter:['aria-pressed']});
 function whoChip(n){ return '<span class="who" style="' + whoStyle(n) + '">' + esc(n) + '</span>'; }
 function whoTag(n){ return '<span class="tag whotag" style="' + whoStyle(n) + '">' + esc(n) + '</span>'; }
 
@@ -1951,7 +1963,7 @@ var Bulk = (function(){
       '<section class="sec bulk"><h2>やることに一括変換 <small>1行1件・上の行ほど先に予定を入れます</small></h2>' +
       '<div class="compose">' +
         '<textarea id="bulk-text" placeholder="・今週中に lw280 と lw281 の新発を進める&#10;・明日 gc014 撮影&#10;・10/15まで P2発注の確認">'+esc(ls('wb_bulk') || '')+'</textarea>' +
-        '<div class="fld"><span>担当（必須）</span><div class="whopick" id="bulk-who">'+names.map(function(n){ return '<button type="button" data-v="'+esc(n)+'"'+(who === n ? ' aria-pressed="true"' : '')+'>'+esc(n)+'</button>'; }).join('')+'</div></div>' +
+        '<div class="fld"><span>担当（必須）</span><div class="whopick" id="bulk-who">'+names.map(function(n){ return '<button type="button" data-v="'+esc(n)+'"'+(who === n ? ' aria-pressed="true"' : '')+'><i class="wdot" style="background:'+whoColor(n)+'"></i>'+esc(n)+'</button>'; }).join('')+'</div></div>' +
         '<p class="meta" style="margin:0">品番（lw280 など）を書くと、その品番の次の工程が予定になります（未登録なら新発進捗に追加して撮影から）。「今週中・急ぎ」は優先。期間は 今日／明日／今週／来週／10/15まで。土日と担当業務の日は外します。</p>' +
         '<div class="row"><button class="btn primary" id="bulk-go">変換して確認</button><span class="status" id="bulk-status"></span></div>' +
       '</div></section>';
