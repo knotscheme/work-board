@@ -932,6 +932,10 @@ var Office = (function(){
       [-1,1].forEach(function(sd){ var side = new THREE.Mesh(new THREE.SphereGeometry(.09,10,8), hair); side.scale.set(.8,1.4,.9); side.position.set(sd*.25,-.03,.03); headG.add(side); });
     }
     if (opts.cap != null) { // キャップ
+      // キャップの下から金髪が見えるように：襟足・耳まわり・前髪
+      var nape2 = new THREE.Mesh(new THREE.SphereGeometry(.28,18,12), hair); nape2.scale.set(1.04,.75,.95); nape2.position.set(0,-.05,-.08); headG.add(nape2);
+      [-1,1].forEach(function(sd){ var sb = new THREE.Mesh(new THREE.SphereGeometry(.085,10,8), hair); sb.scale.set(.8,1.3,1); sb.position.set(sd*.25,-.02,.05); headG.add(sb); });
+      var bang = new THREE.Mesh(new THREE.SphereGeometry(.12,12,8), hair); bang.scale.set(1.7,.4,.55); bang.position.set(0,.14,.2); headG.add(bang);
       var capM = mat(opts.cap);
       var crown = new THREE.Mesh(new THREE.SphereGeometry(.295,20,12,0,Math.PI*2,0,Math.PI*.5), capM); crown.position.y = .03; crown.rotation.x = -.12; crown.castShadow = true; headG.add(crown);
       var brim = new THREE.Mesh(new THREE.CylinderGeometry(.2,.2,.025,20,1,false,-Math.PI/2,Math.PI), capM); brim.scale.set(1,1,1.25); brim.position.set(0,.06,.2); brim.rotation.x = .1; headG.add(brim);
