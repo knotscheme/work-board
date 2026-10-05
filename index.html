@@ -60,6 +60,8 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
 .count .num{font-size:1.7rem;font-weight:700;line-height:1.1}
 .count .num span{font-size:.9rem;margin-left:2px}
 .count .sub{font-size:.74rem}
+.reload{border:1px solid var(--line);background:var(--surface);border-radius:999px;font-size:.72rem;font-weight:700;padding:1px 10px;color:var(--muted);vertical-align:1px}
+.reload[disabled]{opacity:.5}
 .tabs{display:flex;gap:4px;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:4px;justify-self:start;grid-column:1/-1}
 .tabs button{border:0;background:none;border-radius:8px;padding:6px 14px;font-weight:700;font-size:.86rem;color:var(--muted);display:inline-flex;align-items:center;gap:6px}
 .tabs svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;flex:none}
@@ -1249,14 +1251,22 @@ function deptStates(owner, depts){
 }
 
 /* ---------- 読み込み ---------- */
-async function load(){
+var LAST_SIG = '', LOADING = false;
+async function load(force){
+  if (LOADING) return; LOADING = true;
+  try { await loadInner(force); } finally { LOADING = false; }
+}
+async function loadInner(force){
   KEY = location.hash.slice(1);
   if (!KEY) return fail('鍵付きのURL（末尾に # から始まる文字列があるもの）で開いてください。');
   try {
-    cryptoKey = await crypto.subtle.importKey('raw', fromB64(KEY), 'AES-GCM', false, ['encrypt','decrypt']);
-    var res = await fetch('data.enc.json?t=' + Date.now(), {cache:'no-store'});
-    DATA = await decryptJSON(await res.json());
+    if (!cryptoKey) cryptoKey = await crypto.subtle.importKey('raw', fromB64(KEY), 'AES-GCM', false, ['encrypt','decrypt']);
+    var fresh = null;
+    if (ghToken()) { try { fresh = (await ghRead('data.enc.json')).data; } catch(e) {} }
+    if (!fresh) { var res = await fetch('data.enc.json?t=' + Date.now(), {cache:'no-store'}); fresh = await decryptJSON(await res.json()); }
+    DATA = fresh;
   } catch(e) {
+    if (document.getElementById('shell')) return;   // 2回目以降の失敗は今の表示のまま
     return fail('鍵が正しくないか、データを読み込めませんでした。URLの末尾まで正しくコピーされているか確認してください。');
   }
   await loadSharedToken();
@@ -1271,7 +1281,11 @@ async function load(){
     DATA.webOps = (to && to.ops) || [];
   } catch(e) { DATA.webOps = DATA.webOps || []; }
   DATA.pending = mergeOps(DATA.pending, (DATA.pendingOps || []).concat(DATA.webOps || []));
-  if (!document.getElementById('shell')) shell();
+  var sig = JSON.stringify([DATA.updated, DATA.pending, DATA.done, DATA.board]);
+  var first = !document.getElementById('shell');
+  if (first) shell();
+  else if (sig === LAST_SIG && !force) return;   // 変わっていなければ何もしない
+  LAST_SIG = sig;
   renderHeader(); renderBoard(); Office.update(); Bulk.render();
   if (!Memo.loaded) Memo.load();
 }
@@ -1284,7 +1298,7 @@ function shell(){
       '<div id="view-board" class="wrap" style="gap:36px"></div>' +
       '<div id="view-office" class="sec"></div>' +
       '<div id="view-memo" class="sec" style="gap:28px"><div id="bulk-area"></div><div id="memo-area" class="sec"></div></div>' +
-      '<footer>秘書（00_secretary）でタスクを追加・完了すると、自動でこのページに反映されます（5分ごとに再読み込み）。</footer>' +
+      '<footer>秘書（00_secretary）でタスクを追加・完了すると、自動でこのページに反映されます（1分ごと・アプリに戻ったときに自動で再読み込み）。</footer>' +
     '</div>';
   Office.mount(document.getElementById('view-office'));
   Memo.mount(document.getElementById('memo-area'));
@@ -1319,7 +1333,7 @@ function setTab(t){
   document.getElementById('view-board').hidden = !TAB_SECTIONS[t];
   ['office','memo'].forEach(function(k){ document.getElementById('view-'+k).hidden = k !== t; });
   applyBoardSections();
-  window.scrollTo(0, 0);
+
   document.querySelectorAll('.tabs button').forEach(function(b){ b.setAttribute('aria-selected', b.dataset.t === t); });
   if (t === 'office') Office.start(); else Office.stop();
 }
@@ -1338,9 +1352,10 @@ function renderHeader(){
     countHtml = '<div class="count"><div class="lbl">'+esc(next.title)+' まで</div><div class="num mono">'+(d>0? d+'<span>日</span> ':'')+h+'<span>時間</span></div><div class="sub mono">'+jpDate(next.at)+' '+esc(next.time||'')+'</div></div>';
   }
   document.getElementById('hdr').innerHTML =
-    '<div><h1>やることボード</h1><p>アジアンアーツ制作部 ・ 未完了 <span class="mono">'+DATA.pending.length+'</span> 件 ・ 更新 <span class="mono">'+jpDateTime(DATA.updated)+'</span></p></div>'+countHtml+
+    '<div><h1>やることボード</h1><p>アジアンアーツ制作部 ・ 未完了 <span class="mono">'+DATA.pending.length+'</span> 件 ・ 更新 <span class="mono">'+jpDateTime(DATA.updated)+'</span> <button class="reload" id="reload" aria-label="最新の内容を読み込む">↻ 更新</button></p></div>'+countHtml+
     '<nav class="tabs" role="tablist" aria-label="メニュー"><button role="tab" data-t="today"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 11.2 12 4l8.5 7.2"/><path d="M6 9.6V20h12V9.6"/><path d="M10 20v-5.2h4V20"/></svg><span>今日</span></button><button role="tab" data-t="sched"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15.5" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/><path d="M7.5 14h3M13.5 14h3M7.5 17.2h3"/></svg><span>予定</span></button><button role="tab" data-t="pipe"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 7.8L12 3.5l8.5 4.3v8.4L12 20.5l-8.5-4.3z"/><path d="M3.5 7.8L12 12l8.5-4.2M12 12v8.5"/><path d="M7.7 5.6l8.5 4.3"/></svg><span>新発進捗</span></button><button role="tab" data-t="tasks"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6.5l1.6 1.6L8.8 5"/><path d="M4 12.5l1.6 1.6L8.8 11"/><path d="M4.6 18.5h2.6"/><path d="M11.5 6.5H20M11.5 12.5H20M11.5 18.5H20"/></svg><span>タスク</span></button><button role="tab" data-t="office"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="7.5" r="2.6"/><circle cx="16.5" cy="7.5" r="2.6"/><path d="M3.5 15.5c.6-2.6 2.4-4 4.5-4s3.9 1.4 4.5 4"/><path d="M12 15.5c.6-2.6 2.4-4 4.5-4s3.9 1.4 4.5 4"/><rect x="2.5" y="15.5" width="19" height="3" rx="1"/><path d="M5 18.5v2.5M19 18.5v2.5"/></svg><span>オフィス</span></button><button role="tab" data-t="memo"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5.5 3.5h9l4 4v13h-13z"/><path d="M14.5 3.5v4h4"/><path d="M8.5 12h7M8.5 15.5h7M8.5 8.5h3"/></svg><span>メモ</span></button></nav>';
-  document.querySelectorAll('.tabs button').forEach(function(b){ b.onclick = function(){ setTab(b.dataset.t); }; });
+  document.querySelectorAll('.tabs button').forEach(function(b){ b.onclick = function(){ setTab(b.dataset.t); window.scrollTo(0, 0); }; });
+  var rb = document.getElementById('reload'); if (rb) rb.onclick = async function(){ rb.disabled = true; await load(true); rb.disabled = false; toast('最新にしました'); };
   setTab(tab);
 }
 
@@ -2454,7 +2469,9 @@ var Memo = (function(){
 })();
 
 load();
-setInterval(function(){ if (!document.hidden) load(); }, 300000);
+setInterval(function(){ if (!document.hidden) load(); }, 60000);
+document.addEventListener('visibilitychange', function(){ if (!document.hidden) load(); });
+window.addEventListener('focus', function(){ load(); });
 window.addEventListener('hashchange', function(){ location.reload(); });
 })();
 </script>
