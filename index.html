@@ -934,6 +934,7 @@ function taskSheet(t){
         toast('定期タスクにしました（' + recRuleLabel(item) + '）。このタスクが今回分になります');
       }
       Sheet.close(); renderBoard(); Office.update();
+      if (op && op.op === 'done') removeFutureEvents(op.id);
       if (op && op.op === 'done') toast('完了にしました', false, {label:'元に戻す', fn:function(){ reopenTask(op.id); }});
     } catch(err) { st(sh, err.message, true); }
   }
@@ -950,6 +951,19 @@ function toast(text, err, action){
     t.appendChild(b);
   }
   clearTimeout(t._h); t._h = setTimeout(function(){ t.hidden = true; }, action ? 6000 : 2600);
+}
+
+// 完了したタスクの、明日以降の予定（作業予定・締切）を消す。今日までは記録として残す
+async function removeFutureEvents(taskId){
+  var today = dayKey(0);
+  if (!(DATA.board.events || []).some(function(e){ return e.task === taskId && e.date > today; })) return;
+  try {
+    var res = await ghUpdate('events.enc.json', function(d){
+      var evs = JSON.parse(JSON.stringify((d && d.events) || DATA.board.events || []));
+      return {events: evs.filter(function(e){ return !(e.task === taskId && e.date > today); }), updated: new Date().toISOString()};
+    }, 'remove future events');
+    DATA.board.events = res.events; renderBoard(); Office.update();
+  } catch(e) {}
 }
 
 // 完了を取り消して未完了に戻す
@@ -1368,7 +1382,7 @@ function deptStates(owner, depts){
 }
 
 /* ---------- 読み込み ---------- */
-var LAST_SIG = '', LOADING = false, BUILD = '446da4b0f717';
+var LAST_SIG = '', LOADING = false, BUILD = '97bde73863d4';
 // 新しい版が公開されていたら、キャッシュを避けて読み直す
 async function checkVersion(){
   if (BUILD.indexOf('BUILD') >= 0) return;
