@@ -115,6 +115,10 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
 .td-task{font-size:.76rem;color:var(--muted);overflow-wrap:anywhere}
 .td-done{border:1px solid var(--done);background:var(--surface);color:var(--done);border-radius:10px;font-weight:700;font-size:.8rem;padding:0 10px;min-width:56px}
 .td-done:hover{background:var(--done);color:var(--surface)}
+.td-item.fin .td-main{opacity:.55;border-left-color:var(--done)}
+.td-item.fin .td-title{text-decoration:line-through}
+.td-kind.fin{background:var(--done-soft);color:var(--done)}
+.ev.evdone{opacity:.5;text-decoration:line-through}
 .td-empty{margin:0;font-size:.86rem;color:var(--muted)}
 .td-event{background:var(--urgent-soft);color:var(--urgent);border-radius:10px;padding:10px 14px;font-size:.9rem}
 .addev{border:1px dashed var(--line);background:none;border-radius:6px;font-size:.74rem;color:var(--muted);padding:3px 0;margin-top:auto}
@@ -739,6 +743,12 @@ function needToken(){
 
 var KIND_JP = [['plan','作業予定'],['deadline','締切'],['event','イベント'],['duty','担当業務']];
 // 定期タスクの予定なら「毎日」などの名前を返す（そうでなければ空）
+// 予定にひも付くタスクが完了済みか
+function isDoneEvent(e){
+  if (!e || !e.task || !DATA) return false;
+  if (DATA.pending.some(function(t){ return t.id === e.task; })) return false;
+  return (DATA.done || []).some(function(t){ return t.id === e.task; });
+}
 function recLabelOfEvent(e){
   if (!e || !e.task || !DATA) return '';
   var t = DATA.pending.concat(DATA.done || []).filter(function(x){ return x.id === e.task; })[0];
@@ -1301,14 +1311,16 @@ function todayHtml(){
     .filter(function(n, i, a){ return a.indexOf(n) === i; });
   var total = 0;
   var cards = people.concat(extra).map(function(n){
-    var list = (items[n] || []).sort(evOrder(evs.map(function(e, i){ return e; })));
+    // 完了したタスクの予定は下にまとめ、件数に数えない
+    var all = (items[n] || []).sort(evOrder(evs.map(function(e, i){ return e; })));
+    var list = all.filter(function(e){ return !isDoneEvent(e); }), fin = all.filter(isDoneEvent);
     var od = overdue[n] || [], dt = duty[n] || [];
     total += list.length + od.length;
     var c = n === '担当なし' ? '#8A8F96' : whoColor(n);
     function row(e, late){
-      var t = e.task && pend[e.task];
-      return '<li class="td-item'+(late ? ' late' : '')+'"><button class="td-main" data-ei="'+e._i+'"'+(t ? ' data-tk="'+esc(t.id)+'"' : '')+'>' +
-        '<span class="td-kind '+(late ? 'late' : e.kind)+'">'+(late ? '期限切れ '+jpDate(e.date+'T00:00:00') : e.kind === 'deadline' ? '締切' : '作業')+'</span>' +
+      var t = e.task && pend[e.task], fin = isDoneEvent(e);
+      return '<li class="td-item'+(late ? ' late' : '')+(fin ? ' fin' : '')+'"><button class="td-main" data-ei="'+e._i+'"'+(t ? ' data-tk="'+esc(t.id)+'"' : '')+'>' +
+        '<span class="td-kind '+(fin ? 'fin' : late ? 'late' : e.kind)+'">'+(fin ? '✓ 完了' : late ? '期限切れ '+jpDate(e.date+'T00:00:00') : e.kind === 'deadline' ? '締切' : '作業')+'</span>' +
         (e.time ? '<span class="mono td-time">'+esc(e.time)+'</span>' : '') +
         '<span class="td-title">'+(e.carried ? '<span class="ctag">持ち越し</span>' : '')+esc(e.title)+(recLabelOfEvent(e) ? ' <span class="rtag">'+esc(recLabelOfEvent(e).replace('（平日）',''))+'</span>' : '')+'</span>' +
         (t ? '<span class="td-task">'+esc(t.content.slice(0,60))+(t.content.length > 60 ? '…' : '')+'</span>' : '') + '</button>' +
@@ -1316,7 +1328,7 @@ function todayHtml(){
     }
     return '<div class="td-card" style="--pc:'+c+'"><div class="td-head"><span class="td-dot"></span><b>'+esc(n)+'</b>' +
       (dt.length ? '<span class="td-duty">担当業務</span>' : '') + '<span class="mono td-n">'+(list.length + od.length)+'件</span></div>' +
-      ((list.length || od.length) ? '<ul>'+od.map(function(e){ return row(e, true); }).join('')+list.map(function(e){ return row(e, false); }).join('')+'</ul>'
+      ((list.length || od.length || fin.length) ? '<ul>'+od.map(function(e){ return row(e, true); }).join('')+list.map(function(e){ return row(e, false); }).join('')+fin.map(function(e){ return row(e, false); }).join('')+'</ul>'
         : '<p class="td-empty">'+(dt.length ? '今日は担当業務の日です。' : '今日の予定はありません。')+'</p>') + '</div>';
   }).join('');
   var d = new Date();
@@ -1382,7 +1394,7 @@ function deptStates(owner, depts){
 }
 
 /* ---------- 読み込み ---------- */
-var LAST_SIG = '', LOADING = false, BUILD = '1bd17f0ee1b3';
+var LAST_SIG = '', LOADING = false, BUILD = 'cea11c0f768e';
 // 新しい版が公開されていたら、キャッシュを避けて読み直す
 async function checkVersion(){
   if (BUILD.indexOf('BUILD') >= 0) return;
@@ -1514,7 +1526,7 @@ function renderBoard(){
     var evs = events.filter(function(e){ return e.date === key && (e.kind === 'event' || whoMatch(whoOfEvent(e))); }).sort(evOrder(events));
     cal += '<div data-date="'+key+'" class="day'+(key === today ? ' today' : key < today ? ' past' : '')+(day.getDay()===0 ? ' sun' : '')+(day.getDay()%6===0 ? ' wkend' : '')+(evs.length ? '' : ' empty')+'"><div class="dn"><b>'+(day.getMonth()+1)+'/'+day.getDate()+'（'+W[day.getDay()]+'）</b>'+(key===today?'<span>今日</span>':'')+'</div>';
     recurringOn(key).forEach(function(r){ var daily = r.rule.type === 'daily'; cal += '<div class="ev '+(daily ? 'plan' : 'deadline')+' virtual" title="定期タスク（その日になると自動でタスクになります）">'+(r.assignee ? whoChip(r.assignee) : '')+'<span class="rtag">'+esc(recRuleLabel(r).replace('（平日）',''))+'</span>'+esc(r.title)+(daily ? '' : ' 締切')+'</div>'; });
-    evs.forEach(function(e){ var who = whoOfEvent(e); var rl = recLabelOfEvent(e); cal += '<button class="ev '+esc(e.kind)+(rl ? ' recur' : '')+'" data-ei="'+events.indexOf(e)+'">'+(who ? whoChip(who) : '')+(rl ? '<span class="rtag">'+esc(rl.replace('（平日）',''))+'</span>' : '')+(e.carried ? '<span class="ctag">持ち越し</span>' : '')+(e.time?'<span class="tm">'+esc(e.time)+'</span>':'')+esc(e.title)+'</button>'; });
+    evs.forEach(function(e){ var who = whoOfEvent(e); var rl = recLabelOfEvent(e); cal += '<button class="ev '+esc(e.kind)+(rl ? ' recur' : '')+(isDoneEvent(e) ? ' evdone' : '')+'" data-ei="'+events.indexOf(e)+'">'+(who ? whoChip(who) : '')+(rl ? '<span class="rtag">'+esc(rl.replace('（平日）',''))+'</span>' : '')+(e.carried ? '<span class="ctag">持ち越し</span>' : '')+(e.time?'<span class="tm">'+esc(e.time)+'</span>':'')+esc(e.title)+'</button>'; });
     if (key >= today) cal += '<button class="addev" data-date="'+key+'" aria-label="'+key+' に予定を追加">＋ 追加</button>';
     cal += '</div>';
   }
