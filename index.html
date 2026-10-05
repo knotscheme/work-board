@@ -1382,7 +1382,7 @@ function deptStates(owner, depts){
 }
 
 /* ---------- 読み込み ---------- */
-var LAST_SIG = '', LOADING = false, BUILD = '97bde73863d4';
+var LAST_SIG = '', LOADING = false, BUILD = '1bd17f0ee1b3';
 // 新しい版が公開されていたら、キャッシュを避けて読み直す
 async function checkVersion(){
   if (BUILD.indexOf('BUILD') >= 0) return;
@@ -1637,7 +1637,12 @@ var Office = (function(){
     var hairM = new THREE.Mesh(new THREE.SphereGeometry(.285,20,12,0,Math.PI*2,0,Math.PI*.55), hair); hairM.rotation.x = -.35; hairM.position.z = -.02; headG.add(hairM);
     // 髪型・帽子
     var st = opts.style;
-    if (st === 'medium') { // ミディアムロング（肩につくくらい）
+    if (st === 'twoblock') { // ツーブロック：サイドと襟足は短く刈り上げ、トップに長さとボリューム
+      hairM.visible = false;
+      var buzz = new THREE.Mesh(new THREE.SphereGeometry(.276,20,12,0,Math.PI*2,0,Math.PI*.62), mat(0x6E6862)); buzz.rotation.x = -.3; buzz.position.z = -.01; headG.add(buzz);
+      var topH = new THREE.Mesh(new THREE.SphereGeometry(.3,20,12,0,Math.PI*2,0,Math.PI*.36), hair); topH.position.set(0,.05,.0); topH.rotation.x = -.15; topH.scale.set(1.0,1.15,1.05); topH.castShadow = true; headG.add(topH);
+      var fringe = new THREE.Mesh(new THREE.SphereGeometry(.13,12,8), hair); fringe.scale.set(1.6,.55,.7); fringe.position.set(.04,.2,.19); fringe.rotation.z = -.25; headG.add(fringe);
+    } else if (st === 'medium') { // ミディアムロング（肩につくくらい）
       var mh = new THREE.Mesh(new THREE.SphereGeometry(.3,20,14), hair); mh.scale.set(1.04,1.2,.86); mh.position.set(0,-.08,-.08); mh.castShadow = true; headG.add(mh);
       [-1,1].forEach(function(sd){ var side = new THREE.Mesh(new THREE.SphereGeometry(.11,10,8), hair); side.scale.set(.8,1.8,.9); side.position.set(sd*.24,-.1,.06); headG.add(side); });
     } else if (st === 'ponytail') { // ポニーテール
@@ -1727,7 +1732,7 @@ var Office = (function(){
   var teamOwner = null, teamKeys = [], hintEl = null;
   var LOOK = {
     '佐藤':{hair:0x3B2A20, style:'longish', shirt:0xB8AC9C},   // 少し長めの髪・グレージュの服
-    '白川':{hair:0x141414},                                   // 黒髪
+    '白川':{hair:0x141414, style:'twoblock'},                                   // 黒髪
     '鳥居':{hair:0xE8C25A, cap:0x161616},                     // 金髪・黒のキャップ
     '藤田':{hair:0x141414, style:'medium'},                   // 黒髪ミディアムロング
     '佐々木':{hair:0x2B2118, style:'ponytail'}                // ポニーテール
