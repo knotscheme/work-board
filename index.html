@@ -1394,7 +1394,7 @@ function deptStates(owner, depts){
 }
 
 /* ---------- 読み込み ---------- */
-var LAST_SIG = '', LOADING = false, BUILD = 'cea11c0f768e';
+var LAST_SIG = '', LOADING = false, BUILD = '50e4163dcc3a';
 // 新しい版が公開されていたら、キャッシュを避けて読み直す
 async function checkVersion(){
   if (BUILD.indexOf('BUILD') >= 0) return;
@@ -1653,7 +1653,7 @@ var Office = (function(){
       hairM.visible = false;
       var buzz = new THREE.Mesh(new THREE.SphereGeometry(.276,20,12,0,Math.PI*2,0,Math.PI*.62), mat(0x6E6862)); buzz.rotation.x = -.3; buzz.position.z = -.01; headG.add(buzz);
       var topH = new THREE.Mesh(new THREE.SphereGeometry(.3,20,12,0,Math.PI*2,0,Math.PI*.36), hair); topH.position.set(0,.05,.0); topH.rotation.x = -.15; topH.scale.set(1.0,1.15,1.05); topH.castShadow = true; headG.add(topH);
-      var fringe = new THREE.Mesh(new THREE.SphereGeometry(.13,12,8), hair); fringe.scale.set(1.6,.55,.7); fringe.position.set(.04,.2,.19); fringe.rotation.z = -.25; headG.add(fringe);
+      var fringe = new THREE.Mesh(new THREE.SphereGeometry(.13,12,8), hair); fringe.scale.set(1.5,.7,.8); fringe.position.set(0,.3,.14); fringe.rotation.x = -.7; fringe.castShadow = true; headG.add(fringe);  // 前髪を上げる（アップバング）
     } else if (st === 'medium') { // ミディアムロング（肩につくくらい）
       var mh = new THREE.Mesh(new THREE.SphereGeometry(.3,20,14), hair); mh.scale.set(1.04,1.2,.86); mh.position.set(0,-.08,-.08); mh.castShadow = true; headG.add(mh);
       [-1,1].forEach(function(sd){ var side = new THREE.Mesh(new THREE.SphereGeometry(.11,10,8), hair); side.scale.set(.8,1.8,.9); side.position.set(sd*.24,-.1,.06); headG.add(side); });
