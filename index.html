@@ -135,6 +135,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
 .tagrow{display:flex;gap:4px;flex-wrap:wrap}
 .tag.cat{background:var(--bg);color:var(--muted)}
 .tag.whotag{background:var(--done-soft);color:var(--done)}
+.ctag{display:inline-block;font-size:.64rem;font-weight:700;background:var(--warn-soft);color:var(--warn);border-radius:999px;padding:0 6px;margin-right:4px;vertical-align:1px}
 .rtag{display:inline-block;font-size:.64rem;font-weight:700;border:1px dashed var(--accent);color:var(--accent);border-radius:999px;padding:0 5px;margin-right:4px;vertical-align:1px;background:var(--surface)}
 .ev.recur{border-left-style:dashed}
 .ev .who{display:inline-block;font-size:.68rem;font-weight:700;background:var(--done-soft);color:var(--done);border-radius:999px;padding:0 6px;margin-right:5px;vertical-align:1px}
@@ -746,6 +747,65 @@ function recLabelOfEvent(e){
   return k >= 0 ? recRuleLabel(DATA.board.recurring[k]) : '';
 }
 // 同じ日の並び：ふつうの予定 → 定期タスク → 担当業務。その中は 時刻 → 並べた順番 → 登録順
+// ---------- 持ち越し：終わらなかった作業予定を、担当者の次の稼働日へ自動で移す ----------
+function nextWorkDay(who){
+  var d = new Date(); d.setHours(0,0,0,0);
+  for (var i = 0; i < 21; i++) {
+    var w = d.getDay(), k = ymd(d);
+    if (w !== 0 && w !== 6 && !isDutyDay(k, who)) return k;
+    d.setDate(d.getDate() + 1);
+  }
+  return ymd(new Date());
+}
+function carryTargets(evs){
+  var today = dayKey(0), pend = {}, moves = [];
+  DATA.pending.forEach(function(t){ pend[t.id] = t; });
+  var byTask = {};
+  evs.forEach(function(e){
+    if (e.kind !== 'plan' || !e.task || !pend[e.task]) return;
+    var t = pend[e.task];
+    if (t.rk || (typeof recOfTask === 'function' && recOfTask(t) >= 0)) return;   // 定期タスクは毎回出るので移さない
+    (byTask[e.task] = byTask[e.task] || []).push(e);
+  });
+  Object.keys(byTask).forEach(function(id){
+    var list = byTask[id], past = list.filter(function(e){ return e.date < today; });
+    if (!past.length) return;
+    var hasFuture = list.some(function(e){ return e.date >= today; });
+    past.sort(function(a,b){ return a.date.localeCompare(b.date); });
+    moves.push({task:id, past:past, keepLast: !hasFuture});
+  });
+  return moves;
+}
+var CARRY_RUNNING = false;
+async function carryOver(){
+  if (CARRY_RUNNING || !ghToken() || !DATA || !DATA.board) return;
+  if (!carryTargets(DATA.board.events || []).length) return;
+  CARRY_RUNNING = true;
+  var moved = 0, cleaned = 0, toDates = {};
+  try {
+    var res = await ghUpdate('events.enc.json', function(d){
+      var evs = JSON.parse(JSON.stringify((d && d.events) || DATA.board.events || []));
+      moved = 0; cleaned = 0; toDates = {};
+      carryTargets(evs).forEach(function(m){
+        m.past.forEach(function(p, i){
+          var idx = evs.findIndex(function(x){ return sameEv(x, p) && x.task === p.task; });
+          if (idx < 0) return;
+          if (m.keepLast && i === m.past.length - 1) {
+            var who = whoOfEvent(evs[idx]), to = nextWorkDay(who);
+            evs[idx] = Object.assign({}, evs[idx], {date: to, carried: true, order: -1});
+            moved++; toDates[to] = 1;
+          } else { evs.splice(idx, 1); cleaned++; }
+        });
+      });
+      return {events: evs, updated: new Date().toISOString()};
+    }, 'carry over');
+    if (moved || cleaned) {
+      DATA.board.events = res.events; renderBoard(); Office.update();
+      if (moved) toast('終わらなかった作業予定 ' + moved + '件を ' + Object.keys(toDates).sort().map(function(k){ return jpDate(k + 'T00:00:00'); }).join('・') + ' に移しました');
+    }
+  } catch(e) {} finally { CARRY_RUNNING = false; }
+}
+
 function evGroup(e){ return e.kind === 'duty' ? 2 : recLabelOfEvent(e) ? 1 : 0; }
 function evOrder(events){ return function(a, b){ return (evGroup(a) - evGroup(b)) || (a.time||'99').localeCompare(b.time||'99') || ((a.order == null ? 999 : a.order) - (b.order == null ? 999 : b.order)) || events.indexOf(a) - events.indexOf(b); }; }
 function sameEv(a, b){ return a.date === b.date && a.title === b.title && a.kind === b.kind && (a.time||'') === (b.time||''); }
@@ -1228,7 +1288,7 @@ function todayHtml(){
       return '<li class="td-item'+(late ? ' late' : '')+'"><button class="td-main" data-ei="'+e._i+'"'+(t ? ' data-tk="'+esc(t.id)+'"' : '')+'>' +
         '<span class="td-kind '+(late ? 'late' : e.kind)+'">'+(late ? '期限切れ '+jpDate(e.date+'T00:00:00') : e.kind === 'deadline' ? '締切' : '作業')+'</span>' +
         (e.time ? '<span class="mono td-time">'+esc(e.time)+'</span>' : '') +
-        '<span class="td-title">'+esc(e.title)+(recLabelOfEvent(e) ? ' <span class="rtag">'+esc(recLabelOfEvent(e).replace('（平日）',''))+'</span>' : '')+'</span>' +
+        '<span class="td-title">'+(e.carried ? '<span class="ctag">持ち越し</span>' : '')+esc(e.title)+(recLabelOfEvent(e) ? ' <span class="rtag">'+esc(recLabelOfEvent(e).replace('（平日）',''))+'</span>' : '')+'</span>' +
         (t ? '<span class="td-task">'+esc(t.content.slice(0,60))+(t.content.length > 60 ? '…' : '')+'</span>' : '') + '</button>' +
         '</li>';
     }
@@ -1300,7 +1360,7 @@ function deptStates(owner, depts){
 }
 
 /* ---------- 読み込み ---------- */
-var LAST_SIG = '', LOADING = false, BUILD = '448cced096a6';
+var LAST_SIG = '', LOADING = false, BUILD = '0a23ecfbb9e0';
 // 新しい版が公開されていたら、キャッシュを避けて読み直す
 async function checkVersion(){
   if (BUILD.indexOf('BUILD') >= 0) return;
@@ -1345,6 +1405,7 @@ async function loadInner(force){
   if (first) shell();
   else if (sig === LAST_SIG && !force) return;   // 変わっていなければ何もしない
   LAST_SIG = sig;
+  setTimeout(carryOver, 0);
   renderHeader(); renderBoard(); Office.update(); Bulk.render();
   if (!Memo.loaded) Memo.load();
 }
@@ -1431,7 +1492,7 @@ function renderBoard(){
     var evs = events.filter(function(e){ return e.date === key && (e.kind === 'event' || whoMatch(whoOfEvent(e))); }).sort(evOrder(events));
     cal += '<div data-date="'+key+'" class="day'+(key === today ? ' today' : key < today ? ' past' : '')+(day.getDay()===0 ? ' sun' : '')+(day.getDay()%6===0 ? ' wkend' : '')+(evs.length ? '' : ' empty')+'"><div class="dn"><b>'+(day.getMonth()+1)+'/'+day.getDate()+'（'+W[day.getDay()]+'）</b>'+(key===today?'<span>今日</span>':'')+'</div>';
     recurringOn(key).forEach(function(r){ cal += '<div class="ev deadline virtual" title="定期タスク（まだタスクになっていない回）">'+(r.assignee ? whoChip(r.assignee) : '')+'（定期）'+esc(r.title)+' 締切</div>'; });
-    evs.forEach(function(e){ var who = whoOfEvent(e); var rl = recLabelOfEvent(e); cal += '<button class="ev '+esc(e.kind)+(rl ? ' recur' : '')+'" data-ei="'+events.indexOf(e)+'">'+(who ? whoChip(who) : '')+(rl ? '<span class="rtag">'+esc(rl.replace('（平日）',''))+'</span>' : '')+(e.time?'<span class="tm">'+esc(e.time)+'</span>':'')+esc(e.title)+'</button>'; });
+    evs.forEach(function(e){ var who = whoOfEvent(e); var rl = recLabelOfEvent(e); cal += '<button class="ev '+esc(e.kind)+(rl ? ' recur' : '')+'" data-ei="'+events.indexOf(e)+'">'+(who ? whoChip(who) : '')+(rl ? '<span class="rtag">'+esc(rl.replace('（平日）',''))+'</span>' : '')+(e.carried ? '<span class="ctag">持ち越し</span>' : '')+(e.time?'<span class="tm">'+esc(e.time)+'</span>':'')+esc(e.title)+'</button>'; });
     if (key >= today) cal += '<button class="addev" data-date="'+key+'" aria-label="'+key+' に予定を追加">＋ 追加</button>';
     cal += '</div>';
   }
