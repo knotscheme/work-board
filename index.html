@@ -825,7 +825,7 @@ function recurringOn(key){
 function repeatField(t){
   if (t && t.rk) {
     var recs = (DATA.board && DATA.board.recurring) || [], id = t.rk.split(':')[0], i = recs.findIndex(function(r){ return r.id === id; });
-    return '<div class="fld"><span>くり返し</span><div class="rep-on"><span class="tag rec">'+esc(t.rec || '定期')+'</span><span class="meta">定期タスクの今回分です</span>' +
+    return '<div class="fld"><span>くり返し</span><div class="rep-on"><span class="tag rec">'+esc(recLabelOf(t) || '定期')+'</span><span class="meta">定期タスクの今回分です</span>' +
       (i >= 0 ? '<button type="button" class="btn" id="tk-rec-open" data-i="'+i+'">定期の設定を開く</button>' : '') + '</div></div>';
   }
   return '<div class="fld"><span>くり返し</span><div class="row2"><select id="tk-rep">' +
@@ -845,6 +845,13 @@ function bindRepeat(sh, t){
     if (sel.value === 'weekday') return {rule: {type:'weekly', dow: +dow.value}};
     return null;
   };
+}
+
+// タスクの「毎月○日」などの札：今の定期タスクの設定から作る（設定を変えたらすぐ反映）
+function recLabelOf(t){
+  if (!t.rk) return t.rec || '';
+  var id = t.rk.split(':')[0], r = ((DATA.board && DATA.board.recurring) || []).filter(function(x){ return x.id === id; })[0];
+  return r ? recRuleLabel(r) : (t.rec || '');
 }
 
 function recurringCard(){
@@ -1082,7 +1089,7 @@ function renderBoard(){
     return '<div class="card"><h3>'+esc(k)+'<span class="mono">'+groups[k].length+'件</span></h3><ul>'+groups[k].map(function(t){
       var p = planned[t.id] ? ' ・ 予定 '+planned[t.id].sort().map(function(d){ return jpDate(d+'T00:00:00'); }).join('、') : '';
       var sub = taskView === 'who' ? '<span class="tag cat">'+esc(t.category)+'</span>' : (t.assignee ? '<span class="tag whotag">'+esc(t.assignee)+'</span>' : '');
-      return '<li><button class="task tbtn" data-tid="'+esc(t.id)+'"><span class="tagrow"><span class="tag '+esc(t.label)+'">'+esc(t.label)+'</span>'+sub+(t.rec ? '<span class="tag rec">'+esc(t.rec)+'</span>' : '')+(t.web ? '<span class="tag web">取り込み待ち</span>' : '')+'</span><span>'+esc(t.content)+'</span><span class="meta mono">記録 '+jpDate(t.recorded)+p+'</span></button></li>';
+      return '<li><button class="task tbtn" data-tid="'+esc(t.id)+'"><span class="tagrow"><span class="tag '+esc(t.label)+'">'+esc(t.label)+'</span>'+sub+(recLabelOf(t) ? '<span class="tag rec">'+esc(recLabelOf(t))+'</span>' : '')+(t.web ? '<span class="tag web">取り込み待ち</span>' : '')+'</span><span>'+esc(t.content)+'</span><span class="meta mono">記録 '+jpDate(t.recorded)+p+'</span></button></li>';
     }).join('')+'</ul></div>';
   }).join('') || '<p class="muted" style="margin:0">この担当のタスクはありません。</p>';
   var qs = (b.questions||[]).map(function(q){ return '<li><b>'+esc(q.cat)+'</b>：'+esc(q.text)+'</li>'; }).join('');
