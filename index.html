@@ -811,7 +811,11 @@ function taskSheet(t){
         var item = {id: 'rec-' + newId(), title: v.content.replace(/（[^（）]*(まで|今週中)[^（）]*）\s*$/, ''), category: v.category, label: v.label, rule: rule.rule, adoptId: tid};
         if (rule.rule.type === 'monthly') item.lead = 7;
         if (v.assignee) item.assignee = v.assignee;
-        var res = await ghUpdate('recurring.enc.json', function(d){ return {recurring: JSON.parse(JSON.stringify((d && d.recurring) || (DATA.board.recurring || []))).concat([item]), updated: new Date().toISOString()}; }, 'add recurring');
+        var res = await ghUpdate('recurring.enc.json', function(d){
+          var list = JSON.parse(JSON.stringify((d && d.recurring) || (DATA.board.recurring || [])));
+          var k = list.findIndex(function(r){ return r.adoptId === tid; });
+          if (k >= 0) { item.id = list[k].id; list[k] = Object.assign({}, list[k], item); } else list.push(item);
+          return {recurring: list, updated: new Date().toISOString()}; }, 'add recurring');
         DATA.board.recurring = res.recurring;
         DATA.pending.forEach(function(x){ if (x.id === tid) x.rec = recRuleLabel(item); });
         toast('定期タスクにしました（' + recRuleLabel(item) + '）。このタスクが今回分になります');
@@ -1031,9 +1035,15 @@ function recurringOn(key){
   });
 }
 // タスクのシートに出す「くり返し」欄。すでに定期なら設定へのボタンを出す
+function recOfTask(t){
+  if (!t) return -1;
+  var recs = (DATA.board && DATA.board.recurring) || [], id = t.rk ? t.rk.split(':')[0] : null;
+  return recs.findIndex(function(r){ return (id && r.id === id) || r.adoptId === t.id; });
+}
 function repeatField(t){
-  if (t && t.rk) {
-    var recs = (DATA.board && DATA.board.recurring) || [], id = t.rk.split(':')[0], i = recs.findIndex(function(r){ return r.id === id; });
+  if (t && (t.rk || recOfTask(t) >= 0)) {
+    var recs = (DATA.board && DATA.board.recurring) || [], i = recOfTask(t);
+    if (i >= 0 && !t.rk) t = Object.assign({}, t, {rec: recRuleLabel(recs[i])});
     return '<div class="fld"><span>くり返し</span><div class="rep-on"><span class="tag rec">'+esc(recLabelOf(t) || '定期')+'</span><span class="meta">定期タスクの今回分です</span>' +
       (i >= 0 ? '<button type="button" class="btn" id="tk-rec-open" data-i="'+i+'">定期の設定を開く</button>' : '') + '</div></div>';
   }
@@ -1099,10 +1109,15 @@ function recurringSheet(idx){
         }
         sh.querySelectorAll('#rc-kind button').forEach(function(b){ b.onclick = function(){ pull(); kind = b.dataset.v; draw(); }; });
         sh.querySelectorAll('#rc-label button').forEach(function(b){ b.onclick = function(){ r.label = b.dataset.v; sh.querySelectorAll('#rc-label button').forEach(function(x){ x.setAttribute('aria-pressed', x === b); }); }; });
-        async function save(list, msg){
+        // 最新の一覧を読み直してから、この1件だけを書き換える（古い一覧で上書きしない）
+        async function save(mutate, msg){
           st(sh, '保存中…');
           try {
-            var res = await ghUpdate('recurring.enc.json', function(){ return {recurring: list, updated: new Date().toISOString()}; }, msg);
+            var res = await ghUpdate('recurring.enc.json', function(d){
+              var list = JSON.parse(JSON.stringify((d && d.recurring) || (DATA.board.recurring || [])));
+              mutate(list);
+              return {recurring: list, updated: new Date().toISOString()};
+            }, msg);
             DATA.board.recurring = res.recurring; Sheet.close(); renderBoard(); toast('保存しました。次に秘書が動いたときにタスクへ反映されます');
           } catch(err) { st(sh, err.message, true); }
         }
@@ -1114,14 +1129,16 @@ function recurringSheet(idx){
           if (r.assignee) item.assignee = r.assignee;
           if (kind === 'monthly') item.lead = r.lead == null ? 7 : r.lead;
           if (orig && orig.match) item.match = orig.match;
-          var list = JSON.parse(JSON.stringify(recs));
-          if (orig) list[idx] = item; else list.push(item);
-          save(list, orig ? 'edit recurring' : 'add recurring');
+          if (orig && orig.adoptId) item.adoptId = orig.adoptId;
+          save(function(list){
+            var k = orig ? list.findIndex(function(x){ return x.id === orig.id; }) : -1;
+            if (k >= 0) list[k] = item; else list.push(item);
+          }, orig ? 'edit recurring' : 'add recurring');
         };
         var del = sh.querySelector('#rc-del');
         if (del) del.onclick = function(){
           confirmModal('本当に削除しますか？', '定期タスク「'+orig.title+'」のひな形を削除します。すでに出ているタスクは残ります。', '削除する', function(){
-            var list = JSON.parse(JSON.stringify(recs)); list.splice(idx, 1); save(list, 'delete recurring');
+            save(function(list){ var k = list.findIndex(function(x){ return x.id === orig.id; }); if (k >= 0) list.splice(k, 1); }, 'delete recurring');
           });
         };
       });
