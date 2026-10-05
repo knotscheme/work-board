@@ -96,6 +96,10 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
 .whofilter button,.whopick button{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:4px 12px;font-size:.8rem;font-weight:700;color:var(--muted)}
 .whofilter button[aria-pressed="true"],.whopick button[aria-pressed="true"]{background:var(--done);border-color:var(--done);color:var(--surface)}
 .whopick{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:6px}
+.tag.rec{background:var(--accent-soft);color:var(--accent);border:1px dashed var(--accent)}
+.ev.virtual{opacity:.6;border-left-style:dashed;cursor:default}
+.seg.wide.rc3{grid-template-columns:repeat(3,1fr)}
+.seg.wide.rc3 button{font-size:.74rem;padding:9px 2px}
 .tag.web{background:var(--warn-soft);color:var(--warn)}
 .tag.最優先{background:var(--urgent);color:var(--surface)}
 .h2row{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
@@ -765,6 +769,88 @@ function productSheet(item){
     });
 }
 
+// ---------- 定期タスク ----------
+function recRuleLabel(r){
+  if (r.rule.type === 'monthly') return '毎月' + r.rule.day + '日';
+  if (r.rule.dow != null) return '毎週' + W[r.rule.dow] + '曜';
+  return '毎週（曜日自由）';
+}
+// その日が締切の回で、まだタスクになっていないもの（毎月の分だけ）
+function recurringOn(key){
+  var d = new Date(key + 'T00:00:00');
+  return ((DATA.board && DATA.board.recurring) || []).filter(function(r){
+    if (r.rule.type !== 'monthly' || d.getDate() !== r.rule.day) return false;
+    if (!whoMatch(r.assignee || '')) return false;
+    var rk = r.id + ':' + key.slice(0, 7);
+    return !DATA.pending.concat(DATA.done || []).some(function(t){ return t.rk === rk; });
+  });
+}
+function recurringCard(){
+  var recs = (DATA.board && DATA.board.recurring) || [];
+  return '<div class="card"><h3>定期タスク<span class="mono">'+recs.length+'件</span></h3>' +
+    '<p class="meta" style="margin:0">毎月・毎週の分は、時期が来ると自動でタスクになります（毎月は締切の数日前、毎週は月曜）。</p>' +
+    (recs.length ? '<ul>'+recs.map(function(r, i){
+      return '<li><button class="task tbtn" data-rec="'+i+'"><span class="tagrow"><span class="tag rec">'+esc(recRuleLabel(r))+'</span><span class="tag cat">'+esc(r.category)+'</span>'+(r.assignee ? '<span class="tag whotag">'+esc(r.assignee)+'</span>' : '')+'</span><span>'+esc(r.title)+'</span></button></li>';
+    }).join('')+'</ul>' : '') +
+    '<button class="btn" id="add-rec">＋ 定期タスクを追加</button></div>';
+}
+function recurringSheet(idx){
+  if (!ghToken()) return needToken();
+  var recs = (DATA.board && DATA.board.recurring) || [], orig = idx != null ? recs[idx] : null;
+  var r = orig ? JSON.parse(JSON.stringify(orig)) : {id:'', title:'', category:'事務・受注・発注', label:'通常', assignee:'', rule:{type:'monthly', day:10}, lead:7};
+  var kind = r.rule.type === 'monthly' ? 'monthly' : (r.rule.dow != null ? 'weekday' : 'weekly');
+  function draw(){
+    Sheet.open(
+      '<h3>'+(orig ? '定期タスクを編集' : '定期タスクを追加')+'</h3>' +
+      '<label class="fld"><span>内容</span><input type="text" id="rc-title" value="'+esc(r.title)+'" placeholder="例：P2（革小物）発注"></label>' +
+      '<div class="fld"><span>くり返し</span><div class="seg wide rc3" id="rc-kind">'+[['monthly','毎月'],['weekly','毎週（曜日自由）'],['weekday','毎週（曜日指定）']].map(function(k){ return '<button type="button" data-v="'+k[0]+'"'+(kind === k[0] ? ' aria-pressed="true"' : '')+'>'+k[1]+'</button>'; }).join('')+'</div></div>' +
+      (kind === 'monthly' ? '<div class="row2"><label class="fld"><span>締切日（毎月）</span><select id="rc-day">'+Array.from({length:28}, function(_, i){ return '<option value="'+(i+1)+'"'+((r.rule.day || 10) === i+1 ? ' selected' : '')+'>'+(i+1)+'日</option>'; }).join('')+'</select></label>' +
+        '<label class="fld"><span>何日前にタスクを出す</span><select id="rc-lead">'+[3,5,7,10,14].map(function(n){ return '<option'+((r.lead == null ? 7 : r.lead) === n ? ' selected' : '')+'>'+n+'</option>'; }).join('')+'</select></label></div>' : '') +
+      (kind === 'weekday' ? '<label class="fld"><span>曜日</span><select id="rc-dow">'+[1,2,3,4,5].map(function(n){ return '<option value="'+n+'"'+(r.rule.dow === n ? ' selected' : '')+'>'+W[n]+'曜</option>'; }).join('')+'</select></label>' : '') +
+      (kind === 'weekly' ? '<p class="meta" style="margin:0">毎週月曜に「今週中」のタスクとして出ます。やる日は自由です。</p>' : '') +
+      '<label class="fld"><span>工程</span><select id="rc-cat">'+ORDER.map(function(c){ return '<option'+(c === r.category ? ' selected' : '')+'>'+esc(c)+'</option>'; }).join('')+'</select></label>' +
+      whoField(r.assignee) +
+      '<div class="fld"><span>優先度</span><div class="seg wide" id="rc-label">'+['最優先','優先','通常','低'].map(function(l){ return '<button type="button" data-v="'+l+'"'+(l === r.label ? ' aria-pressed="true"' : '')+'>'+l+'</button>'; }).join('')+'</div></div>' +
+      '<div class="row"><button class="btn primary" id="rc-save">保存</button><button class="btn" data-close>やめる</button>' + (orig ? '<button class="btn danger push-right" id="rc-del">削除</button>' : '') + '</div><span class="status"></span>',
+      function(sh){
+        var getWho = bindWho(sh, r.assignee);
+        function pull(){
+          r.title = sh.querySelector('#rc-title').value.trim(); r.category = sh.querySelector('#rc-cat').value; r.assignee = getWho();
+          var dd = sh.querySelector('#rc-day'), ld = sh.querySelector('#rc-lead'), dw = sh.querySelector('#rc-dow');
+          if (dd) r.rule.day = +dd.value; if (ld) r.lead = +ld.value; if (dw) r.rule.dow = +dw.value;
+        }
+        sh.querySelectorAll('#rc-kind button').forEach(function(b){ b.onclick = function(){ pull(); kind = b.dataset.v; draw(); }; });
+        sh.querySelectorAll('#rc-label button').forEach(function(b){ b.onclick = function(){ r.label = b.dataset.v; sh.querySelectorAll('#rc-label button').forEach(function(x){ x.setAttribute('aria-pressed', x === b); }); }; });
+        async function save(list, msg){
+          st(sh, '保存中…');
+          try {
+            var res = await ghUpdate('recurring.enc.json', function(){ return {recurring: list, updated: new Date().toISOString()}; }, msg);
+            DATA.board.recurring = res.recurring; Sheet.close(); renderBoard(); toast('保存しました。次に秘書が動いたときにタスクへ反映されます');
+          } catch(err) { st(sh, err.message, true); }
+        }
+        sh.querySelector('#rc-save').onclick = function(){
+          pull();
+          if (!r.title) { st(sh, '内容を入れてください', true); return; }
+          var rule = kind === 'monthly' ? {type:'monthly', day: r.rule.day || 10} : kind === 'weekday' ? {type:'weekly', dow: r.rule.dow || 1} : {type:'weekly'};
+          var item = {id: r.id || ('rec-' + newId()), title: r.title, category: r.category, label: r.label, rule: rule};
+          if (r.assignee) item.assignee = r.assignee;
+          if (kind === 'monthly') item.lead = r.lead == null ? 7 : r.lead;
+          if (orig && orig.match) item.match = orig.match;
+          var list = JSON.parse(JSON.stringify(recs));
+          if (orig) list[idx] = item; else list.push(item);
+          save(list, orig ? 'edit recurring' : 'add recurring');
+        };
+        var del = sh.querySelector('#rc-del');
+        if (del) del.onclick = function(){
+          confirmModal('本当に削除しますか？', '定期タスク「'+orig.title+'」のひな形を削除します。すでに出ているタスクは残ります。', '削除する', function(){
+            var list = JSON.parse(JSON.stringify(recs)); list.splice(idx, 1); save(list, 'delete recurring');
+          });
+        };
+      });
+  }
+  draw();
+}
+
 function st(sh, text, err){ var el = sh.querySelector('.status'); if (el) { el.textContent = text; el.classList.toggle('err', !!err); } }
 
 function fail(text){ app.innerHTML = '<div class="msg"><h1 style="font-size:1.2rem">ボードを開けません</h1><p class="muted">'+text+'</p></div>'; }
@@ -827,6 +913,8 @@ async function load(){
     if (pipe && pipe.pipeline) { DATA.board.pipeline = pipe.pipeline; DATA.pipeSyncPending = true; }
     var ev = await readWeb('events.enc.json');
     if (ev && ev.events) DATA.board.events = ev.events;
+    var rc = await readWeb('recurring.enc.json');
+    if (rc && rc.recurring) DATA.board.recurring = rc.recurring;
     var to = await readWeb('taskops.enc.json');
     DATA.webOps = (to && to.ops) || [];
   } catch(e) { DATA.webOps = DATA.webOps || []; }
@@ -902,6 +990,7 @@ function renderBoard(){
     var key = ymd(day);
     var evs = events.filter(function(e){ return e.date === key && (e.kind === 'duty' || e.kind === 'event' || whoMatch(whoOfEvent(e))); }).sort(function(a,b){ return (a.time||'99').localeCompare(b.time||'99'); });
     cal += '<div data-date="'+key+'" class="day'+(key === today ? ' today' : key < today ? ' past' : '')+(day.getDay()===0 ? ' sun' : '')+(day.getDay()%6===0 ? ' wkend' : '')+(evs.length ? '' : ' empty')+'"><div class="dn"><b>'+(day.getMonth()+1)+'/'+day.getDate()+'（'+W[day.getDay()]+'）</b>'+(key===today?'<span>今日</span>':'')+'</div>';
+    recurringOn(key).forEach(function(r){ cal += '<div class="ev deadline virtual" title="定期タスク（まだタスクになっていない回）">'+(r.assignee ? '<span class="who">'+esc(r.assignee)+'</span>' : '')+'（定期）'+esc(r.title)+' 締切</div>'; });
     evs.forEach(function(e){ var who = whoOfEvent(e); cal += '<button class="ev '+esc(e.kind)+'" data-ei="'+events.indexOf(e)+'">'+(who ? '<span class="who">'+esc(who)+'</span>' : '')+(e.time?'<span class="tm">'+esc(e.time)+'</span>':'')+esc(e.title)+'</button>'; });
     if (key >= today) cal += '<button class="addev" data-date="'+key+'" aria-label="'+key+' に予定を追加">＋ 追加</button>';
     cal += '</div>';
@@ -930,7 +1019,7 @@ function renderBoard(){
     return '<div class="card"><h3>'+esc(k)+'<span class="mono">'+groups[k].length+'件</span></h3><ul>'+groups[k].map(function(t){
       var p = planned[t.id] ? ' ・ 予定 '+planned[t.id].sort().map(function(d){ return jpDate(d+'T00:00:00'); }).join('、') : '';
       var sub = taskView === 'who' ? '<span class="tag cat">'+esc(t.category)+'</span>' : (t.assignee ? '<span class="tag whotag">'+esc(t.assignee)+'</span>' : '');
-      return '<li><button class="task tbtn" data-tid="'+esc(t.id)+'"><span class="tagrow"><span class="tag '+esc(t.label)+'">'+esc(t.label)+'</span>'+sub+(t.web ? '<span class="tag web">取り込み待ち</span>' : '')+'</span><span>'+esc(t.content)+'</span><span class="meta mono">記録 '+jpDate(t.recorded)+p+'</span></button></li>';
+      return '<li><button class="task tbtn" data-tid="'+esc(t.id)+'"><span class="tagrow"><span class="tag '+esc(t.label)+'">'+esc(t.label)+'</span>'+sub+(t.rec ? '<span class="tag rec">'+esc(t.rec)+'</span>' : '')+(t.web ? '<span class="tag web">取り込み待ち</span>' : '')+'</span><span>'+esc(t.content)+'</span><span class="meta mono">記録 '+jpDate(t.recorded)+p+'</span></button></li>';
     }).join('')+'</ul></div>';
   }).join('') || '<p class="muted" style="margin:0">この担当のタスクはありません。</p>';
   var qs = (b.questions||[]).map(function(q){ return '<li><b>'+esc(q.cat)+'</b>：'+esc(q.text)+'</li>'; }).join('');
@@ -952,7 +1041,7 @@ function renderBoard(){
     '<section class="sec" id="sec-tasks"><div class="h2row"><h2>タスク <small>タップで編集</small></h2><button class="btn primary" id="add-task">＋ タスクを追加</button></div>' +
       '<div class="row meta">並べ方 <span class="seg" id="tview"><button data-v="cat"'+(taskView === 'cat' ? ' aria-pressed="true"' : '')+'>工程別</button><button data-v="who"'+(taskView === 'who' ? ' aria-pressed="true"' : '')+'>担当別</button></span></div>' +
       whoFilterHtml() + '<div class="cols">'+cards+'</div></section>' +
-    '<section class="sec" id="sec-qa"><h2>確認と完了</h2><div class="cols">' +
+    '<section class="sec" id="sec-qa"><h2>定期タスク・確認・完了</h2><div class="cols">' + recurringCard() +
       (qs ? '<div class="card q"><h3>確認が必要</h3><ul>'+qs+'</ul></div>' : '') +
       '<div class="card"><h3>最近の完了</h3><ul class="done-list">'+(dn || '<li>まだありません</li>')+'</ul></div>' +
     '</div></section>';
@@ -964,6 +1053,8 @@ function renderBoard(){
   vb.querySelectorAll('.tbtn').forEach(function(b){ b.onclick = function(){ taskSheet(DATA.pending.filter(function(x){ return x.id === b.dataset.tid; })[0]); }; });
   document.getElementById('add-task').onclick = function(){ taskSheet(null); };
   document.getElementById('add-product').onclick = function(){ productSheet(null); };
+  document.getElementById('add-rec').onclick = function(){ recurringSheet(null); };
+  vb.querySelectorAll('[data-rec]').forEach(function(b){ b.onclick = function(){ recurringSheet(+b.dataset.rec); }; });
   vb.querySelectorAll('[data-archive]').forEach(function(b){ b.onclick = function(){ if (!ghToken()) return needToken(); archiveProduct((DATA.board.pipeline || []).filter(function(x){ return x.code === b.dataset.archive; })[0]); }; });
   vb.querySelectorAll('[data-pcode]').forEach(function(b){ b.onclick = function(){ productSheet((DATA.board.pipeline || []).filter(function(x){ return x.code === b.dataset.pcode; })[0]); }; });
   vb.querySelectorAll('.whofilter button').forEach(function(b){ b.onclick = function(){ whoFilter = b.dataset.who; ls('wb_who', whoFilter); renderBoard(); }; });
