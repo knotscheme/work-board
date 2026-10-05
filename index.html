@@ -260,6 +260,10 @@ footer{color:var(--muted);font-size:.78rem}
 .bk-top{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
 .bk-no{font-size:.78rem;color:var(--muted);min-width:1.2em}
 .bk-x{margin-left:auto;border:0;background:none;font-size:1.2rem;color:var(--muted);padding:2px 8px}
+.bk-dup{background:var(--warn-soft);color:var(--ink);border-radius:8px;padding:8px 10px;font-size:.82rem;display:grid;gap:6px}
+.bk-dup b{color:var(--warn)}
+.bk-mode.seg.wide{grid-template-columns:repeat(3,1fr)}
+.bk-content:disabled{opacity:.6}
 .bk-content{font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:8px 10px;width:100%}
 .memo-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.4fr);gap:20px;align-items:start}
 .compose{display:grid;gap:10px;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:16px}
@@ -1650,6 +1654,27 @@ var Bulk = (function(){
     return {key:'tw', label:'今週', days: workDays(t, fri)};
   }
 
+  // 文章の近さ（2文字ずつの重なり）。記号・空白は無視
+  function norm(x){ return String(x || '').toLowerCase().replace(/[\s・\-ー－、。，．,.:：()（）【】\[\]「」]/g, ''); }
+  function similar(a, b){
+    a = norm(a); b = norm(b);
+    if (!a || !b) return 0;
+    if (a.indexOf(b) >= 0 || b.indexOf(a) >= 0) return 1;
+    var bg = function(x){ var m = {}; for (var i = 0; i < x.length - 1; i++) { var k = x.substr(i, 2); m[k] = (m[k] || 0) + 1; } return m; };
+    var A = bg(a), B = bg(b), inter = 0, na = 0, nb = 0, k;
+    for (k in A) { na += A[k]; if (B[k]) inter += Math.min(A[k], B[k]); }
+    for (k in B) nb += B[k];
+    return na + nb ? 2 * inter / (na + nb) : 0;
+  }
+  // 同じ品番で同じ工程の未完了タスク、または内容がほぼ同じタスクを探す
+  function findDup(it){
+    var list = DATA.pending || [];
+    if (it.code) return list.filter(function(t){ return t.category === it.category && t.content.toLowerCase().indexOf(it.code) >= 0; })[0] || null;
+    var best = null, bs = 0;
+    list.forEach(function(t){ var sc = similar(t.content, it.content); if (sc > bs) { bs = sc; best = t; } });
+    return bs >= .6 ? best : null;
+  }
+
   function parse(text){
     var stages = (DATA.board && DATA.board.stages) || ['企画','撮影','画像','LP','登録','販促'];
     var pipe = (DATA.board && DATA.board.pipeline) || [], out = [];
@@ -1682,6 +1707,7 @@ var Bulk = (function(){
         if (D >= n) it.days = g[0].win.days.slice(Math.floor(i*D/n), Math.floor((i+1)*D/n));
         else it.days = [g[0].win.days[Math.floor(i*D/n)]];
         it.days = it.days.slice(0, 2);                         // 作業予定は1件につき最大2日
+        it.dup = findDup(it); it.mode = it.dup ? 'link' : 'new';
         if (it.win.key[0] === 'd') it.deadline = it.win.key.slice(1);  // 「〇日まで」はその日に締切
       });
     });
@@ -1722,13 +1748,18 @@ var Bulk = (function(){
         return '<div class="bk-item" data-i="'+i+'"><div class="bk-top"><span class="bk-no mono">'+(i+1)+'</span>' +
           (it.code ? '<span class="code">'+esc(it.code)+'</span>'+(it.isNew ? '<span class="tag web">新発進捗に追加</span>' : '')+'<span class="tag cat">'+esc(it.stage)+'</span>' : '<span class="tag cat">'+esc(it.category)+'</span>') +
           '<button class="bk-x" data-x="'+i+'" aria-label="この行を外す">×</button></div>' +
-          '<input type="text" class="bk-content" value="'+esc(it.content)+'">' +
+          (it.dup ? '<div class="bk-dup"><b>既存のタスクと重複：</b>'+esc(it.dup.content.slice(0,60))+(it.dup.content.length > 60 ? '…' : '') +
+            '<div class="seg wide bk-mode" data-m="'+i+'">' + [['link','予定だけ追加'],['new','新しく追加'],['skip','登録しない']].map(function(m){ return '<button type="button" data-v="'+m[0]+'"'+(it.mode === m[0] ? ' aria-pressed="true"' : '')+'>'+m[1]+'</button>'; }).join('') + '</div></div>' : '') +
+          '<input type="text" class="bk-content" value="'+esc(it.content)+'"'+(it.mode === 'link' ? ' disabled title="既存のタスクを使います"' : '')+'>' +
           '<div class="row2"><select class="bk-who">'+names.map(function(n){ return '<option'+(n === it.who ? ' selected' : '')+'>'+esc(n)+'</option>'; }).join('')+'</select>' +
           '<select class="bk-label">'+LABELS.map(function(l){ return '<option'+(l === it.label ? ' selected' : '')+'>'+l+'</option>'; }).join('')+'</select></div>' +
           '<div class="meta">予定：'+esc(it.win.label)+' → '+dlist(it.days)+(it.deadline ? ' ／ 締切 '+jpDate(it.deadline+'T00:00:00') : '')+'</div></div>';
       }).join('') + '</div>' +
-      '<div class="row"><button class="btn primary" id="bk-save">登録する</button><button class="btn" data-close>やめる</button></div><span class="status"></span>',
+      '<div class="row"><button class="btn primary" id="bk-save">'+(items.every(function(x){ return x.mode === 'skip'; }) ? '閉じる' : '登録する')+'</button><button class="btn" data-close>やめる</button></div><span class="status"></span>',
       function(sh){
+        sh.querySelectorAll('.bk-mode').forEach(function(g){
+          g.querySelectorAll('button').forEach(function(b){ b.onclick = function(){ collect(sh); items[+g.dataset.m].mode = b.dataset.v; preview(); }; });
+        });
         sh.querySelectorAll('[data-x]').forEach(function(b){ b.onclick = function(){ collect(sh); items.splice(+b.dataset.x, 1); if (items.length) preview(); else Sheet.close(); }; });
         sh.querySelector('#bk-save').onclick = function(){ collect(sh); commit(sh); };
       });
@@ -1736,7 +1767,7 @@ var Bulk = (function(){
   function collect(sh){
     sh.querySelectorAll('.bk-item').forEach(function(row){
       var it = items[+row.dataset.i]; if (!it) return;
-      it.content = row.querySelector('.bk-content').value.trim() || it.content;
+      if (it.mode !== 'link') it.content = row.querySelector('.bk-content').value.trim() || it.content;
       it.who = row.querySelector('.bk-who').value; it.label = row.querySelector('.bk-label').value;
     });
   }
@@ -1744,22 +1775,34 @@ var Bulk = (function(){
   async function commit(sh){
     st(sh, '登録中…');
     try {
-      var now = new Date().toISOString(), ops = [], evs = [];
-      items.forEach(function(it){
-        it.id = newId();
-        ops.push({op:'add', id:it.id, content:it.content, category:it.category, label:it.label, assignee:it.who, opId:newId(), at:now});
+      var now = new Date().toISOString(), ops = [], evs = [], linked = 0, skipped = 0;
+      var use = items.filter(function(it){ if (it.mode === 'skip') { skipped++; return false; } return true; });
+      if (!use.length) { Sheet.close(); toast('登録するものはありませんでした'); return; }
+      use.forEach(function(it){
+        if (it.mode === 'link') {
+          it.id = it.dup.id; linked++;
+          var e = {op:'edit', id:it.id, opId:newId(), at:now};
+          if ((it.dup.assignee || '') !== it.who) e.assignee = it.who;
+          if (it.dup.label !== it.label) e.label = it.label;
+          if (Object.keys(e).length > 4) ops.push(e);
+        } else {
+          it.id = newId();
+          ops.push({op:'add', id:it.id, content:it.content, category:it.category, label:it.label, assignee:it.who, opId:newId(), at:now});
+        }
         it.days.forEach(function(d){ evs.push({date:d, kind:'plan', title:it.title, task:it.id, assignee:it.who}); });
         if (it.deadline) evs.push({date:it.deadline, kind:'deadline', title:it.title + ' 締切', task:it.id, assignee:it.who});
       });
       // 1) タスク
-      await ghUpdate('taskops.enc.json', function(d){ return {ops: ((d && d.ops) || []).concat(ops)}; }, 'bulk tasks');
-      DATA.webOps = (DATA.webOps || []).concat(ops); DATA.pending = mergeOps(DATA.pending, ops);
+      if (ops.length) {
+        await ghUpdate('taskops.enc.json', function(d){ return {ops: ((d && d.ops) || []).concat(ops)}; }, 'bulk tasks');
+        DATA.webOps = (DATA.webOps || []).concat(ops); DATA.pending = mergeOps(DATA.pending, ops);
+      }
       // 2) 予定
       var er = await ghUpdate('events.enc.json', function(d){ return {events: JSON.parse(JSON.stringify((d && d.events) || DATA.board.events || [])).concat(evs), updated: now}; }, 'bulk events');
       DATA.board.events = er.events;
       // 3) 新発進捗
       var stages = DATA.board.stages || [];
-      var codeItems = items.filter(function(it){ return it.code; });
+      var codeItems = use.filter(function(it){ return it.code; });
       if (codeItems.length) {
         await savePipeline(function(base){
           codeItems.forEach(function(it){
@@ -1772,7 +1815,8 @@ var Bulk = (function(){
       }
       ls('wb_bulk', null); items = null;
       Sheet.close(); render(); renderBoard(); Office.update();
-      toast(ops.length + '件をタスク・予定' + (codeItems.length ? '・新発進捗' : '') + 'に登録しました');
+      var added = use.length - linked;
+      toast([added ? '新規 ' + added + '件' : '', linked ? '既存に予定追加 ' + linked + '件' : '', skipped ? '登録しない ' + skipped + '件' : ''].filter(Boolean).join('・') + ' で登録しました');
     } catch(err) { st(sh, err.message, true); }
   }
   return {mount:mount, render:render};
