@@ -1062,12 +1062,12 @@ function todayHtml(){
     var c = n === '担当なし' ? '#8A8F96' : whoColor(n);
     function row(e, late){
       var t = e.task && pend[e.task];
-      return '<li class="td-item'+(late ? ' late' : '')+'"><button class="td-main" data-ei="'+e._i+'">' +
+      return '<li class="td-item'+(late ? ' late' : '')+'"><button class="td-main" data-ei="'+e._i+'"'+(t ? ' data-tk="'+esc(t.id)+'"' : '')+'>' +
         '<span class="td-kind '+(late ? 'late' : e.kind)+'">'+(late ? '期限切れ '+jpDate(e.date+'T00:00:00') : e.kind === 'deadline' ? '締切' : '作業')+'</span>' +
         (e.time ? '<span class="mono td-time">'+esc(e.time)+'</span>' : '') +
         '<span class="td-title">'+esc(e.title)+'</span>' +
         (t ? '<span class="td-task">'+esc(t.content.slice(0,60))+(t.content.length > 60 ? '…' : '')+'</span>' : '') + '</button>' +
-        (t ? '<button class="td-done" data-done="'+esc(t.id)+'" aria-label="完了にする">完了</button>' : '') + '</li>';
+        '</li>';
     }
     return '<div class="td-card" style="--pc:'+c+'"><div class="td-head"><span class="td-dot"></span><b>'+esc(n)+'</b>' +
       (dt.length ? '<span class="td-duty">担当業務</span>' : '') + '<span class="mono td-n">'+(list.length + od.length)+'件</span></div>' +
@@ -1079,20 +1079,12 @@ function todayHtml(){
     (dayEvents.length ? '<div class="td-event">'+dayEvents.map(function(e){ return '<b>'+(e.time ? esc(e.time)+' ' : '')+esc(e.title)+'</b>'; }).join('　')+'</div>' : '') +
     '<div class="td-grid">'+cards+'</div></section>';
 }
+// 今日の画面は見るだけ。タップでタスク（ひも付きがなければ予定）を開き、その中で完了や編集をする
 function bindToday(vb){
-  vb.querySelectorAll('.td-main[data-ei]').forEach(function(b){ b.onclick = function(){ eventSheet(DATA.board.events[+b.dataset.ei]); }; });
-  vb.querySelectorAll('[data-done]').forEach(function(b){
+  vb.querySelectorAll('.td-main[data-ei]').forEach(function(b){
     b.onclick = function(){
-      if (!ghToken()) return needToken();
-      var t = DATA.pending.filter(function(x){ return x.id === b.dataset.done; })[0]; if (!t) return;
-      confirmModal('完了にしますか？', '「'+t.content.slice(0,50)+(t.content.length > 50 ? '…' : '')+'」を完了にします。', '完了にする', async function(){
-        var op = {op:'done', id:t.id, opId:newId(), at:new Date().toISOString()};
-        try {
-          await ghUpdate('taskops.enc.json', function(d){ return {ops: ((d && d.ops) || []).concat([op])}; }, 'task done');
-          DATA.webOps = (DATA.webOps || []).concat([op]); DATA.pending = mergeOps(DATA.pending, [op]);
-          renderBoard(); Office.update(); toast('完了にしました');
-        } catch(err) { toast(err.message, true); }
-      });
+      var t = b.dataset.tk && DATA.pending.filter(function(x){ return x.id === b.dataset.tk; })[0];
+      if (t) taskSheet(t); else eventSheet(DATA.board.events[+b.dataset.ei]);
     };
   });
 }
