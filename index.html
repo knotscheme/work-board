@@ -83,6 +83,13 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
 .tbtn{font:inherit;color:inherit;text-align:left;border:0;background:none;padding:6px;margin:-6px;border-radius:8px;width:calc(100% + 12px);cursor:pointer}
 .tbtn:hover{background:var(--bg)}
 .tagrow{display:flex;gap:4px;flex-wrap:wrap}
+.tag.cat{background:var(--bg);color:var(--muted)}
+.tag.whotag{background:var(--done-soft);color:var(--done)}
+.ev .who{display:inline-block;font-size:.68rem;font-weight:700;background:var(--done-soft);color:var(--done);border-radius:999px;padding:0 6px;margin-right:5px;vertical-align:1px}
+.whofilter{display:flex;flex-wrap:wrap;gap:6px}
+.whofilter button,.whopick button{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:4px 12px;font-size:.8rem;font-weight:700;color:var(--muted)}
+.whofilter button[aria-pressed="true"],.whopick button[aria-pressed="true"]{background:var(--done);border-color:var(--done);color:var(--surface)}
+.whopick{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:6px}
 .tag.web{background:var(--warn-soft);color:var(--warn)}
 .tag.最優先{background:var(--urgent);color:var(--surface)}
 .h2row{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
@@ -338,6 +345,44 @@ async function ghUpdate(file, mutate, msg){
   }
   throw new Error('ほかの端末と同時に保存されました。もう一度お試しください。');
 }
+// 担当：タスク・予定に付く人の名前。予定に担当がなければ関連タスクの担当を使う
+var whoFilter = ls('wb_who') || '', taskView = ls('wb_tview') || 'cat';
+function knownWho(){
+  var set = {};
+  ((DATA.board && DATA.board.members) || []).forEach(function(n){ set[n] = 1; });
+  DATA.pending.forEach(function(t){ if (t.assignee) set[t.assignee] = 1; });
+  ((DATA.board && DATA.board.events) || []).forEach(function(e){ if (e.assignee) set[e.assignee] = 1; });
+  return Object.keys(set);
+}
+function whoOfEvent(e){
+  if (e.assignee) return e.assignee;
+  var t = e.task && DATA.pending.filter(function(x){ return x.id === e.task; })[0];
+  return (t && t.assignee) || '';
+}
+function whoMatch(name){ return !whoFilter || (whoFilter === '__none' ? !name : name === whoFilter); }
+function whoFilterHtml(){
+  var names = knownWho();
+  if (!names.length) return '';
+  var opts = [['', 'みんな']].concat(names.map(function(n){ return [n, n]; })).concat([['__none', '担当なし']]);
+  return '<div class="whofilter" role="group" aria-label="担当で絞り込み">' + opts.map(function(o){
+    return '<button type="button" data-who="'+esc(o[0])+'"'+(whoFilter === o[0] ? ' aria-pressed="true"' : '')+'>'+esc(o[1])+'</button>';
+  }).join('') + '</div>';
+}
+function whoField(cur){
+  var names = knownWho();
+  return '<div class="fld"><span>担当</span><div class="whopick" id="who-pick">' +
+    [['', '未定']].concat(names.map(function(n){ return [n, n]; })).map(function(o){
+      return '<button type="button" data-v="'+esc(o[0])+'"'+((cur || '') === o[0] ? ' aria-pressed="true"' : '')+'>'+esc(o[1])+'</button>';
+    }).join('') + '</div><input type="text" id="who-new" placeholder="新しい担当の名前（入力するとこちらが優先）" autocomplete="off"></div>';
+}
+function bindWho(sh, cur){
+  var v = cur || '';
+  sh.querySelectorAll('#who-pick button').forEach(function(b){
+    b.onclick = function(){ v = b.dataset.v; sh.querySelectorAll('#who-pick button').forEach(function(x){ x.setAttribute('aria-pressed', x === b); }); };
+  });
+  return function(){ return sh.querySelector('#who-new').value.trim() || v; };
+}
+
 function newId(){ return Date.now().toString(36) + Math.random().toString(36).slice(2,6); }
 
 // 秘書がまだ取り込んでいないタスク操作を一覧に重ねる
@@ -346,9 +391,9 @@ function mergeOps(base, ops){
   var list = base.map(function(t){ return Object.assign({}, t); }), seen = {};
   ops.forEach(function(o){
     if (seen[o.opId]) return; seen[o.opId] = 1;
-    if (o.op === 'add') { if (!list.some(function(x){ return x.id === o.id; })) list.push({id:o.id, content:o.content, category:o.category, label:o.label, score:LABEL_SCORE[o.label] || 18, recorded:o.at, web:true}); return; }
+    if (o.op === 'add') { if (!list.some(function(x){ return x.id === o.id; })) list.push({id:o.id, content:o.content, category:o.category, label:o.label, assignee:o.assignee || null, score:LABEL_SCORE[o.label] || 18, recorded:o.at, web:true}); return; }
     var t = list.filter(function(x){ return x.id === o.id; })[0]; if (!t) return;
-    if (o.op === 'edit') { if (o.content) t.content = o.content; if (o.category) t.category = o.category; if (o.label) { t.label = o.label; t.score = LABEL_SCORE[o.label]; } t.web = true; }
+    if (o.op === 'edit') { if ('assignee' in o) t.assignee = o.assignee || null; if (o.content) t.content = o.content; if (o.category) t.category = o.category; if (o.label) { t.label = o.label; t.score = LABEL_SCORE[o.label]; } t.web = true; }
     if (o.op === 'done') list = list.filter(function(x){ return x !== t; });
   });
   return list;
@@ -391,18 +436,19 @@ function eventSheet(orig, date){
       '<div class="row2"><label class="fld"><span>日付</span><input type="date" id="ev-date" value="'+esc(e.date)+'"></label>' +
       '<label class="fld"><span>時刻（任意）</span><input type="time" id="ev-time" value="'+esc(e.time||'')+'"></label></div>' +
       '<div class="fld"><span>種類</span><div class="seg wide" id="ev-kind">'+KIND_JP.map(function(k){ return '<button type="button" data-v="'+k[0]+'"'+(k[0] === e.kind ? ' aria-pressed="true"' : '')+'>'+k[1]+'</button>'; }).join('')+'</div></div>' +
+      whoField(e.assignee) +
       '<label class="fld"><span>関連するタスク（任意）</span><select id="ev-task">'+taskOpts+'</select></label>' +
       '<p class="warnline" id="ev-warn" hidden>土日は休みの設定です（このまま保存もできます）</p>' +
       '<div class="row"><button class="btn primary" id="ev-save">保存</button><button class="btn" data-close>やめる</button>' +
       (orig ? (confirmDel ? '<button class="btn danger" id="ev-del2">本当に削除</button>' : '<button class="btn danger" id="ev-del">削除</button>') : '') + '</div>' +
       '<span class="status" id="ev-status"></span>',
       function(sh){
-        var kind = e.kind;
+        var kind = e.kind, getWho = bindWho(sh, e.assignee);
         function warn(){ var d = new Date(sh.querySelector('#ev-date').value + 'T00:00:00'); sh.querySelector('#ev-warn').hidden = !((kind === 'plan' || kind === 'deadline') && (d.getDay() === 0 || d.getDay() === 6)); }
         sh.querySelectorAll('#ev-kind button').forEach(function(b){ b.onclick = function(){ kind = b.dataset.v; sh.querySelectorAll('#ev-kind button').forEach(function(x){ x.setAttribute('aria-pressed', x === b); }); warn(); }; });
         sh.querySelector('#ev-date').onchange = warn; warn();
         if (!orig) sh.querySelector('#ev-title').focus();
-        function collect(){ return {title: sh.querySelector('#ev-title').value.trim(), date: sh.querySelector('#ev-date').value, time: sh.querySelector('#ev-time').value, kind: kind, task: sh.querySelector('#ev-task').value}; }
+        function collect(){ return {title: sh.querySelector('#ev-title').value.trim(), date: sh.querySelector('#ev-date').value, time: sh.querySelector('#ev-time').value, kind: kind, task: sh.querySelector('#ev-task').value, assignee: getWho()}; }
         var del = sh.querySelector('#ev-del'); if (del) del.onclick = function(){ e = Object.assign({}, e, collect()); confirmDel = true; draw(); };
         var del2 = sh.querySelector('#ev-del2'); if (del2) del2.onclick = function(){ commit(null, sh); };
         sh.querySelector('#ev-save').onclick = function(){
@@ -411,6 +457,7 @@ function eventSheet(orig, date){
           var ne = {date: v.date, kind: v.kind, title: v.title};
           if (v.time) ne.time = v.time;
           if (v.task) ne.task = v.task;
+          if (v.assignee) ne.assignee = v.assignee;
           if (orig && orig.cat) ne.cat = orig.cat;
           commit(ne, sh);
         };
@@ -443,25 +490,27 @@ function taskSheet(t){
       '<h3>'+(t ? 'タスクを編集' : 'タスクを追加')+'</h3>' +
       '<label class="fld"><span>内容</span><textarea id="tk-content" rows="3" placeholder="例：gc014 グラスホルダーの撮影">'+esc(cur.content)+'</textarea></label>' +
       '<label class="fld"><span>工程</span><select id="tk-cat">'+ORDER.map(function(c){ return '<option'+(c === cur.category ? ' selected' : '')+'>'+esc(c)+'</option>'; }).join('')+'</select></label>' +
+      whoField(cur.assignee) +
       '<div class="fld"><span>優先度</span><div class="seg wide" id="tk-label">'+LABELS.map(function(l){ return '<button type="button" data-v="'+l+'"'+(l === cur.label ? ' aria-pressed="true"' : '')+'>'+l+'</button>'; }).join('')+'</div></div>' +
       '<div class="row"><button class="btn primary" id="tk-save">保存</button><button class="btn" data-close>やめる</button>' +
       (t ? (confirmDone ? '<button class="btn ok" id="tk-done2">完了にする（確定）</button>' : '<button class="btn ok" id="tk-done">完了にする</button>') : '') + '</div>' +
       '<span class="status" id="tk-status"></span><p class="meta" style="margin:0">変更は秘書が取り込むとタスクリスト（tasklist.md）にも反映されます。</p>',
       function(sh){
-        var label = cur.label;
+        var label = cur.label, getWho = bindWho(sh, cur.assignee);
         sh.querySelectorAll('#tk-label button').forEach(function(b){ b.onclick = function(){ label = b.dataset.v; sh.querySelectorAll('#tk-label button').forEach(function(x){ x.setAttribute('aria-pressed', x === b); }); }; });
         if (!t) sh.querySelector('#tk-content').focus();
-        function collect(){ return {content: sh.querySelector('#tk-content').value.trim(), category: sh.querySelector('#tk-cat').value, label: label}; }
+        function collect(){ return {content: sh.querySelector('#tk-content').value.trim(), category: sh.querySelector('#tk-cat').value, label: label, assignee: getWho()}; }
         var d1 = sh.querySelector('#tk-done'); if (d1) d1.onclick = function(){ cur = Object.assign({}, cur, collect()); confirmDone = true; draw(); };
         var d2 = sh.querySelector('#tk-done2'); if (d2) d2.onclick = function(){ commit({op:'done', id:t.id}, sh); };
         sh.querySelector('#tk-save').onclick = function(){
           var v = collect();
           if (!v.content) { st(sh, '内容を入れてください', true); return; }
-          if (!t) return commit({op:'add', id:newId(), content:v.content, category:v.category, label:v.label}, sh);
+          if (!t) return commit({op:'add', id:newId(), content:v.content, category:v.category, label:v.label, assignee:v.assignee || null}, sh);
           var op = {op:'edit', id:t.id};
           if (v.content !== t.content) op.content = v.content;
           if (v.category !== t.category) op.category = v.category;
           if (v.label !== t.label) op.label = v.label;
+          if ((v.assignee || '') !== (t.assignee || '')) op.assignee = v.assignee || null;
           if (Object.keys(op).length === 2) { Sheet.close(); return; }
           commit(op, sh);
         };
@@ -610,9 +659,9 @@ function renderBoard(){
   for (var i=0;i<14;i++){
     var day = new Date(start); day.setDate(start.getDate()+i);
     var key = ymd(day);
-    var evs = events.filter(function(e){ return e.date === key; }).sort(function(a,b){ return (a.time||'99').localeCompare(b.time||'99'); });
+    var evs = events.filter(function(e){ return e.date === key && (e.kind === 'duty' || e.kind === 'event' || whoMatch(whoOfEvent(e))); }).sort(function(a,b){ return (a.time||'99').localeCompare(b.time||'99'); });
     cal += '<div class="day'+(key === today ? ' today' : key < today ? ' past' : '')+(day.getDay()===0 ? ' sun' : '')+(day.getDay()%6===0 ? ' wkend' : '')+(evs.length ? '' : ' empty')+'"><div class="dn"><b>'+(day.getMonth()+1)+'/'+day.getDate()+'（'+W[day.getDay()]+'）</b>'+(key===today?'<span>今日</span>':(day.getDay()%6===0?'<span class="off">休み</span>':''))+'</div>';
-    evs.forEach(function(e){ cal += '<button class="ev '+esc(e.kind)+'" data-ei="'+events.indexOf(e)+'">'+(e.time?'<span class="tm">'+esc(e.time)+'</span>':'')+esc(e.title)+'</button>'; });
+    evs.forEach(function(e){ var who = whoOfEvent(e); cal += '<button class="ev '+esc(e.kind)+'" data-ei="'+events.indexOf(e)+'">'+(who ? '<span class="who">'+esc(who)+'</span>' : '')+(e.time?'<span class="tm">'+esc(e.time)+'</span>':'')+esc(e.title)+'</button>'; });
     if (key >= today) cal += '<button class="addev" data-date="'+key+'" aria-label="'+key+' に予定を追加">＋ 追加</button>';
     cal += '</div>';
   }
@@ -624,32 +673,39 @@ function renderBoard(){
     pipe += '</div>'+(p.note ? '<div class="note">'+esc(p.note)+'</div>' : '')+'</div>';
   });
 
-  var groups = {}, cats = [];
-  DATA.pending.slice().sort(function(a,b){ return b.score - a.score; }).forEach(function(t){
-    if (!groups[t.category]) { groups[t.category] = []; cats.push(t.category); }
-    groups[t.category].push(t);
-  });
-  cats.sort(function(a,b){ return ORDER.indexOf(a) - ORDER.indexOf(b); });
   var planned = {}; events.forEach(function(e){ if (e.task) (planned[e.task] = planned[e.task] || []).push(e.date); });
-  var cards = cats.map(function(c){
-    return '<div class="card"><h3>'+esc(c)+'<span class="mono">'+groups[c].length+'件</span></h3><ul>'+groups[c].map(function(t){
+  var shown = DATA.pending.filter(function(t){ return whoMatch(t.assignee || ''); }).sort(function(a,b){ return b.score - a.score; });
+  var groups = {}, keys = [];
+  shown.forEach(function(t){
+    var k = taskView === 'who' ? (t.assignee || '担当なし') : t.category;
+    if (!groups[k]) { groups[k] = []; keys.push(k); }
+    groups[k].push(t);
+  });
+  if (taskView === 'who') keys.sort(function(a,b){ return (a === '担当なし') - (b === '担当なし') || a.localeCompare(b, 'ja'); });
+  else keys.sort(function(a,b){ return ORDER.indexOf(a) - ORDER.indexOf(b); });
+  var cards = keys.map(function(k){
+    return '<div class="card"><h3>'+esc(k)+'<span class="mono">'+groups[k].length+'件</span></h3><ul>'+groups[k].map(function(t){
       var p = planned[t.id] ? ' ・ 予定 '+planned[t.id].sort().map(function(d){ return jpDate(d+'T00:00:00'); }).join('、') : '';
-      return '<li><button class="task tbtn" data-tid="'+esc(t.id)+'"><span class="tagrow"><span class="tag '+esc(t.label)+'">'+esc(t.label)+'</span>'+(t.web ? '<span class="tag web">取り込み待ち</span>' : '')+'</span><span>'+esc(t.content)+'</span><span class="meta mono">記録 '+jpDate(t.recorded)+p+'</span></button></li>';
+      var sub = taskView === 'who' ? '<span class="tag cat">'+esc(t.category)+'</span>' : (t.assignee ? '<span class="tag whotag">'+esc(t.assignee)+'</span>' : '');
+      return '<li><button class="task tbtn" data-tid="'+esc(t.id)+'"><span class="tagrow"><span class="tag '+esc(t.label)+'">'+esc(t.label)+'</span>'+sub+(t.web ? '<span class="tag web">取り込み待ち</span>' : '')+'</span><span>'+esc(t.content)+'</span><span class="meta mono">記録 '+jpDate(t.recorded)+p+'</span></button></li>';
     }).join('')+'</ul></div>';
-  }).join('');
+  }).join('') || '<p class="muted" style="margin:0">この担当のタスクはありません。</p>';
   var qs = (b.questions||[]).map(function(q){ return '<li><b>'+esc(q.cat)+'</b>：'+esc(q.text)+'</li>'; }).join('');
   var dn = DATA.done.slice(0,6).map(function(t){ return '<li><span class="mono">'+jpDate(t.done)+'</span> '+esc(t.content)+'</li>'; }).join('');
 
   document.getElementById('view-board').innerHTML =
     '<section class="sec" id="sec-sched"><h2>予定 <small>今週と来週・タップで編集</small></h2>' +
       '<div class="legend"><span><i class="sw" style="background:var(--urgent)"></i>イベント</span><span><i class="sw" style="background:var(--warn)"></i>締切</span><span><i class="sw" style="background:var(--accent)"></i>作業予定</span><span><i class="sw" style="background:var(--muted)"></i>担当業務</span></div>' +
+      whoFilterHtml() +
       '<div class="cal">'+cal+'</div></section>' +
     '<section class="sec" id="sec-pipe"><h2>新商品の進み具合 <small>品番ごと・工程順・丸をタップで変更</small></h2>' +
       '<div class="pipe-note" id="pipe-status">'+(ghToken() ? (DATA.pipeSyncPending ? 'Webでの変更があります。秘書が取り込むと、タスクの担当工程にも反映されます。' : '丸をタップすると状態を変えられます。') : '変更するには、メモタブで書き込みの設定（トークン登録）をしてください。')+'</div>' +
       '<div class="legend"><span><i class="dot done"></i>完了</span><span><i class="dot hot"></i>今週やる</span><span><i class="dot now"></i>次の作業</span><span><i class="dot wait"></i>待ち</span><span><i class="dot"></i>未着手／不明</span></div>' +
       '<div class="pipe">'+pipe+'</div></section>' +
     '<div class="dotmenu" id="dotmenu" hidden role="menu"></div>' +
-    '<section class="sec" id="sec-tasks"><div class="h2row"><h2>タスク <small>工程別・優先度順・タップで編集</small></h2><button class="btn primary" id="add-task">＋ タスクを追加</button></div><div class="cols">'+cards+'</div></section>' +
+    '<section class="sec" id="sec-tasks"><div class="h2row"><h2>タスク <small>タップで編集</small></h2><button class="btn primary" id="add-task">＋ タスクを追加</button></div>' +
+      '<div class="row meta">並べ方 <span class="seg" id="tview"><button data-v="cat"'+(taskView === 'cat' ? ' aria-pressed="true"' : '')+'>工程別</button><button data-v="who"'+(taskView === 'who' ? ' aria-pressed="true"' : '')+'>担当別</button></span></div>' +
+      whoFilterHtml() + '<div class="cols">'+cards+'</div></section>' +
     '<section class="sec" id="sec-qa"><h2>確認と完了</h2><div class="cols">' +
       (qs ? '<div class="card q"><h3>確認が必要</h3><ul>'+qs+'</ul></div>' : '') +
       '<div class="card"><h3>最近の完了</h3><ul class="done-list">'+(dn || '<li>まだありません</li>')+'</ul></div>' +
@@ -660,6 +716,8 @@ function renderBoard(){
   vb.querySelectorAll('.ev[data-ei]').forEach(function(b){ b.onclick = function(){ eventSheet(DATA.board.events[+b.dataset.ei]); }; });
   vb.querySelectorAll('.tbtn').forEach(function(b){ b.onclick = function(){ taskSheet(DATA.pending.filter(function(x){ return x.id === b.dataset.tid; })[0]); }; });
   document.getElementById('add-task').onclick = function(){ taskSheet(null); };
+  vb.querySelectorAll('.whofilter button').forEach(function(b){ b.onclick = function(){ whoFilter = b.dataset.who; ls('wb_who', whoFilter); renderBoard(); }; });
+  vb.querySelectorAll('#tview button').forEach(function(b){ b.onclick = function(){ taskView = b.dataset.v; ls('wb_tview', taskView); renderBoard(); }; });
   applyBoardSections();
 }
 
