@@ -72,6 +72,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
 .ev{font-size:.78rem;line-height:1.45;border-radius:5px;padding:4px 6px;background:var(--accent-soft);border-left:3px solid var(--accent)}
 .ev.deadline{background:var(--warn-soft);border-left-color:var(--warn)}
 .ev.event{background:var(--urgent-soft);border-left-color:var(--urgent);font-weight:700}
+.ev.duty{background:var(--bg);border-left-color:var(--muted);color:var(--muted);font-weight:700}
 .ev .tm{font-family:var(--mono);margin-right:4px}
 .legend{display:flex;flex-wrap:wrap;gap:16px;font-size:.8rem;color:var(--muted)}
 .legend span{display:inline-flex;align-items:center;gap:6px}
@@ -101,9 +102,10 @@ th.st,td.st{text-align:center;width:60px}
 .card ul{margin:0;padding:0;list-style:none;display:grid;gap:10px;font-size:.88rem}
 .task{display:grid;gap:3px}
 .tag{font-size:.72rem;font-weight:700;border-radius:999px;padding:1px 8px;justify-self:start}
+.tag.最優先{background:var(--urgent);color:var(--surface)}
 .tag.優先{background:var(--urgent-soft);color:var(--urgent)}
 .tag.通常{background:var(--accent-soft);color:var(--accent)}
-.tag.未分類,.tag.後回し{background:var(--bg);color:var(--muted)}
+.tag.未分類,.tag.後回し,.tag.低{background:var(--bg);color:var(--muted)}
 .meta{font-size:.74rem;color:var(--muted)}
 .q{border-color:var(--warn)}
 .q h3{color:var(--warn)}
@@ -247,7 +249,7 @@ function deptStates(){
     var qs = (b.questions || []).filter(function(q){ return q.cat === d.cat; });
     var stale = tasks.filter(function(t){ return now - new Date(t.recorded) > STALE_DAYS*86400000; });
     var state = stale.length ? 'stale' : qs.length ? 'decision' : tasks.length ? 'working' : 'idle';
-    out[d.cat] = {dept:d, tasks:tasks, qs:qs, stale:stale, state:state, prio: tasks.some(function(t){ return t.label === '優先'; })};
+    out[d.cat] = {dept:d, tasks:tasks, qs:qs, stale:stale, state:state, prio: tasks.some(function(t){ return t.label === '優先' || t.label === '最優先'; })};
   });
   return out;
 }
@@ -350,7 +352,7 @@ function renderBoard(){
 
   document.getElementById('view-board').innerHTML =
     '<section class="sec"><h2>予定 <small>今週と来週</small></h2>' +
-      '<div class="legend"><span><i class="sw" style="background:var(--urgent)"></i>イベント</span><span><i class="sw" style="background:var(--warn)"></i>締切</span><span><i class="sw" style="background:var(--accent)"></i>作業予定</span></div>' +
+      '<div class="legend"><span><i class="sw" style="background:var(--urgent)"></i>イベント</span><span><i class="sw" style="background:var(--warn)"></i>締切</span><span><i class="sw" style="background:var(--accent)"></i>作業予定</span><span><i class="sw" style="background:var(--muted)"></i>担当業務</span></div>' +
       '<div class="cal">'+cal+'</div></section>' +
     '<section class="sec"><h2>新商品の進み具合 <small>品番ごと・工程順</small></h2>' +
       '<div class="legend"><span><i class="dot done"></i>完了</span><span><i class="dot hot"></i>今週やる</span><span><i class="dot now"></i>次の作業</span><span><i class="dot wait"></i>待ち</span><span><i class="dot"></i>未着手／不明</span></div>' +
