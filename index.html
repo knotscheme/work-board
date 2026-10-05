@@ -177,8 +177,8 @@ footer{color:var(--muted);font-size:.78rem}
 .msg{max-width:520px;margin:80px auto;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:24px}
 
 /* office */
-.office{position:relative;height:min(68vh,640px);min-height:420px;border-radius:12px;overflow:hidden;background:var(--scene-bg);border:1px solid var(--line);touch-action:none;user-select:none}
-.office canvas{display:block;width:100%;height:100%;cursor:grab}
+.office{position:relative;height:min(68vh,640px);min-height:420px;border-radius:12px;overflow:hidden;background:var(--scene-bg);border:1px solid var(--line);user-select:none}
+.office canvas{display:block;width:100%;height:100%;cursor:grab;touch-action:none}
 .office canvas.drag{cursor:grabbing}
 .labels{position:absolute;inset:0;pointer-events:none}
 .nm{position:absolute;transform:translate(-50%,-100%);white-space:nowrap;font-size:.72rem;font-weight:700;background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:999px;padding:1px 9px;display:flex;gap:6px;align-items:center;pointer-events:auto;cursor:pointer;box-shadow:0 1px 3px rgb(0 0 0 / .12)}
@@ -232,7 +232,7 @@ footer{color:var(--muted);font-size:.78rem}
 .zoom button{border:1px solid var(--line);background:var(--surface);border-radius:10px;min-width:44px;height:44px;font-weight:700;font-size:1rem;box-shadow:0 1px 4px rgb(0 0 0 / .12)}
 .zoom button[data-z="all"]{font-size:.8rem;padding:0 10px}
 .hint{position:absolute;bottom:10px;left:12px;font-size:.72rem;color:var(--muted);pointer-events:none}
-.panel{position:absolute;top:12px;right:12px;bottom:12px;width:min(360px,calc(100% - 24px));background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px 18px;overflow:auto;display:grid;gap:12px;align-content:start;box-shadow:0 4px 18px rgb(0 0 0 / .18)}
+.panel{position:absolute;top:12px;right:12px;bottom:12px;width:min(360px,calc(100% - 24px));background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px 18px;overflow-y:auto;overflow-x:hidden;touch-action:pan-y;overscroll-behavior:contain;display:grid;grid-template-columns:minmax(0,1fr);gap:12px;align-content:start;box-shadow:0 4px 18px rgb(0 0 0 / .18)}
 .panel .x{position:absolute;top:8px;right:8px;border:0;background:none;font-size:1.2rem;line-height:1;padding:6px 8px;color:var(--muted)}
 .panel h3{font-size:1.05rem;padding-right:28px}
 .panel .state{font-size:.78rem;font-weight:700;justify-self:start;border-radius:999px;padding:2px 10px}
@@ -240,6 +240,7 @@ footer{color:var(--muted);font-size:.78rem}
 .state.decision{background:var(--warn-soft);color:var(--warn)}
 .state.stale{background:var(--urgent-soft);color:var(--urgent)}
 .state.idle{background:var(--bg);color:var(--muted)}
+.panel *{overflow-wrap:anywhere}
 .panel ul{margin:0;padding:0;list-style:none;display:grid;gap:10px;font-size:.86rem}
 .panel .lbl{font-size:.74rem;color:var(--muted);font-weight:700;letter-spacing:.04em}
 .tools{display:flex;flex-wrap:wrap;gap:6px}
@@ -893,7 +894,7 @@ var Office = (function(){
     root = el;
     el.innerHTML = '<h2>オフィス <small>佐藤 → 白川・藤田・佐々木・鳥居。メンバーをタップすると担当チームが現れます。今日の予定＝スポットライト・締切間近＝汗・挙手＝確認待ち・赤点滅＝放置</small></h2>' +
       '<div class="office" id="office"><canvas id="office-cv" aria-label="オフィスの3D表示"></canvas><div class="labels" id="office-labels"></div>' +
-      '<div class="hud" id="office-hud"></div><div class="hint">1本指で回転・2本指で拡大縮小・社員をタップで詳細</div><div class="zoom"><button data-z="in" aria-label="拡大">＋</button><button data-z="out" aria-label="縮小">−</button><button data-z="all" aria-label="全体を表示">全体</button></div><div class="panel" id="office-panel" hidden></div></div>' +
+      '<div class="hud" id="office-hud"></div><div class="hint">1本指で移動・2本指で拡大縮小と回転・右ドラッグで回転</div><div class="zoom"><button data-z="in" aria-label="拡大">＋</button><button data-z="out" aria-label="縮小">−</button><button data-z="all" aria-label="全体を表示">全体</button></div><div class="panel" id="office-panel" hidden></div></div>' +
       '<div class="ostrip" id="office-strip" role="group" aria-label="メンバー"></div><p class="oticker" id="office-ticker"></p>';
     canvas = el.querySelector('#office-cv'); labelsEl = el.querySelector('#office-labels');
     hudEl = el.querySelector('#office-hud'); panelEl = el.querySelector('#office-panel');
@@ -1119,31 +1120,50 @@ var Office = (function(){
   }
 
   /* ---- 入力 ---- */
+  // 指1本（左ドラッグ）＝移動、指2本＝拡大縮小と回転、右ドラッグ／Shift＋ドラッグ＝回転、ホイール＝拡大縮小
+  function panBy(dx, dy){
+    var k = cam.r * .0019, ca = Math.cos(cam.az), sa = Math.sin(cam.az);
+    cam.tx = Math.max(-15, Math.min(15, cam.tx - ca*dx*k - sa*dy*k));
+    cam.tz = Math.max(-12, Math.min(7, cam.tz + sa*dx*k - ca*dy*k));
+  }
   function bindInput(){
-    var down = null, pts = {}, pinch = null;
-    function dist(){ var k = Object.keys(pts); if (k.length < 2) return 0; var a = pts[k[0]], b = pts[k[1]]; return Math.hypot(a.x - b.x, a.y - b.y); }
+    var pts = {}, one = null, two = null;
+    function list(){ return Object.keys(pts).map(function(k){ return pts[k]; }); }
+    function twoInfo(){ var l = list(), a = l[0], b = l[1]; return {d: Math.hypot(a.x - b.x, a.y - b.y), ang: Math.atan2(b.y - a.y, b.x - a.x), cx: (a.x + b.x)/2, cy: (a.y + b.y)/2}; }
+    canvas.addEventListener('contextmenu', function(e){ e.preventDefault(); });
     canvas.addEventListener('pointerdown', function(e){
       pts[e.pointerId] = {x:e.clientX, y:e.clientY};
-      canvas.setPointerCapture(e.pointerId);
-      if (Object.keys(pts).length === 2) { pinch = {d: dist(), r: cam.r}; down = null; camGoal = null; autoSpin = false; return; }
-      down = {x:e.clientX, y:e.clientY, az:cam.az, el:cam.el, moved:false};
+      try { canvas.setPointerCapture(e.pointerId); } catch(err) {}
+      camGoal = null;
+      if (list().length >= 2) { var t = twoInfo(); two = {d:t.d, ang:t.ang, cx:t.cx, cy:t.cy, r:cam.r, az:cam.az}; one = null; autoSpin = false; return; }
+      one = {x:e.clientX, y:e.clientY, lx:e.clientX, ly:e.clientY, moved:false, rotate: e.button === 2 || e.shiftKey, az:cam.az, el:cam.el};
     });
-    function lift(e){ delete pts[e.pointerId]; if (Object.keys(pts).length < 2) pinch = null; }
-    canvas.addEventListener('pointercancel', function(e){ lift(e); down = null; });
+    function lift(e){ delete pts[e.pointerId]; if (list().length < 2) two = null; }
+    canvas.addEventListener('pointercancel', function(e){ lift(e); one = null; canvas.classList.remove('drag'); });
     canvas.addEventListener('pointermove', function(e){
-      if (pts[e.pointerId]) pts[e.pointerId] = {x:e.clientX, y:e.clientY};
-      if (pinch) { var d = dist(); if (d > 0) cam.r = Math.max(8, Math.min(48, pinch.r * pinch.d / d)); return; }
-      if (!down) return;
-      var dx = e.clientX - down.x, dy = e.clientY - down.y;
-      if (Math.abs(dx) + Math.abs(dy) > 4) { down.moved = true; autoSpin = false; canvas.classList.add('drag'); }
-      cam.az = down.az - dx * .006; cam.el = Math.max(.25, Math.min(1.25, down.el + dy * .004)); camGoal = null;
+      if (!pts[e.pointerId]) return;
+      pts[e.pointerId] = {x:e.clientX, y:e.clientY};
+      if (two && list().length >= 2) {
+        var t = twoInfo();
+        if (t.d > 0) cam.r = Math.max(8, Math.min(48, two.r * two.d / t.d));
+        cam.az = two.az - (t.ang - two.ang);
+        panBy(t.cx - two.cx, t.cy - two.cy); two.cx = t.cx; two.cy = t.cy;
+        return;
+      }
+      if (!one) return;
+      var dx = e.clientX - one.x, dy = e.clientY - one.y;
+      if (!one.moved && Math.abs(dx) + Math.abs(dy) > 5) { one.moved = true; autoSpin = false; canvas.classList.add('drag'); }
+      if (!one.moved) return;
+      if (one.rotate) { cam.az = one.az - dx * .006; cam.el = Math.max(.25, Math.min(1.25, one.el + dy * .004)); }
+      else { panBy(e.clientX - one.lx, e.clientY - one.ly); }
+      one.lx = e.clientX; one.ly = e.clientY;
     });
     canvas.addEventListener('pointerup', function(e){
-      var wasPinch = !!pinch;
+      var wasTwo = !!two;
       lift(e);
       canvas.classList.remove('drag');
-      if (down && !down.moved && !wasPinch) pick(e);
-      down = null;
+      if (one && !one.moved && !wasTwo) pick(e);
+      one = null;
     });
     root.querySelectorAll('.zoom button').forEach(function(b){
       b.onclick = function(){
