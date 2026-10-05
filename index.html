@@ -895,7 +895,8 @@ var Office = (function(){
       return desks[key];
     }
     addPerson(boss, 0, 0, -9.6, .4, {big:true});
-    staff.forEach(function(n, i){ addPerson(n, i+1, -7.5 + i*5, -5.6, 0, n === '白川' ? {headset:true} : {}); });
+    var SLOT = [-2.5, -7.5, 2.5, 7.5, 12.5];  // 白川を中央寄りに（左から 藤田・白川・佐々木・鳥居）
+    staff.forEach(function(n, i){ addPerson(n, i+1, SLOT[i] !== undefined ? SLOT[i] : -12 + i*5, -5.6, 0, n === '白川' ? {headset:true} : {}); });
     var hub = desks['@白川'] || desks['@' + staff[0]];
     bubbleEl = document.createElement('div'); bubbleEl.className = 'bubble'; labelsEl.appendChild(bubbleEl);
     secretary = hub;
@@ -923,7 +924,7 @@ var Office = (function(){
     renderer.setSize(r.width, r.height, false);
     camera.aspect = r.width / r.height; camera.updateProjectionMatrix();
     cam.r = defaultR();
-    var portrait = r.width / r.height < 1; cam.el = portrait ? 1.0 : .62; if (portrait) cam.r *= .85;
+    var portrait = r.width / r.height < 1; cam.el = portrait ? 1.12 : .62;
   }
 
   /* ---- 入力 ---- */
@@ -944,7 +945,7 @@ var Office = (function(){
     root.querySelectorAll('.zoom button').forEach(function(b){
       b.onclick = function(){
         var z = b.dataset.z;
-        if (z === 'all') { var rr = canvas.getBoundingClientRect(), pt = rr.width / rr.height < 1; cam.el = pt ? 1.0 : .62; camGoal = {tx:0, tz:-2.6, r:defaultR() * (pt ? .85 : 1)}; autoSpin = true; select(null); return; }
+        if (z === 'all') { var rr = canvas.getBoundingClientRect(), pt = rr.width / rr.height < 1; cam.el = pt ? 1.12 : .62; camGoal = {tx:0, tz:-2.6, r:defaultR()}; autoSpin = true; select(null); return; }
         camGoal = {tx:cam.tx, tz:cam.tz, r: Math.max(8, Math.min(44, cam.r * (z === 'in' ? .8 : 1.25)))};
       };
     });
@@ -1161,7 +1162,8 @@ var Office = (function(){
     bubbleT -= dt;
     if (bubbleT <= 0) { var lines = bubbleLines(); bubbleEl.textContent = lines[bubbleIdx++ % lines.length]; bubbleT = 5; }
     var bp = project(secretary.group, 3.6);
-    bubbleEl.style.left = bp.x+'px'; bubbleEl.style.top = bp.y+'px';
+    var cw = canvas.getBoundingClientRect().width, bw = Math.min(260, bubbleEl.offsetWidth || 200);
+    bubbleEl.style.left = Math.max(bw/2 + 8, Math.min(cw - bw/2 - 8, bp.x))+'px'; bubbleEl.style.top = Math.max(bubbleEl.offsetHeight + 8, bp.y)+'px';
 
     // 書類が飛ぶ
     if (mo) { planeT -= dt; if (planeT <= 0) { spawnPlane(); planeT = 1.4 + Math.random(); } }
