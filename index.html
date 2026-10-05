@@ -198,6 +198,11 @@ th.st,td.st{text-align:center;width:60px}
 .pc{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 14px;display:grid;gap:8px;align-content:start}
 .pc-h{display:flex;gap:8px;align-items:baseline;flex-wrap:wrap;font:inherit;color:inherit;text-align:left;border:0;background:none;padding:4px;margin:-4px;border-radius:8px;cursor:pointer;width:calc(100% + 8px)}
 .pc-h:hover{background:var(--bg)}
+.pc .pc-h{display:grid;grid-template-columns:minmax(0,1fr) auto auto;grid-template-areas:"code who edit" "name name name";align-items:center;gap:4px 8px}
+.pc .pc-h .code{grid-area:code;font-size:.9rem}
+.pc .pc-h .whotag,.pc .pc-h .pc-nowho{grid-area:who;justify-self:end}
+.pc .pc-h .pc-edit{grid-area:edit;margin:0}
+.pc .pc-h .name{grid-area:name;font-size:1rem;line-height:1.4;min-height:1.4em}
 .pc-edit{margin-left:auto;font-size:.72rem;color:var(--accent);font-weight:700}
 .arch-row{display:flex;justify-content:space-between;align-items:center;gap:8px;background:var(--done-soft);color:var(--done);border-radius:8px;padding:6px 6px 6px 12px;font-size:.84rem;font-weight:700}
 .pdone{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px 14px}
@@ -307,7 +312,26 @@ footer{color:var(--muted);font-size:.78rem}
 .state.idle{background:var(--bg);color:var(--muted)}
 .panel *{overflow-wrap:anywhere}
 .panel ul{margin:0;padding:0;list-style:none;display:grid;gap:10px;font-size:.86rem}
-.panel .lbl{font-size:.74rem;color:var(--muted);font-weight:700;letter-spacing:.04em}
+.panel .lbl{font-size:.8rem;color:var(--ink);font-weight:700;letter-spacing:.02em;border-top:1px solid var(--line);padding-top:12px;margin-top:2px}
+.pn-head{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding-right:30px}
+.pn-head h3{padding-right:0}
+.pn-av{width:16px;height:16px;border-radius:50%}
+.pn-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.pn-stats span{background:var(--bg);border-radius:10px;padding:6px 4px;text-align:center;font-size:.68rem;color:var(--muted);display:grid;gap:0}
+.pn-stats b{font-size:1.1rem;color:var(--ink)}
+.pn-list{display:grid;gap:8px}
+.pn-ev{display:flex;flex-wrap:wrap;gap:4px 8px;align-items:baseline;background:var(--bg);border:1px solid var(--line);border-left:4px solid var(--accent);border-radius:10px;padding:8px 10px;font-size:.88rem}
+.pn-ev.deadline{border-left-color:var(--warn)}
+.pn-date{font-size:.76rem;color:var(--muted)}
+.pn-grp{border:1px solid var(--line);border-radius:10px;padding:8px 10px}
+.pn-grp summary{cursor:pointer;display:flex;justify-content:space-between;font-weight:700;font-size:.86rem;list-style:none}
+.pn-grp summary::-webkit-details-marker{display:none}
+.pn-grp summary::before{content:"▸";margin-right:6px;color:var(--muted)}
+.pn-grp[open] summary::before{content:"▾"}
+.pn-grp summary .mono{color:var(--muted);font-weight:500;margin-left:auto}
+.pn-grp[open] summary{margin-bottom:8px}
+.pn-empty{margin:0;font-size:.86rem;color:var(--muted)}
+.panel .qbox{line-height:1.6}
 .tools{display:flex;flex-wrap:wrap;gap:6px}
 .tools span{font-family:var(--mono);font-size:.72rem;background:var(--bg);border-radius:5px;padding:2px 7px}
 .qbox{background:var(--warn-soft);border-radius:8px;padding:8px 10px;font-size:.84rem}
@@ -1265,7 +1289,7 @@ function deptStates(owner, depts){
 }
 
 /* ---------- 読み込み ---------- */
-var LAST_SIG = '', LOADING = false, BUILD = '0e9bf160bb9b';
+var LAST_SIG = '', LOADING = false, BUILD = 'ec03ebc166f8';
 // 新しい版が公開されていたら、キャッシュを避けて読み直す
 async function checkVersion(){
   if (BUILD.indexOf('BUILD') >= 0) return;
@@ -1404,7 +1428,7 @@ function renderBoard(){
   var stages = b.stages || [], tip = {done:'完了', hot:'今週やる', now:'次の作業', wait:'待ち', '':'未着手／不明'}, pipe = '';
   var pipeAll = b.pipeline || [], pipeDone = pipeAll.filter(function(p){ return p.done; });
   pipeAll.filter(function(p){ return !p.done && whoMatch(p.assignee || ''); }).forEach(function(p){
-    pipe += '<div class="pc"><button class="pc-h" data-pcode="'+esc(p.code)+'" aria-label="'+esc(p.code)+'を編集"><span class="code">'+esc(p.code)+'</span><span class="name">'+esc(p.name)+'</span>'+(p.assignee ? whoTag(p.assignee) : '')+'<span class="pc-edit">編集</span></button><div class="pc-st">';
+    pipe += '<div class="pc"><button class="pc-h" data-pcode="'+esc(p.code)+'" aria-label="'+esc(p.code)+'を編集"><span class="code">'+esc(p.code)+'</span>'+(p.assignee ? whoTag(p.assignee) : '<span class="tag cat pc-nowho">担当なし</span>')+'<span class="pc-edit">編集</span><span class="name">'+esc(p.name)+'</span></button><div class="pc-st">';
     stages.forEach(function(st, j){ var s = (p.s||[])[j] || ''; pipe += '<button class="dotbtn" data-code="'+esc(p.code)+'" data-j="'+j+'" aria-label="'+esc(p.code)+' '+esc(st)+'：'+tip[s]+'（タップで変更）"><i class="dot '+esc(s)+'"></i><span>'+esc(st)+'</span></button>'; });
     var allDone = (p.s || []).length && p.s.every(function(x){ return x === 'done'; });
     pipe += '</div>'+(p.note ? '<div class="note">'+esc(p.note)+'</div>' : '')+(allDone ? '<div class="arch-row"><span>全工程が完了しました</span><button class="btn ok" data-archive="'+esc(p.code)+'">アーカイブする</button></div>' : '')+'</div>';
@@ -1794,13 +1818,35 @@ var Office = (function(){
   }
 
   /* ---- 詳細パネル ---- */
-  function taskList(tasks, withCat){
-    return tasks.length ? '<ul>'+tasks.map(function(t){
-      return '<li class="task"><span class="tagrow"><span class="tag '+esc(t.label)+'">'+esc(t.label)+'</span>'+(withCat ? '<span class="tag cat">'+esc(t.category)+'</span>' : '')+'</span><span>'+esc(t.content)+'</span><span class="meta mono">記録 '+jpDate(t.recorded)+'</span></li>';
-    }).join('')+'</ul>' : '<p class="muted" style="margin:0;font-size:.86rem">担当タスクはありません。</p>';
+  function tcardHtml(t, withCat){
+    return '<button class="task tbtn tcard" data-p="'+esc(t.label)+'" data-ptid="'+esc(t.id)+'"><span class="tagrow"><span class="tag '+esc(t.label)+'">'+esc(t.label)+'</span>' +
+      (withCat ? '<span class="tag cat">'+esc(t.category)+'</span>' : '') + (recLabelOf(t) ? '<span class="tag rec">'+esc(recLabelOf(t))+'</span>' : '') +
+      '</span><span>'+esc(t.content)+'</span><span class="meta mono">記録 '+jpDate(t.recorded)+'</span></button>';
+  }
+  // 担当タスク：工程ごとに折りたたみ（groupBy=true のとき）
+  function taskList(tasks, groupBy){
+    if (!tasks.length) return '<p class="pn-empty">担当タスクはありません。</p>';
+    if (!groupBy) return '<div class="pn-list">'+tasks.map(function(t){ return tcardHtml(t, false); }).join('')+'</div>';
+    var g = {}, keys = [];
+    tasks.forEach(function(t){ if (!g[t.category]) { g[t.category] = []; keys.push(t.category); } g[t.category].push(t); });
+    keys.sort(function(a,b){ return ORDER.indexOf(a) - ORDER.indexOf(b); });
+    return keys.map(function(k){
+      var top = g[k].some(function(t){ return t.label === '最優先' || t.label === '優先'; });
+      return '<details class="pn-grp"'+(top ? ' open' : '')+'><summary><span>'+esc(k)+'</span><span class="mono">'+g[k].length+'</span></summary><div class="pn-list">'+g[k].map(function(t){ return tcardHtml(t, false); }).join('')+'</div></details>';
+    }).join('');
   }
   function evList(label, evs){
-    return evs.length ? '<div class="lbl">'+label+'</div><ul>'+evs.map(function(e){ return '<li>'+(label === '今日の予定' ? '' : jpDate(e.date+'T00:00:00')+' ')+'<b>'+(e.time ? esc(e.time)+' ' : '')+esc(e.title)+'</b></li>'; }).join('')+'</ul>' : '';
+    if (!evs.length) return '';
+    return '<div class="lbl">'+label+'</div><div class="pn-list">'+evs.map(function(e){
+      var rl = recLabelOfEvent(e);
+      return '<div class="pn-ev '+esc(e.kind)+'"><span class="td-kind '+esc(e.kind)+'">'+(e.kind === 'deadline' ? '締切' : e.kind === 'event' ? 'イベント' : '作業')+'</span>' +
+        (label === '今日の予定' ? '' : '<span class="mono pn-date">'+jpDate(e.date+'T00:00:00')+'</span>') +
+        (e.time ? '<span class="mono pn-date">'+esc(e.time)+'</span>' : '') + '<b>'+esc(e.title)+'</b>' + (rl ? '<span class="rtag">'+esc(rl.replace('（平日）',''))+'</span>' : '') + '</div>';
+    }).join('')+'</div>';
+  }
+  function statRow(s){
+    var soon = s.soon.filter(function(e){ return s.today.indexOf(e) < 0; }).length;
+    return '<div class="pn-stats"><span><b class="mono">'+s.today.length+'</b>今日</span><span><b class="mono">'+soon+'</b>締切間近</span><span><b class="mono">'+s.qs.length+'</b>確認</span><span><b class="mono">'+s.tasks.length+'</b>タスク</span></div>';
   }
 
   function select(key, fly){
@@ -1819,10 +1865,10 @@ var Office = (function(){
         '<div class="lbl">報告</div><ul>'+summary().map(function(x){ return '<li>'+esc(x)+'</li>'; }).join('')+'</ul>' +
         '<div class="lbl">メンバー</div><ul>'+o.staff.map(function(n){ var m = states['@'+n]; return '<li><b>'+esc(n)+'</b> <span class="meta">担当タスク '+(m ? m.tasks.length : 0)+'件'+(m && m.today.length ? '・今日の予定 '+m.today.length+'件' : '')+'</span></li>'; }).join('')+'</ul>';
     } else if (u.person) {
-      html += '<h3>'+esc(u.person)+'</h3><span class="state '+s.state+'">'+STATE_JP[s.state]+'</span>';
+      html += '<div class="pn-head"><span class="pn-av" style="background:'+whoColor(u.person)+'"></span><h3>'+esc(u.person)+'</h3><span class="state '+s.state+'">'+STATE_JP[s.state]+'</span></div>' + statRow(s);
       html += evList('今日の予定', s.today) + evList('近い締切', s.soon.filter(function(e){ return s.today.indexOf(e) < 0; }));
-      if (s.qs.length) html += '<div class="lbl">あなたへの確認（挙手中）</div>' + s.qs.map(function(q){ return '<div class="qbox"><b>'+esc(q.cat)+'</b>：'+esc(q.text)+'</div>'; }).join('');
-      html += '<div class="lbl">担当タスク '+s.tasks.length+'件</div>' + taskList(s.tasks, true);
+      if (s.qs.length) html += '<div class="lbl">あなたへの確認</div><div class="pn-list">' + s.qs.map(function(q){ return '<div class="qbox"><b>'+esc(q.cat)+'</b><br>'+esc(q.text)+'</div>'; }).join('') + '</div>';
+      html += '<div class="lbl">担当タスク（工程ごと・タップで編集）</div>' + taskList(s.tasks, true);
       html += '<div class="row"><button class="btn" id="team-close">チームをしまう</button></div>';
     } else {
       var d = s.dept;
@@ -1831,12 +1877,13 @@ var Office = (function(){
       html += evList('今日の予定', s.today) + evList('近い締切', s.soon.filter(function(e){ return s.today.indexOf(e) < 0; }));
       if (s.qs.length) html += '<div class="lbl">あなたへの確認（挙手中）</div>' + s.qs.map(function(q){ return '<div class="qbox">'+esc(q.text)+'</div>'; }).join('');
       if (s.products.length) { var PJ = {hot:'今週やる', now:'次の作業', wait:'待ち'}; html += '<div class="lbl">担当している品番</div><ul>'+s.products.map(function(a){ return '<li><span class="code">'+esc(a.code)+'</span> '+esc(a.name)+' <span class="meta">（'+esc(a.stage)+'・'+PJ[a.state]+'）</span></li>'; }).join('')+'</ul>'; }
-      html += '<div class="lbl">担当タスク '+s.tasks.length+'件</div>' + taskList(s.tasks, false);
+      html += '<div class="lbl">担当タスク '+s.tasks.length+'件（タップで編集）</div>' + taskList(s.tasks, false);
       html += '<div class="lbl">道具（AI・ツール）</div><div class="tools">'+(d.tools || []).map(function(t){ return '<span>'+esc(t)+'</span>'; }).join('')+'</div>';
     }
     panelEl.innerHTML = html; panelEl.hidden = false;
     renderStrip();
     panelEl.querySelector('.x').onclick = function(){ select(null); };
+    panelEl.querySelectorAll('[data-ptid]').forEach(function(b){ b.onclick = function(){ var t = DATA.pending.filter(function(x){ return x.id === b.dataset.ptid; })[0]; if (t) taskSheet(t); }; });
     var tc = panelEl.querySelector('#team-close');
     if (tc) tc.onclick = function(){ collapse(); select(null); update(); };
   }
