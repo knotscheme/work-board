@@ -1265,9 +1265,19 @@ function deptStates(owner, depts){
 }
 
 /* ---------- 読み込み ---------- */
-var LAST_SIG = '', LOADING = false;
+var LAST_SIG = '', LOADING = false, BUILD = '0e9bf160bb9b';
+// 新しい版が公開されていたら、キャッシュを避けて読み直す
+async function checkVersion(){
+  if (BUILD.indexOf('BUILD') >= 0) return;
+  try {
+    var r = await fetch('version.txt?t=' + Date.now(), {cache:'no-store'});
+    var v = r.ok ? (await r.text()).trim() : '';
+    if (v && v !== BUILD && /^[0-9a-f]{12}$/.test(v)) location.replace(location.pathname + '?v=' + v + location.hash);
+  } catch(e) {}
+}
 async function load(force){
   if (LOADING) return; LOADING = true;
+  checkVersion();
   try { await loadInner(force); } finally { LOADING = false; }
 }
 async function loadInner(force){
