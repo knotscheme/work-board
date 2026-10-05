@@ -96,6 +96,8 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
 .whofilter button,.whopick button{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:4px 12px;font-size:.8rem;font-weight:700;color:var(--muted)}
 .whofilter button[aria-pressed="true"],.whopick button[aria-pressed="true"]{background:var(--done);border-color:var(--done);color:var(--surface)}
 .whopick{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:6px}
+.rep-on{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.rep-on .btn{margin-left:auto;padding:5px 12px;font-size:.8rem}
 .tag.rec{background:var(--accent-soft);color:var(--accent);border:1px dashed var(--accent)}
 .ev.virtual{opacity:.6;border-left-style:dashed;cursor:default}
 .seg.wide.rc3{grid-template-columns:repeat(3,1fr)}
@@ -576,11 +578,12 @@ function taskSheet(t){
       '<label class="fld"><span>工程</span><select id="tk-cat">'+ORDER.map(function(c){ return '<option'+(c === cur.category ? ' selected' : '')+'>'+esc(c)+'</option>'; }).join('')+'</select></label>' +
       whoField(cur.assignee) +
       '<div class="fld"><span>優先度</span><div class="seg wide" id="tk-label">'+LABELS.map(function(l){ return '<button type="button" data-v="'+l+'"'+(l === cur.label ? ' aria-pressed="true"' : '')+'>'+l+'</button>'; }).join('')+'</div></div>' +
+      repeatField(t) +
       '<div class="row"><button class="btn primary" id="tk-save">保存</button><button class="btn" data-close>やめる</button>' +
       (t ? (confirmDone ? '<button class="btn ok" id="tk-done2">完了にする（確定）</button>' : '<button class="btn ok" id="tk-done">完了にする</button>') + '<button class="btn danger push-right" id="tk-del">削除</button>' : '') + '</div>' +
       '<span class="status" id="tk-status"></span><p class="meta" style="margin:0">変更は秘書が取り込むとタスクリスト（tasklist.md）にも反映されます。</p>',
       function(sh){
-        var label = cur.label, getWho = bindWho(sh, cur.assignee);
+        var label = cur.label, getWho = bindWho(sh, cur.assignee), getRep = bindRepeat(sh, t);
         sh.querySelectorAll('#tk-label button').forEach(function(b){ b.onclick = function(){ label = b.dataset.v; sh.querySelectorAll('#tk-label button').forEach(function(x){ x.setAttribute('aria-pressed', x === b); }); }; });
         if (!t) sh.querySelector('#tk-content').focus();
         function collect(){ return {content: sh.querySelector('#tk-content').value.trim(), category: sh.querySelector('#tk-cat').value, label: label, assignee: getWho()}; }
@@ -592,24 +595,37 @@ function taskSheet(t){
         sh.querySelector('#tk-save').onclick = function(){
           var v = collect();
           if (!v.content) { st(sh, '内容を入れてください', true); return; }
-          if (!t) return commit({op:'add', id:newId(), content:v.content, category:v.category, label:v.label, assignee:v.assignee || null}, sh);
+          var rule = getRep();
+          if (!t) return commit({op:'add', id:newId(), content:v.content, category:v.category, label:v.label, assignee:v.assignee || null}, sh, rule, v);
           var op = {op:'edit', id:t.id};
           if (v.content !== t.content) op.content = v.content;
           if (v.category !== t.category) op.category = v.category;
           if (v.label !== t.label) op.label = v.label;
           if ((v.assignee || '') !== (t.assignee || '')) op.assignee = v.assignee || null;
-          if (Object.keys(op).length === 2) { Sheet.close(); return; }
-          commit(op, sh);
+          if (Object.keys(op).length === 2 && !rule) { Sheet.close(); return; }
+          commit(Object.keys(op).length === 2 ? null : op, sh, rule, v);
         };
       });
   }
-  async function commit(op, sh){
-    op.opId = newId(); op.at = new Date().toISOString();
+  async function commit(op, sh, rule, v){
     st(sh, '保存中…');
     try {
-      await ghUpdate('taskops.enc.json', function(d){ return {ops: ((d && d.ops) || []).concat([op])}; }, 'task ' + op.op);
-      DATA.webOps = (DATA.webOps || []).concat([op]);
-      DATA.pending = mergeOps(DATA.pending, [op]);
+      if (op) {
+        op.opId = newId(); op.at = new Date().toISOString();
+        await ghUpdate('taskops.enc.json', function(d){ return {ops: ((d && d.ops) || []).concat([op])}; }, 'task ' + op.op);
+        DATA.webOps = (DATA.webOps || []).concat([op]);
+        DATA.pending = mergeOps(DATA.pending, [op]);
+      }
+      if (rule) {
+        var tid = t ? t.id : op.id;
+        var item = {id: 'rec-' + newId(), title: v.content.replace(/（[^（）]*(まで|今週中)[^（）]*）\s*$/, ''), category: v.category, label: v.label, rule: rule.rule, adoptId: tid};
+        if (rule.rule.type === 'monthly') item.lead = 7;
+        if (v.assignee) item.assignee = v.assignee;
+        var res = await ghUpdate('recurring.enc.json', function(d){ return {recurring: JSON.parse(JSON.stringify((d && d.recurring) || (DATA.board.recurring || []))).concat([item]), updated: new Date().toISOString()}; }, 'add recurring');
+        DATA.board.recurring = res.recurring;
+        DATA.pending.forEach(function(x){ if (x.id === tid) x.rec = recRuleLabel(item); });
+        toast('定期タスクにしました（' + recRuleLabel(item) + '）。このタスクが今回分になります');
+      }
       Sheet.close(); renderBoard(); Office.update();
     } catch(err) { st(sh, err.message, true); }
   }
@@ -785,6 +801,32 @@ function recurringOn(key){
     return !DATA.pending.concat(DATA.done || []).some(function(t){ return t.rk === rk; });
   });
 }
+// タスクのシートに出す「くり返し」欄。すでに定期なら設定へのボタンを出す
+function repeatField(t){
+  if (t && t.rk) {
+    var recs = (DATA.board && DATA.board.recurring) || [], id = t.rk.split(':')[0], i = recs.findIndex(function(r){ return r.id === id; });
+    return '<div class="fld"><span>くり返し</span><div class="rep-on"><span class="tag rec">'+esc(t.rec || '定期')+'</span><span class="meta">定期タスクの今回分です</span>' +
+      (i >= 0 ? '<button type="button" class="btn" id="tk-rec-open" data-i="'+i+'">定期の設定を開く</button>' : '') + '</div></div>';
+  }
+  return '<div class="fld"><span>くり返し</span><div class="row2"><select id="tk-rep">' +
+    '<option value="">なし</option><option value="monthly">毎月（締切日を指定）</option><option value="weekly">毎週（曜日自由）</option><option value="weekday">毎週（曜日指定）</option></select>' +
+    '<select id="tk-rep-day" hidden>'+Array.from({length:28}, function(_, i){ return '<option value="'+(i+1)+'"'+(i === 9 ? ' selected' : '')+'>毎月'+(i+1)+'日</option>'; }).join('')+'</select>' +
+    '<select id="tk-rep-dow" hidden>'+[1,2,3,4,5].map(function(n){ return '<option value="'+n+'">毎週'+W[n]+'曜</option>'; }).join('')+'</select></div></div>';
+}
+function bindRepeat(sh, t){
+  var open = sh.querySelector('#tk-rec-open');
+  if (open) open.onclick = function(){ var i = +open.dataset.i; Sheet.close(); recurringSheet(i); };
+  var sel = sh.querySelector('#tk-rep'); if (!sel) return function(){ return null; };
+  var day = sh.querySelector('#tk-rep-day'), dow = sh.querySelector('#tk-rep-dow');
+  sel.onchange = function(){ day.hidden = sel.value !== 'monthly'; dow.hidden = sel.value !== 'weekday'; };
+  return function(){
+    if (sel.value === 'monthly') return {rule: {type:'monthly', day: +day.value}};
+    if (sel.value === 'weekly') return {rule: {type:'weekly'}};
+    if (sel.value === 'weekday') return {rule: {type:'weekly', dow: +dow.value}};
+    return null;
+  };
+}
+
 function recurringCard(){
   var recs = (DATA.board && DATA.board.recurring) || [];
   return '<div class="card"><h3>定期タスク<span class="mono">'+recs.length+'件</span></h3>' +
