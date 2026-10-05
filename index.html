@@ -126,6 +126,9 @@ footer{color:var(--muted);font-size:.78rem}
 .nm.stale{border-color:var(--urgent);animation:blink 1.1s steps(2,start) infinite}
 .nm.stale .b{background:var(--urgent);color:var(--surface)}
 .nm.idle{opacity:.75}
+.nm.today{border:2px solid #E8A800}
+.nm .b.now{background:#E8A800;color:#1D2127}
+.chip.today{color:#9A6A0B;border-color:#E8A800;background:#FFF4D1}
 .nm.sel{outline:2px solid var(--accent)}
 @keyframes blink{50%{border-color:var(--line)}}
 .bubble{position:absolute;transform:translate(-50%,-100%);max-width:260px;font-size:.78rem;background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:10px;padding:6px 10px;box-shadow:0 2px 8px rgb(0 0 0 / .15);pointer-events:none;transition:opacity .3s}
@@ -242,14 +245,28 @@ async function encryptJSON(obj){
 function fail(text){ app.innerHTML = '<div class="msg"><h1 style="font-size:1.2rem">ボードを開けません</h1><p class="muted">'+text+'</p></div>'; }
 
 /* ---------- 部署の状態 ---------- */
+function dayKey(offset){ var d = new Date(); d.setDate(d.getDate() + (offset||0)); return ymd(d); }
+function eventCat(e){
+  if (e.cat) return e.cat;
+  var t = e.task && DATA.pending.filter(function(x){ return x.id === e.task; })[0];
+  return t ? t.category : null;
+}
+function eventsOn(key){ return ((DATA.board && DATA.board.events) || []).filter(function(e){ return e.date === key; }); }
+function isDutyDay(key){ return eventsOn(key).some(function(e){ return e.kind === 'duty'; }); }
+
 function deptStates(){
-  var b = DATA.board || {}, now = Date.now(), out = {};
+  var b = DATA.board || {}, now = Date.now(), out = {}, today = dayKey(0), soonEnd = dayKey(2);
+  var events = b.events || [];
   ((b.org && b.org.depts) || []).forEach(function(d){
     var tasks = DATA.pending.filter(function(t){ return t.category === d.cat; }).sort(function(a,b){ return b.score - a.score; });
     var qs = (b.questions || []).filter(function(q){ return q.cat === d.cat; });
     var stale = tasks.filter(function(t){ return now - new Date(t.recorded) > STALE_DAYS*86400000; });
+    var mine = events.filter(function(e){ return eventCat(e) === d.cat; });
+    var todayEv = mine.filter(function(e){ return e.date === today && e.kind !== 'duty'; });
+    var soon = mine.filter(function(e){ return (e.kind === 'deadline' || e.kind === 'event') && e.date >= today && e.date <= soonEnd; });
     var state = stale.length ? 'stale' : qs.length ? 'decision' : tasks.length ? 'working' : 'idle';
-    out[d.cat] = {dept:d, tasks:tasks, qs:qs, stale:stale, state:state, prio: tasks.some(function(t){ return t.label === '優先' || t.label === '最優先'; })};
+    out[d.cat] = {dept:d, tasks:tasks, qs:qs, stale:stale, state:state, today:todayEv, soon:soon,
+      prio: tasks.some(function(t){ return t.label === '優先' || t.label === '最優先'; })};
   });
   return out;
 }
@@ -370,6 +387,7 @@ function renderBoard(){
 var Office = (function(){
   var root, canvas, labelsEl, hudEl, panelEl, bubbleEl;
   var renderer, scene, camera, raycaster, clock;
+  var hemi, sun;
   var desks = {}, secretary = null, planes = [], running = false, built = false, raf = 0;
   var cam = {az:0, el:0.62, r:20, tx:0, tz:-0.5}, camGoal = null, autoSpin = true;
   var states = {}, selected = null, bubbleIdx = 0, bubbleT = 0, planeT = 0, hudCycle = {};
@@ -379,7 +397,7 @@ var Office = (function(){
 
   function mount(el){
     root = el;
-    el.innerHTML = '<h2>オフィス <small>工程ごとのAI社員。タイピング＝作業中・挙手＝確認待ち・赤点滅＝放置</small></h2>' +
+    el.innerHTML = '<h2>オフィス <small>今日の予定がある社員にスポットライト・締切が近いと汗・挙手＝確認待ち・赤点滅＝放置</small></h2>' +
       '<div class="office" id="office"><canvas id="office-cv" aria-label="オフィスの3D表示"></canvas><div class="labels" id="office-labels"></div>' +
       '<div class="hud" id="office-hud"></div><div class="hint">ドラッグで回転・ホイールで拡大縮小・社員をクリックで詳細</div><div class="panel" id="office-panel" hidden></div></div>';
     canvas = el.querySelector('#office-cv'); labelsEl = el.querySelector('#office-labels');
@@ -450,6 +468,15 @@ var Office = (function(){
     s.scale.set(.45,.45,.45); s.renderOrder = 10; return s;
   }
 
+  function makeDrop(){
+    var c = document.createElement('canvas'); c.width = 64; c.height = 96;
+    var x = c.getContext('2d'); x.fillStyle = '#5AB4F0';
+    x.beginPath(); x.moveTo(32,4); x.bezierCurveTo(32,4,6,46,6,62); x.arc(32,62,26,Math.PI,0,true); x.bezierCurveTo(58,46,32,4,32,4); x.fill();
+    x.fillStyle = 'rgba(255,255,255,.7)'; x.beginPath(); x.arc(22,62,7,0,Math.PI*2); x.fill();
+    var sp = new THREE.Sprite(new THREE.SpriteMaterial({map:new THREE.CanvasTexture(c), transparent:true, depthTest:false}));
+    sp.scale.set(.22,.33,1); sp.renderOrder = 11; return sp;
+  }
+
   function cssColor(n){ var v = cssVar(n); return new THREE.Color(v || '#888'); }
 
   function plant(x,z){
@@ -469,8 +496,8 @@ var Office = (function(){
     camera = new THREE.PerspectiveCamera(38, 1, .1, 200);
     raycaster = new THREE.Raycaster(); clock = new THREE.Clock();
 
-    scene.add(new THREE.HemisphereLight(0xFFFFFF, 0x8A8070, .75));
-    var sun = new THREE.DirectionalLight(0xFFF4E0, .75); sun.position.set(8,18,10); sun.castShadow = true;
+    hemi = new THREE.HemisphereLight(0xFFFFFF, 0x8A8070, .75); scene.add(hemi);
+    sun = new THREE.DirectionalLight(0xFFF4E0, .75); sun.position.set(8,18,10); sun.castShadow = true;
     sun.shadow.mapSize.set(2048,2048); var sc = sun.shadow.camera; sc.left = -18; sc.right = 18; sc.top = 14; sc.bottom = -14; sc.far = 60;
     scene.add(sun);
 
@@ -494,10 +521,13 @@ var Office = (function(){
       var ring = makeRing(); g.add(ring);
       var hand = makeSign('?', '#C98A12'); hand.position.set(.62,2.55,0); g.add(hand);
       var alert = makeSign('!', '#C9431A'); alert.position.set(-.4,2.45,0); g.add(alert);
+      var beam = new THREE.Mesh(new THREE.CylinderGeometry(.45,1.45,5.2,28,1,true), new THREE.MeshBasicMaterial({color:0xFFE6A0, transparent:true, opacity:.2, side:THREE.DoubleSide, depthWrite:false})); beam.position.set(0,2.6,.35); g.add(beam);
+      var spot = new THREE.Mesh(new THREE.CircleGeometry(1.45,40), new THREE.MeshBasicMaterial({color:0xFFE08A, transparent:true, opacity:.35, depthWrite:false})); spot.rotation.x = -Math.PI/2; spot.position.set(0,.025,.35); g.add(spot);
+      var sweat = makeDrop(); sweat.position.set(.34,1.95,.2); g.add(sweat);
       g.traverse(function(o){ o.userData.dept = d.cat; });
       var lbl = document.createElement('div'); lbl.className = 'nm'; lbl.onclick = function(){ select(d.cat, true); };
       labelsEl.appendChild(lbl);
-      desks[d.cat] = {dept:d, group:g, w:wk, d:dk, ring:ring, hand:hand, alert:alert, label:lbl, phase:i*1.7, idx:i};
+      desks[d.cat] = {dept:d, group:g, w:wk, d:dk, ring:ring, hand:hand, alert:alert, beam:beam, spot:spot, sweat:sweat, label:lbl, phase:i*1.7, idx:i};
       // 秘書から各席への線
     });
 
@@ -575,12 +605,16 @@ var Office = (function(){
     if (cat === '__secretary') {
       var org = DATA.board.org.head, sum = summary();
       html += '<h3>'+esc(org.name)+'</h3><span class="state working">全体把握</span><p style="margin:0;font-size:.88rem">'+esc(org.role)+'</p>' +
+        '<div class="lbl">今日・明日の予定</div><ul>'+scheduleLines().map(function(s){ return '<li>'+esc(s)+'</li>'; }).join('')+'</ul>' +
         '<div class="lbl">報告</div><ul>'+sum.map(function(s){ return '<li>'+esc(s)+'</li>'; }).join('')+'</ul>' +
         '<div class="lbl">道具</div><div class="tools">'+org.tools.map(function(t){ return '<span>'+esc(t)+'</span>'; }).join('')+'</div>';
     } else {
       var s = states[cat], d = s.dept;
       html += '<h3>'+esc(d.cat)+'担当</h3><span class="state '+s.state+'">'+STATE_JP[s.state]+'</span>' +
         '<div class="meta mono">Works/'+esc(d.folder)+'/</div>';
+      if (s.today.length) html += '<div class="lbl">今日の予定</div><ul>'+s.today.map(function(e){ return '<li><b>'+(e.time ? esc(e.time)+' ' : '')+esc(e.title)+'</b></li>'; }).join('')+'</ul>';
+      var soonOther = s.soon.filter(function(e){ return s.today.indexOf(e) < 0; });
+      if (soonOther.length) html += '<div class="lbl">近い締切</div><ul>'+soonOther.map(function(e){ return '<li>'+jpDate(e.date+'T00:00:00')+' '+esc(e.title)+'</li>'; }).join('')+'</ul>';
       if (s.qs.length) html += '<div class="lbl">あなたへの確認（挙手中）</div>' + s.qs.map(function(q){ return '<div class="qbox">'+esc(q.text)+'</div>'; }).join('');
       html += '<div class="lbl">担当タスク '+s.tasks.length+'件</div>';
       html += s.tasks.length ? '<ul>'+s.tasks.map(function(t){
@@ -605,8 +639,8 @@ var Office = (function(){
   }
 
   function count(){
-    var c = {stale:0, decision:0, working:0, idle:0};
-    Object.keys(states).forEach(function(k){ c[states[k].state]++; if (states[k].state === 'stale' && states[k].qs.length) c.decision++; });
+    var c = {stale:0, decision:0, working:0, idle:0, today:0};
+    Object.keys(states).forEach(function(k){ c[states[k].state]++; if (states[k].today.length) c.today++; if (states[k].state === 'stale' && states[k].qs.length) c.decision++; });
     return c;
   }
 
@@ -618,23 +652,25 @@ var Office = (function(){
     var accent = cssColor('--accent'), warn = cssColor('--warn'), urgent = cssColor('--urgent'), idle = cssColor('--idle');
     Object.keys(desks).forEach(function(k){
       var dk = desks[k], s = states[k];
-      dk.state = s.state; dk.hasQ = s.qs.length > 0; dk.isStale = s.stale.length > 0;
-      dk.ring.material.color.copy(s.state === 'stale' ? urgent : s.state === 'decision' ? warn : s.state === 'working' ? accent : idle);
+      dk.state = s.state; dk.hasQ = s.qs.length > 0; dk.isStale = s.stale.length > 0; dk.today = s.today.length > 0; dk.soon = s.soon.length > 0;
+      dk.ring.material.color.copy(s.state === 'stale' ? urgent : s.state === 'decision' ? warn : dk.today ? new THREE.Color(0xE8A800) : s.state === 'working' ? accent : idle);
       dk.d.lidMat.emissive.copy(s.tasks.length ? accent : new THREE.Color(0)); dk.d.lidMat.emissiveIntensity = s.tasks.length ? .6 : 0;
       dk.d.paper.visible = s.tasks.length > 0;
       dk.line.material.opacity = s.tasks.length ? .6 : .15;
-      dk.label.className = 'nm ' + s.state + (selected === k ? ' sel' : '');
-      dk.label.innerHTML = esc(k) + (s.tasks.length ? '<span class="b">'+s.tasks.length+'</span>' : '');
+      dk.label.className = 'nm ' + s.state + (dk.today ? ' today' : '') + (selected === k ? ' sel' : '');
+      dk.label.innerHTML = (dk.today ? '<span class="b now">今日</span>' : '') + esc(k) + (s.tasks.length ? '<span class="b">'+s.tasks.length+'</span>' : '');
     });
+    var duty = isDutyDay(dayKey(0));
+    hemi.intensity = duty ? .38 : .75; sun.intensity = duty ? .3 : .75;
     var c = count();
     hudEl.innerHTML =
-      chip('stale','放置',c.stale) + chip('decision','確認待ち',c.decision) + chip('working','作業中',c.working) +
+      chip('today','今日の予定',c.today) + chip('stale','放置',c.stale) + chip('decision','確認待ち',c.decision) + chip('working','作業中',c.working) +
       '<button class="chip" data-s="__secretary">秘書の報告</button>';
     hudEl.querySelectorAll('button').forEach(function(b){
       b.onclick = function(){
         var s = b.dataset.s;
         if (s === '__secretary') return select('__secretary', true);
-        var list = Object.keys(states).filter(function(k){ return s === 'decision' ? states[k].qs.length : states[k].state === s; });
+        var list = Object.keys(states).filter(function(k){ return s === 'decision' ? states[k].qs.length : s === 'today' ? states[k].today.length : states[k].state === s; });
         if (!list.length) return;
         hudCycle[s] = ((hudCycle[s] == null ? -1 : hudCycle[s]) + 1) % list.length;
         select(list[hudCycle[s]], true);
@@ -645,8 +681,20 @@ var Office = (function(){
   function chip(s, l, n){ return '<button class="chip '+s+'" data-s="'+s+'"'+(n?'':' disabled')+'>'+l+' <span class="mono">'+n+'</span></button>'; }
 
   /* ---- アニメーション ---- */
+  function scheduleLines(){
+    var out = [], labels = ['今日', '明日'];
+    [0,1].forEach(function(off){
+      var key = dayKey(off), evs = eventsOn(key);
+      if (isDutyDay(key)) out.push(labels[off]+'は担当業務の日です。');
+      var work = evs.filter(function(e){ return e.kind !== 'duty'; }).sort(function(a,b){ return (a.time||'99').localeCompare(b.time||'99'); });
+      if (work.length) out.push(labels[off]+'は '+work.map(function(e){ return (e.time ? e.time+' ' : '')+e.title; }).join(' → ')+' です。');
+      else if (!off && !isDutyDay(key)) out.push('今日は決まった予定がありません。優先度の高いタスクから進めましょう。');
+    });
+    return out;
+  }
+
   function bubbleLines(){
-    var lines = summary().slice(1);
+    var lines = scheduleLines().concat(summary().slice(1));
     Object.keys(states).forEach(function(k){ if (states[k].qs.length) lines.push(k+'担当が確認を待っています。'); });
     lines.push('タスクは「秘書に共有して」で受け付けます。');
     return lines;
@@ -691,8 +739,8 @@ var Office = (function(){
         L.rotation.x = -.15; R.rotation.x = -.15 - (Math.sin(p*.4) > .85 ? 1.6 : 0)*mo; // ときどきコーヒー
         L.rotation.z = R.rotation.z = 0;
       } else {
-        var speed = st === 'stale' ? 4 : 14;
-        w.torso.rotation.x = .08 + Math.sin(p*2)*.01*mo; w.head.rotation.x = .18 + Math.sin(p*3)*.03*mo; w.head.rotation.y = 0;
+        var speed = dk.today ? 17 : dk.soon ? 13 : 5;
+        w.torso.rotation.x = (dk.today ? .16 : .08) + Math.sin(p*2)*.01*mo; w.head.rotation.x = .18 + Math.sin(p*3)*.03*mo; w.head.rotation.y = dk.soon ? Math.sin(p*9)*.12*mo : 0;
         L.rotation.x = -1.15 + Math.sin(p*speed)*.12*mo;
         R.rotation.x = -1.15 + Math.sin(p*speed + 1.6)*.12*mo;
         L.rotation.z = -.15; R.rotation.z = .15;
@@ -702,6 +750,8 @@ var Office = (function(){
         w.head.rotation.y = Math.sin(p*1.3)*.25*mo; w.head.rotation.x = -.15;
       }
       dk.hand.visible = dk.hasQ; dk.hand.position.y = 2.55 + Math.sin(p*4)*.06*mo;
+      dk.beam.visible = dk.spot.visible = !!dk.today; dk.beam.material.opacity = .16 + Math.sin(t*2 + dk.phase)*.05*mo;
+      dk.sweat.visible = !!dk.soon; if (dk.soon) { var sw = (t*.7 + dk.phase) % 1; dk.sweat.position.y = 1.95 - sw*.35*mo; dk.sweat.material.opacity = 1 - sw*.8*mo; }
       dk.alert.visible = dk.isStale; dk.alert.material.opacity = mo ? (Math.sin(t*7) > 0 ? 1 : .25) : 1;
       if (st === 'stale') { var on = mo ? (Math.sin(t*7) > 0) : true; w.shirtMat.emissive.setHex(on ? 0x8A1A00 : 0); dk.ring.material.opacity = on ? .85 : .25; }
       else { w.shirtMat.emissive.setHex(0); dk.ring.material.opacity = .5; }
