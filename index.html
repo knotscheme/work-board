@@ -70,6 +70,8 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
 .day .dn{font-family:var(--mono);font-size:.8rem;color:var(--muted);display:flex;justify-content:space-between}
 .day.today .dn b{color:var(--warn)}
 .day.sun .dn{color:var(--urgent)}
+.day.wkend{background:var(--bg)}
+.day .dn .off{font-size:.72rem;font-weight:700}
 .ev{font-size:.78rem;line-height:1.45;border-radius:5px;padding:4px 6px;background:var(--accent-soft);border-left:3px solid var(--accent)}
 .ev.deadline{background:var(--warn-soft);border-left-color:var(--warn)}
 .ev.event{background:var(--urgent-soft);border-left-color:var(--urgent);font-weight:700}
@@ -406,7 +408,7 @@ function renderBoard(){
     var day = new Date(start); day.setDate(start.getDate()+i);
     var key = ymd(day);
     var evs = events.filter(function(e){ return e.date === key; }).sort(function(a,b){ return (a.time||'99').localeCompare(b.time||'99'); });
-    cal += '<div class="day'+(key === today ? ' today' : key < today ? ' past' : '')+(day.getDay()===0 ? ' sun' : '')+(evs.length ? '' : ' empty')+'"><div class="dn"><b>'+(day.getMonth()+1)+'/'+day.getDate()+'（'+W[day.getDay()]+'）</b>'+(key===today?'<span>今日</span>':'')+'</div>';
+    cal += '<div class="day'+(key === today ? ' today' : key < today ? ' past' : '')+(day.getDay()===0 ? ' sun' : '')+(day.getDay()%6===0 ? ' wkend' : '')+(evs.length ? '' : ' empty')+'"><div class="dn"><b>'+(day.getMonth()+1)+'/'+day.getDate()+'（'+W[day.getDay()]+'）</b>'+(key===today?'<span>今日</span>':(day.getDay()%6===0?'<span class="off">休み</span>':''))+'</div>';
     evs.forEach(function(e){ cal += '<div class="ev '+esc(e.kind)+'">'+(e.time?'<span class="tm">'+esc(e.time)+'</span>':'')+esc(e.title)+'</div>'; });
     cal += '</div>';
   }
