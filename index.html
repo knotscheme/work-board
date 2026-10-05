@@ -305,6 +305,7 @@ textarea{min-height:140px;resize:vertical;line-height:1.6}
 .mcats span{font-size:.7rem;font-weight:700;background:var(--accent-soft);color:var(--accent);border-radius:999px;padding:0 8px}
 .status{font-size:.8rem;color:var(--muted)}
 .status.err{color:var(--urgent)}
+.tokbox{display:grid;gap:8px;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 14px}
 .setup{background:var(--warn-soft);border-radius:10px;padding:14px 16px;display:grid;gap:8px;font-size:.86rem}
 .setup ol{margin:0;padding-left:1.3em}
 
@@ -380,6 +381,25 @@ async function encryptJSON(obj){
   return JSON.stringify({v:1, iv: toB64(iv), ct: toB64(ct)});
 }
 function ghToken(){ return ls('wb_token'); }
+// 共有トークン：鍵付きURLで開いた端末なら設定なしで書き込めるよう、トークンをURLの鍵で暗号化して置いておく
+async function loadSharedToken(){
+  if (ghToken()) return;
+  try {
+    var r = await fetch('token.enc.json?t=' + Date.now(), {cache:'no-store'});
+    if (!r.ok) return;
+    var tk = await decryptJSON(await r.json());
+    if (tk && tk.token) { ls('wb_token', tk.token); ls('wb_token_shared', '1'); }
+  } catch(e) {}
+}
+async function shareToken(){
+  await ghUpdate('token.enc.json', function(){ return {token: ghToken(), updated: new Date().toISOString()}; }, 'share token');
+}
+async function unshareToken(){
+  var cur = await ghRead('token.enc.json');
+  if (!cur.sha) return;
+  var r = await ghFile('token.enc.json', 'DELETE', {message: 'unshare token', sha: cur.sha});
+  if (!r.ok) throw new Error('共有の解除に失敗しました（' + r.status + '）。');
+}
 function ghFile(file, method, body){
   return fetch('https://api.github.com/repos/'+REPO+'/contents/'+file, {
     method: method, cache:'no-store',
@@ -950,6 +970,7 @@ async function load(){
   } catch(e) {
     return fail('鍵が正しくないか、データを読み込めませんでした。URLの末尾まで正しくコピーされているか確認してください。');
   }
+  await loadSharedToken();
   try {
     var pipe = await readWeb('pipeline.enc.json');
     if (pipe && pipe.pipeline) { DATA.board.pipeline = pipe.pipeline; DATA.pipeSyncPending = true; }
@@ -2055,7 +2076,10 @@ var Memo = (function(){
           '<div class="row"><button class="btn primary" id="memo-save"'+(tk?'':' disabled')+'>'+(editing ? '更新' : '保存')+'</button>' +
           (editing ? '<button class="btn" id="memo-cancel">やめる</button>' : '') +
           '<span id="memo-status" class="status"></span></div></div>' +
-        (tk ? '<div class="row meta">書き込み：設定済み <button class="btn" id="memo-token-clear" style="padding:2px 10px;font-size:.75rem">この端末の設定を解除</button></div>' : '') +
+        (tk ? '<div class="tokbox"><div class="row meta">書き込み：設定済み'+(ls('wb_token_shared') ? '（共有トークンを使用中）' : '')+'</div>' +
+          '<div class="row"><button class="btn" id="tok-share">この端末のトークンを全端末で使う</button><button class="btn" id="tok-unshare">全端末での共有をやめる</button></div>' +
+          '<p class="meta" style="margin:0">「全端末で使う」を押すと、鍵付きURLで開いた端末は設定なしで書き込めます（URLを知っている人は書き込みもできるようになります）。</p>' +
+          '<div class="row"><button class="btn" id="memo-token-clear" style="padding:2px 10px;font-size:.75rem">この端末の設定を解除</button><span class="status" id="tok-status"></span></div></div>' : '') +
       '</div><div class="sec">' +
         '<input type="search" id="memo-q" placeholder="メモを検索" value="'+esc(query)+'">' +
         '<div class="mfilter"><button data-c=""'+(filterCat ? '' : ' aria-pressed="true"')+'>すべて <span class="mono">'+hit.length+'</span></button>' +
@@ -2077,7 +2101,22 @@ var Memo = (function(){
     var ts = root.querySelector('#memo-token-save');
     if (ts) ts.onclick = function(){ var v = root.querySelector('#memo-token').value.trim(); if (!v) return; ls(TOKEN_KEY, v); load(); };
     var tc = root.querySelector('#memo-token-clear');
-    if (tc) tc.onclick = function(){ ls(TOKEN_KEY, null); draw(); };
+    if (tc) tc.onclick = function(){ ls(TOKEN_KEY, null); ls('wb_token_shared', null); draw(); };
+    var ts2 = root.querySelector('#tok-share'), tu = root.querySelector('#tok-unshare'), tst = root.querySelector('#tok-status');
+    if (ts2) ts2.onclick = function(){
+      confirmModal('全端末で使えるようにしますか？', 'このトークンを、URLの鍵で暗号化してボードに置きます。鍵付きURLを知っている人は、設定なしで書き込めるようになります。', '全端末で使う', async function(){
+        tst.textContent = '保存中…'; tst.className = 'status';
+        try { await shareToken(); tst.textContent = ''; toast('全端末で使えるようにしました'); }
+        catch(err) { tst.textContent = err.message; tst.className = 'status err'; }
+      });
+    };
+    if (tu) tu.onclick = function(){
+      confirmModal('全端末での共有をやめますか？', 'ボードに置いた暗号化トークンを消します。ほかの端末は、次に開いたときから書き込めなくなります（この端末はそのまま使えます）。', '共有をやめる', async function(){
+        tst.textContent = '処理中…'; tst.className = 'status';
+        try { await unshareToken(); tst.textContent = ''; toast('共有をやめました'); }
+        catch(err) { tst.textContent = err.message; tst.className = 'status err'; }
+      });
+    };
     var cancel = root.querySelector('#memo-cancel');
     if (cancel) cancel.onclick = function(){ editing = null; selCats = []; draw(); };
     root.querySelector('#memo-save').onclick = async function(){
