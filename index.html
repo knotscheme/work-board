@@ -892,9 +892,22 @@ var Office = (function(){
     var headG = new THREE.Group(); headG.position.y = .92; torso.add(headG);
     var head = new THREE.Mesh(new THREE.SphereGeometry(.27,20,16), skin); head.castShadow = true; headG.add(head);
     var hairM = new THREE.Mesh(new THREE.SphereGeometry(.285,20,12,0,Math.PI*2,0,Math.PI*.55), hair); hairM.rotation.x = -.35; hairM.position.z = -.02; headG.add(hairM);
-    if (opts.female) { // ロングヘア（肩まで）と前髪
-      var longH = new THREE.Mesh(new THREE.SphereGeometry(.3,20,14), hair); longH.scale.set(1.02,1.35,.85); longH.position.set(0,-.12,-.08); longH.castShadow = true; headG.add(longH);
-      [-1,1].forEach(function(sd){ var side = new THREE.Mesh(new THREE.SphereGeometry(.11,10,8), hair); side.scale.set(.8,2.1,.9); side.position.set(sd*.24,-.14,.06); headG.add(side); });
+    // 髪型・帽子
+    var st = opts.style;
+    if (st === 'medium') { // ミディアムロング（肩につくくらい）
+      var mh = new THREE.Mesh(new THREE.SphereGeometry(.3,20,14), hair); mh.scale.set(1.04,1.2,.86); mh.position.set(0,-.08,-.08); mh.castShadow = true; headG.add(mh);
+      [-1,1].forEach(function(sd){ var side = new THREE.Mesh(new THREE.SphereGeometry(.11,10,8), hair); side.scale.set(.8,1.8,.9); side.position.set(sd*.24,-.1,.06); headG.add(side); });
+    } else if (st === 'ponytail') { // ポニーテール
+      var knot = new THREE.Mesh(new THREE.SphereGeometry(.08,10,8), hair); knot.position.set(0,.12,-.27); headG.add(knot);
+      var tail = new THREE.Mesh(new THREE.SphereGeometry(.1,12,10), hair); tail.scale.set(.85,2.3,.85); tail.position.set(0,-.08,-.34); tail.rotation.x = .25; tail.castShadow = true; headG.add(tail);
+    } else if (st === 'longish') { // 少し長め（襟足と耳が隠れるくらい）
+      var nape = new THREE.Mesh(new THREE.SphereGeometry(.29,18,12), hair); nape.scale.set(1.02,1.0,.9); nape.position.set(0,-.06,-.07); headG.add(nape);
+      [-1,1].forEach(function(sd){ var side = new THREE.Mesh(new THREE.SphereGeometry(.09,10,8), hair); side.scale.set(.8,1.4,.9); side.position.set(sd*.25,-.03,.03); headG.add(side); });
+    }
+    if (opts.cap != null) { // キャップ
+      var capM = mat(opts.cap);
+      var crown = new THREE.Mesh(new THREE.SphereGeometry(.295,20,12,0,Math.PI*2,0,Math.PI*.5), capM); crown.position.y = .03; crown.rotation.x = -.12; crown.castShadow = true; headG.add(crown);
+      var brim = new THREE.Mesh(new THREE.CylinderGeometry(.2,.2,.025,20,1,false,-Math.PI/2,Math.PI), capM); brim.scale.set(1,1,1.25); brim.position.set(0,.06,.2); brim.rotation.x = .1; headG.add(brim);
     }
     var eyeM = mat(0x1A1A1A);
     [-.09,.09].forEach(function(x){ var e = new THREE.Mesh(new THREE.SphereGeometry(.032,8,8), eyeM); e.position.set(x,.02,.25); headG.add(e); });
@@ -965,7 +978,13 @@ var Office = (function(){
   var PERSON_SHIRT = [0x2E4C88, 0x6B4E9B, 0x2F7D4F, 0xA6512E, 0x3E6E8E];
   var SLOT = [-2.5, -7.5, 2.5, 7.5, 12.5];  // 左から 藤田・白川・佐々木・鳥居（白川を中央寄りに）
   var teamOwner = null, teamKeys = [], hintEl = null;
-  var LOOK = {'白川':{hair:0x141414}, '鳥居':{hair:0xE8C25A}, '藤田':{female:true, hair:0x5A3B22}, '佐々木':{female:true, hair:0x2B2118}};
+  var LOOK = {
+    '佐藤':{hair:0x3B2A20, style:'longish', shirt:0xB8AC9C},   // 少し長めの髪・グレージュの服
+    '白川':{hair:0x141414},                                   // 黒髪
+    '鳥居':{hair:0xE8C25A, cap:0x161616},                     // 金髪・黒のキャップ
+    '藤田':{hair:0x141414, style:'medium'},                   // 黒髪ミディアムロング
+    '佐々木':{hair:0x2B2118, style:'ponytail'}                // ポニーテール
+  };
 
   function orgInfo(){ var o = (DATA.board && DATA.board.org) || {}; return {boss: o.boss || '佐藤', staff: o.staff || [], depts: o.depts || []}; }
   function teamDepts(owner){
@@ -1021,7 +1040,7 @@ var Office = (function(){
 
     var o = orgInfo();
     var dais = box(6,.4,3.6, mat(0x8C7A66)); dais.position.set(0,.2,-8.9); scene.add(dais);
-    var bossU = addUnit('@'+o.boss, o.boss, 2, 0, -9.6, .4, {shirt: PERSON_SHIRT[0], big:true, person:true});
+    var bossU = addUnit('@'+o.boss, o.boss, 2, 0, -9.6, .4, Object.assign({shirt: PERSON_SHIRT[0], big:true, person:true}, LOOK[o.boss] || {}));
     bossU.person = o.boss; bossU.isBoss = true;
     o.staff.forEach(function(n, i){
       var u = addUnit('@'+n, n, i+3, SLOT[i] !== undefined ? SLOT[i] : -12 + i*5, -5.6, 0, Object.assign({shirt: PERSON_SHIRT[(i+1) % PERSON_SHIRT.length], headset: n === '白川', person:true}, LOOK[n] || {}));
