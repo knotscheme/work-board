@@ -1413,7 +1413,7 @@ function deptStates(owner, depts){
 }
 
 /* ---------- 読み込み ---------- */
-var LAST_SIG = '', LOADING = false, BUILD = '87ee2b47513c';
+var LAST_SIG = '', LOADING = false, BUILD = '884f9159ef94';
 // 新しい版が公開されていたら、キャッシュを避けて読み直す
 async function checkVersion(){
   if (BUILD.indexOf('BUILD') >= 0) return;
@@ -1827,7 +1827,7 @@ var Office = (function(){
     var bossU = addUnit('@'+o.boss, o.boss, 2, 0, -9.6, .4, Object.assign({shirt: PERSON_SHIRT[0], big:true, person:true}, LOOK[o.boss] || {}));
     bossU.person = o.boss; bossU.isBoss = true;
     o.staff.forEach(function(n, i){
-      var u = addUnit('@'+n, n, i+3, SLOT[i] !== undefined ? SLOT[i] : -12 + i*5, -5.6, 0, Object.assign({shirt: PERSON_SHIRT[(i+1) % PERSON_SHIRT.length], headset: n === '白川', person:true}, LOOK[n] || {}));
+      var u = addUnit('@'+n, n, i+3, SLOT[i] !== undefined ? SLOT[i] : -12 + i*5, -5.6, 0, Object.assign({shirt: PERSON_SHIRT[(i+1) % PERSON_SHIRT.length], headset: false, person:true}, LOOK[n] || {}));
       u.person = n; u.line = link(bossU, u, cssColor('--warn'), .7);
     });
     secretary = desks['@白川'] || desks['@'+o.staff[0]] || bossU;
