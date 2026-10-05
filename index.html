@@ -825,7 +825,8 @@ function sameEv(a, b){ return a.date === b.date && a.title === b.title && a.kind
 function eventSheet(orig, date){
   if (!ghToken()) return needToken();
   var e = orig || {date: date, kind: 'plan', title: ''}, confirmDel = false;
-  var taskOpts = '<option value="">（なし）</option>' + DATA.pending.map(function(t){ return '<option value="'+esc(t.id)+'"'+(t.id === e.task ? ' selected' : '')+'>'+esc(t.content.slice(0,40))+'</option>'; }).join('');
+  var linkedDone = e.task && !DATA.pending.some(function(t){ return t.id === e.task; }) ? (DATA.done || []).filter(function(t){ return t.id === e.task; }) : [];
+  var taskOpts = '<option value="">（なし）</option>' + DATA.pending.concat(linkedDone).map(function(t){ return '<option value="'+esc(t.id)+'"'+(t.id === e.task ? ' selected' : '')+'>'+(t.done ? '［完了］' : '')+esc(t.content.slice(0,40))+'</option>'; }).join('');
   function draw(){
     Sheet.open(
       '<h3>'+(orig ? '予定を編集' : '予定を追加')+'</h3>' +
@@ -1337,11 +1338,29 @@ function todayHtml(){
     '<div class="td-grid">'+cards+'</div></section>';
 }
 // 今日の画面は見るだけ。タップでタスク（ひも付きがなければ予定）を開き、その中で完了や編集をする
+// 完了済みタスクの画面：内容と完了日、未完了に戻す／予定を編集
+function doneSheet(t, ev){
+  Sheet.open('<h3>完了済みのタスク</h3>' +
+    '<div class="tagrow"><span class="tag" style="background:var(--done-soft);color:var(--done)">✓ 完了 '+(t.done ? jpDate(t.done) : '')+'</span>'+(t.assignee ? whoTag(t.assignee) : '')+'<span class="tag cat">'+esc(t.category)+'</span></div>' +
+    '<p style="margin:0;font-size:.95rem">'+esc(t.content)+'</p>' +
+    '<div class="row"><button class="btn ok" id="dn-reopen">未完了に戻す</button>'+(ev ? '<button class="btn" id="dn-ev">予定を編集</button>' : '')+'<button class="btn push-right" data-close>閉じる</button></div>',
+    function(sh){
+      sh.querySelector('#dn-reopen').onclick = function(){
+        confirmModal('未完了に戻しますか？', '「'+t.content.slice(0,50)+'」を未完了に戻します。完了ログからも外れます。', '未完了に戻す', function(){ Sheet.close(); reopenTask(t.id); });
+      };
+      var e2 = sh.querySelector('#dn-ev'); if (e2) e2.onclick = function(){ Sheet.close(); eventSheet(ev); };
+    });
+}
+
 function bindToday(vb){
   vb.querySelectorAll('.td-main[data-ei]').forEach(function(b){
     b.onclick = function(){
+      var ev = DATA.board.events[+b.dataset.ei];
       var t = b.dataset.tk && DATA.pending.filter(function(x){ return x.id === b.dataset.tk; })[0];
-      if (t) taskSheet(t); else eventSheet(DATA.board.events[+b.dataset.ei]);
+      if (t) return taskSheet(t);
+      var dt = ev && ev.task && (DATA.done || []).filter(function(x){ return x.id === ev.task; })[0];
+      if (dt) return doneSheet(dt, ev);
+      eventSheet(ev);
     };
   });
 }
@@ -1394,7 +1413,7 @@ function deptStates(owner, depts){
 }
 
 /* ---------- 読み込み ---------- */
-var LAST_SIG = '', LOADING = false, BUILD = '50e4163dcc3a';
+var LAST_SIG = '', LOADING = false, BUILD = '87ee2b47513c';
 // 新しい版が公開されていたら、キャッシュを避けて読み直す
 async function checkVersion(){
   if (BUILD.indexOf('BUILD') >= 0) return;
@@ -1649,11 +1668,12 @@ var Office = (function(){
     var hairM = new THREE.Mesh(new THREE.SphereGeometry(.285,20,12,0,Math.PI*2,0,Math.PI*.55), hair); hairM.rotation.x = -.35; hairM.position.z = -.02; headG.add(hairM);
     // 髪型・帽子
     var st = opts.style;
-    if (st === 'twoblock') { // ツーブロック：サイドと襟足は短く刈り上げ、トップに長さとボリューム
+    if (st === 'twoblock') { // ツーブロック：横と襟足は短く（頭に沿わせる）、上は長めで前髪を上げる
       hairM.visible = false;
-      var buzz = new THREE.Mesh(new THREE.SphereGeometry(.276,20,12,0,Math.PI*2,0,Math.PI*.62), mat(0x6E6862)); buzz.rotation.x = -.3; buzz.position.z = -.01; headG.add(buzz);
-      var topH = new THREE.Mesh(new THREE.SphereGeometry(.3,20,12,0,Math.PI*2,0,Math.PI*.36), hair); topH.position.set(0,.05,.0); topH.rotation.x = -.15; topH.scale.set(1.0,1.15,1.05); topH.castShadow = true; headG.add(topH);
-      var fringe = new THREE.Mesh(new THREE.SphereGeometry(.13,12,8), hair); fringe.scale.set(1.5,.7,.8); fringe.position.set(0,.3,.14); fringe.rotation.x = -.7; fringe.castShadow = true; headG.add(fringe);  // 前髪を上げる（アップバング）
+      var buzzM = mat(0x2F2C2A);
+      var buzz = new THREE.Mesh(new THREE.SphereGeometry(.281,24,16,0,Math.PI*2,0,Math.PI*.52), buzzM); buzz.rotation.x = -.5; buzz.position.z = -.005; headG.add(buzz);
+      var topH = new THREE.Mesh(new THREE.SphereGeometry(.288,24,14,0,Math.PI*2,0,Math.PI*.4), hair); topH.scale.set(.9,1.08,1.0); topH.position.set(0,.03,-.01); topH.rotation.x = -.15; topH.castShadow = true; headG.add(topH);
+      var quiff = new THREE.Mesh(new THREE.SphereGeometry(.15,16,12), hair); quiff.scale.set(1.25,.62,.85); quiff.position.set(0,.25,.13); quiff.rotation.x = -.45; quiff.castShadow = true; headG.add(quiff);
     } else if (st === 'medium') { // ミディアムロング（肩につくくらい）
       var mh = new THREE.Mesh(new THREE.SphereGeometry(.3,20,14), hair); mh.scale.set(1.04,1.2,.86); mh.position.set(0,-.08,-.08); mh.castShadow = true; headG.add(mh);
       [-1,1].forEach(function(sd){ var side = new THREE.Mesh(new THREE.SphereGeometry(.11,10,8), hair); side.scale.set(.8,1.8,.9); side.position.set(sd*.24,-.1,.06); headG.add(side); });
