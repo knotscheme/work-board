@@ -84,6 +84,10 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
 .dragghost{position:fixed;z-index:80;pointer-events:none;box-shadow:0 8px 24px rgb(0 0 0 / .25);transform:rotate(-2deg) scale(1.04);border-radius:6px}
 .day.dropover{outline:3px solid var(--accent);outline-offset:-2px;background:var(--accent-soft)}
 .toast{position:fixed;left:50%;bottom:calc(92px + env(safe-area-inset-bottom, 0px));transform:translateX(-50%);z-index:90;background:var(--ink);color:var(--surface);border-radius:999px;padding:8px 18px;font-size:.86rem;font-weight:700;box-shadow:0 4px 14px rgb(0 0 0 / .25);max-width:calc(100% - 32px)}
+.toast-act{margin-left:12px;border:0;background:none;color:#9CC0FF;font-weight:700;font-size:.86rem;padding:2px 4px;text-decoration:underline}
+.donebtn{font:inherit;color:inherit;text-align:left;border:0;background:none;width:100%;display:flex;gap:6px;align-items:baseline;padding:4px 6px;margin:-4px -6px;border-radius:6px;cursor:pointer}
+.donebtn:hover{background:var(--bg)}
+.donebtn .undo{margin-left:auto;font-size:.72rem;color:var(--accent);font-weight:700;flex:none}
 .toast.err{background:var(--urgent)}
 .td-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,300px),1fr));gap:12px}
 .td-card{background:var(--surface);border:1px solid var(--line);border-top:5px solid var(--pc);border-radius:12px;padding:12px 14px;display:grid;gap:10px;align-content:start}
@@ -142,6 +146,11 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
 .h2row .btn{padding:6px 14px}
 .sheet-bg{position:fixed;inset:0;background:rgb(0 0 0 / .4);z-index:60;display:flex;align-items:flex-end;justify-content:center}
 .sheet{background:var(--surface);color:var(--ink);width:100%;max-width:520px;border-radius:16px 16px 0 0;padding:18px 16px calc(18px + env(safe-area-inset-bottom, 0px));display:grid;gap:12px;max-height:88vh;overflow:auto;box-shadow:0 -6px 24px rgb(0 0 0 / .2)}
+.sheet{animation:sheetUp .24s ease-out}
+@keyframes sheetUp{from{transform:translateY(40px);opacity:.4}to{transform:none;opacity:1}}
+.grab{width:42px;height:5px;border-radius:3px;background:var(--line);justify-self:center;margin:-8px 0 2px}
+@media (min-width:761px){.grab{display:none}}
+@media (prefers-reduced-motion:reduce){.sheet{animation:none}}
 .sheet h3{font-size:1.05rem}
 .fld{display:grid;gap:4px;min-width:0}
 .fld > span{font-size:.76rem;color:var(--muted);font-weight:700}
@@ -595,14 +604,49 @@ function mergeOps(base, ops){
   ops.forEach(function(o){
     if (seen[o.opId]) return; seen[o.opId] = 1;
     if (o.op === 'add') { if (!list.some(function(x){ return x.id === o.id; })) list.push({id:o.id, content:o.content, category:o.category, label:o.label, assignee:o.assignee || null, score:LABEL_SCORE[o.label] || 18, recorded:o.at, web:true}); return; }
+    if (o.op === 'reopen') {
+      var d = (DATA.done || []).filter(function(x){ return x.id === o.id; })[0];
+      if (d && !list.some(function(x){ return x.id === o.id; })) list.push(Object.assign({}, d, {done: null, web: true}));
+      if (DATA.done) DATA.done = DATA.done.filter(function(x){ return x.id !== o.id; });
+      return;
+    }
     var t = list.filter(function(x){ return x.id === o.id; })[0]; if (!t) return;
     if (o.op === 'edit') { if ('assignee' in o) t.assignee = o.assignee || null; if (o.content) t.content = o.content; if (o.category) t.category = o.category; if (o.label) { t.label = o.label; t.score = LABEL_SCORE[o.label]; } t.web = true; }
-    if (o.op === 'done' || o.op === 'delete') list = list.filter(function(x){ return x !== t; });
+    if (o.op === 'done' || o.op === 'delete') {
+      list = list.filter(function(x){ return x !== t; });
+      if (o.op === 'done' && DATA.done && !DATA.done.some(function(x){ return x.id === t.id; })) DATA.done.unshift(Object.assign({}, t, {done: o.at}));
+    }
   });
   return list;
 }
 
 /* ---------- 下から出るシート（スマホ）／ダイアログ（PC） ---------- */
+// 下にスワイプして閉じる（中身が一番上までスクロールされているときだけ）
+function swipeToClose(sh){
+  var y0 = null, dy = 0, t0 = 0, dragging = false;
+  sh.addEventListener('touchstart', function(e){
+    if (sh.scrollTop > 0 || e.touches.length > 1) { y0 = null; return; }
+    y0 = e.touches[0].clientY; dy = 0; t0 = Date.now(); dragging = false;
+  }, {passive:true});
+  sh.addEventListener('touchmove', function(e){
+    if (y0 == null) return;
+    dy = e.touches[0].clientY - y0;
+    if (!dragging && dy > 8 && sh.scrollTop <= 0) { dragging = true; sh.style.transition = 'none'; }
+    if (!dragging) { if (dy < 0) y0 = null; return; }
+    e.preventDefault();
+    sh.style.transform = 'translateY(' + Math.max(0, dy) + 'px)';
+  }, {passive:false});
+  function end(){
+    if (!dragging) { y0 = null; return; }
+    var fast = dy / Math.max(1, Date.now() - t0) > .6;
+    sh.style.transition = 'transform .22s ease';
+    if (dy > 110 || (fast && dy > 40)) { sh.style.transform = 'translateY(100%)'; setTimeout(Sheet.close, 200); }
+    else sh.style.transform = '';
+    y0 = null; dragging = false;
+  }
+  sh.addEventListener('touchend', end); sh.addEventListener('touchcancel', end);
+}
+
 var Sheet = (function(){
   var bg = null;
   function open(html, bind){
@@ -610,9 +654,10 @@ var Sheet = (function(){
       bg = document.createElement('div'); bg.className = 'sheet-bg'; document.body.appendChild(bg);
       bg.addEventListener('click', function(e){ if (e.target === bg) close(); });
     }
-    bg.innerHTML = '<div class="sheet" role="dialog" aria-modal="true">'+html+'</div>';
+    bg.innerHTML = '<div class="sheet" role="dialog" aria-modal="true"><div class="grab" aria-hidden="true"></div>'+html+'</div>';
     bg.hidden = false; document.body.classList.add('noscroll');
     var sh = bg.querySelector('.sheet'); bind && bind(sh);
+    swipeToClose(sh);
     var c = sh.querySelector('[data-close]'); if (c) c.onclick = close;
   }
   function close(){ if (bg) { bg.hidden = true; bg.innerHTML = ''; document.body.classList.remove('noscroll'); } }
@@ -767,16 +812,33 @@ function taskSheet(t){
         toast('定期タスクにしました（' + recRuleLabel(item) + '）。このタスクが今回分になります');
       }
       Sheet.close(); renderBoard(); Office.update();
+      if (op && op.op === 'done') toast('完了にしました', false, {label:'元に戻す', fn:function(){ reopenTask(op.id); }});
     } catch(err) { st(sh, err.message, true); }
   }
   draw();
 }
 // ---------- 予定カードのドラッグ＆ドロップ（PC：ドラッグ／スマホ：長押しして移動） ----------
-function toast(text, err){
+function toast(text, err, action){
   var t = document.getElementById('toast');
   if (!t) { t = document.createElement('div'); t.id = 'toast'; t.className = 'toast'; t.setAttribute('role', 'status'); document.body.appendChild(t); }
   t.textContent = text; t.classList.toggle('err', !!err); t.hidden = false;
-  clearTimeout(t._h); t._h = setTimeout(function(){ t.hidden = true; }, 2600);
+  if (action) {
+    var b = document.createElement('button'); b.className = 'toast-act'; b.textContent = action.label;
+    b.onclick = function(){ t.hidden = true; action.fn(); };
+    t.appendChild(b);
+  }
+  clearTimeout(t._h); t._h = setTimeout(function(){ t.hidden = true; }, action ? 6000 : 2600);
+}
+
+// 完了を取り消して未完了に戻す
+async function reopenTask(id){
+  if (!ghToken()) return needToken();
+  var op = {op:'reopen', id:id, opId:newId(), at:new Date().toISOString()};
+  try {
+    await ghUpdate('taskops.enc.json', function(d){ return {ops: ((d && d.ops) || []).concat([op])}; }, 'task reopen');
+    DATA.webOps = (DATA.webOps || []).concat([op]); DATA.pending = mergeOps(DATA.pending, [op]);
+    renderBoard(); Office.update(); toast('未完了に戻しました');
+  } catch(err) { toast(err.message, true); }
 }
 
 async function moveEvent(i, date){
@@ -1277,7 +1339,7 @@ function renderBoard(){
     }).join('')+'</ul></div>';
   }).join('') || '<p class="muted" style="margin:0">この担当のタスクはありません。</p>';
   var qs = (b.questions||[]).map(function(q){ return '<li><b>'+esc(q.cat)+'</b>：'+esc(q.text)+'</li>'; }).join('');
-  var dn = DATA.done.slice(0,6).map(function(t){ return '<li><span class="mono">'+jpDate(t.done)+'</span> '+esc(t.content)+'</li>'; }).join('');
+  var dn = DATA.done.slice(0,10).map(function(t){ return '<li><button class="donebtn" data-reopen="'+esc(t.id)+'"><span class="mono">'+jpDate(t.done)+'</span> '+esc(t.content)+'<span class="undo">戻す</span></button></li>'; }).join('');
 
   document.getElementById('view-board').innerHTML = todayHtml() +
     '<section class="sec" id="sec-sched"><h2>予定 <small>今週と来週・タップで編集・ドラッグ（スマホは長押し）で別の日へ移動</small></h2>' +
@@ -1297,7 +1359,7 @@ function renderBoard(){
       whoFilterHtml() + '<div class="cols">'+cards+'</div></section>' +
     '<section class="sec" id="sec-qa"><h2>定期タスク・確認・完了</h2><div class="cols">' + recurringCard() +
       (qs ? '<div class="card q"><h3>確認が必要</h3><ul>'+qs+'</ul></div>' : '') +
-      '<div class="card"><h3>最近の完了</h3><ul class="done-list">'+(dn || '<li>まだありません</li>')+'</ul></div>' +
+      '<div class="card"><h3>最近の完了 <span class="meta">タップで未完了に戻せます</span></h3><ul class="done-list">'+(dn || '<li>まだありません</li>')+'</ul></div>' +
     '</div></section>';
   Pipe.bind();
   var vb = document.getElementById('view-board');
@@ -1305,6 +1367,12 @@ function renderBoard(){
   vb.querySelectorAll('.ev[data-ei]').forEach(function(b){ b.onclick = function(){ if (b.dataset.dragged) return; eventSheet(DATA.board.events[+b.dataset.ei]); }; });
   bindEventDrag(vb);
   bindToday(vb);
+  vb.querySelectorAll('[data-reopen]').forEach(function(b){
+    b.onclick = function(){
+      var t = DATA.done.filter(function(x){ return x.id === b.dataset.reopen; })[0]; if (!t) return;
+      confirmModal('未完了に戻しますか？', '「'+t.content.slice(0,50)+(t.content.length > 50 ? '…' : '')+'」を未完了に戻します。完了ログからも外れます。', '未完了に戻す', function(){ reopenTask(t.id); });
+    };
+  });
   vb.querySelectorAll('.tbtn').forEach(function(b){ b.onclick = function(){ taskSheet(DATA.pending.filter(function(x){ return x.id === b.dataset.tid; })[0]); }; });
   document.getElementById('add-task').onclick = function(){ taskSheet(null); };
   document.getElementById('add-product').onclick = function(){ productSheet(null); };
