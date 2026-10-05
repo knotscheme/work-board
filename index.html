@@ -185,6 +185,8 @@ footer{color:var(--muted);font-size:.78rem}
 @keyframes blink{50%{border-color:var(--line)}}
 .bubble{position:absolute;transform:translate(-50%,-100%);max-width:260px;font-size:.78rem;background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:10px;padding:6px 10px;box-shadow:0 2px 8px rgb(0 0 0 / .15);pointer-events:none;transition:opacity .3s}
 .bubble::after{content:"";position:absolute;left:50%;bottom:-6px;width:10px;height:10px;background:var(--surface);border-right:1px solid var(--line);border-bottom:1px solid var(--line);transform:translateX(-50%) rotate(45deg)}
+.bubble.ticker{transform:none;left:12px;max-width:min(420px,calc(100% - 24px));border-left:4px solid var(--accent)}
+.bubble.ticker::after{display:none}
 .hud{position:absolute;top:12px;left:12px;display:flex;gap:6px;flex-wrap:wrap;max-width:calc(100% - 24px)}
 .chip{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:3px 12px;font-size:.78rem;font-weight:700;display:flex;gap:6px;align-items:center}
 .chip .mono{font-size:.8rem}
@@ -898,7 +900,7 @@ var Office = (function(){
     var SLOT = [-2.5, -7.5, 2.5, 7.5, 12.5];  // 白川を中央寄りに（左から 藤田・白川・佐々木・鳥居）
     staff.forEach(function(n, i){ addPerson(n, i+1, SLOT[i] !== undefined ? SLOT[i] : -12 + i*5, -5.6, 0, n === '白川' ? {headset:true} : {}); });
     var hub = desks['@白川'] || desks['@' + staff[0]];
-    bubbleEl = document.createElement('div'); bubbleEl.className = 'bubble'; labelsEl.appendChild(bubbleEl);
+    bubbleEl = document.createElement('div'); bubbleEl.className = 'bubble ticker'; labelsEl.appendChild(bubbleEl);
     secretary = hub;
 
     function link(from, to, color, op){
@@ -916,7 +918,7 @@ var Office = (function(){
     resize();
   }
 
-  function defaultR(){ var r = canvas.getBoundingClientRect(); return Math.min(44, Math.max(22, 26 / Math.max(.4, r.width / r.height))); }
+  function defaultR(){ var r = canvas.getBoundingClientRect(); return Math.min(48, Math.max(27, 30 / Math.max(.4, r.width / r.height))); }
 
   function resize(){
     if (!renderer) return;
@@ -1161,9 +1163,7 @@ var Office = (function(){
 
     bubbleT -= dt;
     if (bubbleT <= 0) { var lines = bubbleLines(); bubbleEl.textContent = lines[bubbleIdx++ % lines.length]; bubbleT = 5; }
-    var bp = project(secretary.group, 3.6);
-    var cw = canvas.getBoundingClientRect().width, bw = Math.min(260, bubbleEl.offsetWidth || 200);
-    bubbleEl.style.left = Math.max(bw/2 + 8, Math.min(cw - bw/2 - 8, bp.x))+'px'; bubbleEl.style.top = Math.max(bubbleEl.offsetHeight + 8, bp.y)+'px';
+    bubbleEl.style.top = (hudEl.offsetTop + hudEl.offsetHeight + 8) + 'px';
 
     // 書類が飛ぶ
     if (mo) { planeT -= dt; if (planeT <= 0) { spawnPlane(); planeT = 1.4 + Math.random(); } }
