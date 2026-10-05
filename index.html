@@ -254,6 +254,13 @@ footer{color:var(--muted);font-size:.78rem}
 .qbox{background:var(--warn-soft);border-radius:8px;padding:8px 10px;font-size:.84rem}
 
 /* memo */
+.bulk textarea{min-height:120px}
+.bk-list{display:grid;gap:10px}
+.bk-item{border:1px solid var(--line);border-radius:10px;padding:10px;display:grid;gap:6px}
+.bk-top{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.bk-no{font-size:.78rem;color:var(--muted);min-width:1.2em}
+.bk-x{margin-left:auto;border:0;background:none;font-size:1.2rem;color:var(--muted);padding:2px 8px}
+.bk-content{font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:8px 10px;width:100%}
 .memo-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.4fr);gap:20px;align-items:start}
 .compose{display:grid;gap:10px;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:16px}
 textarea,input[type=text],input[type=password],input[type=search]{font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:10px 12px;width:100%}
@@ -821,7 +828,7 @@ async function load(){
   } catch(e) { DATA.webOps = DATA.webOps || []; }
   DATA.pending = mergeOps(DATA.pending, (DATA.pendingOps || []).concat(DATA.webOps || []));
   if (!document.getElementById('shell')) shell();
-  renderHeader(); renderBoard(); Office.update();
+  renderHeader(); renderBoard(); Office.update(); Bulk.render();
   if (!Memo.loaded) Memo.load();
 }
 
@@ -833,11 +840,12 @@ function shell(){
       '<header class="top" id="hdr"></header>' +
       '<div id="view-board" class="wrap" style="gap:36px"></div>' +
       '<div id="view-office" class="sec"></div>' +
-      '<div id="view-memo" class="sec"></div>' +
+      '<div id="view-memo" class="sec" style="gap:28px"><div id="bulk-area"></div><div id="memo-area" class="sec"></div></div>' +
       '<footer>秘書（00_secretary）でタスクを追加・完了すると、自動でこのページに反映されます（5分ごとに再読み込み）。</footer>' +
     '</div>';
   Office.mount(document.getElementById('view-office'));
-  Memo.mount(document.getElementById('view-memo'));
+  Memo.mount(document.getElementById('memo-area'));
+  Bulk.mount(document.getElementById('bulk-area'));
 }
 
 // タブ → 表示する画面とセクション（予定・新発進捗・タスクはボード画面の一部）
@@ -1593,6 +1601,181 @@ var Pipe = (function(){
     finally { busy = false; }
   }
   return {bind: bind};
+})();
+
+/* =====================================================================
+   やることに一括変換：箇条書きをルールで読み取り、タスク・予定・新発進捗にまとめて登録する（AIは使わない）
+   ===================================================================== */
+var Bulk = (function(){
+  var root, who = '', items = null;
+  var STAGE_WORDS = [
+    ['撮影', /撮影|撮る|ロケ|物撮り/],
+    ['画像', /画像|レタッチ|楽天用|白抜き|サムネ/],
+    ['LP', /LP|ＬＰ|ページ|説明文|タイトル|文章/],
+    ['登録', /登録|在庫|Shopify|ショッピファイ|ネクストエンジン|カタログ/],
+    ['販促', /告知|販促|メルマガ|LINE|ライン|SNS|クラファン|広告/],
+    ['企画', /企画|サンプル|設計/]
+  ];
+  var CAT_WORDS = [
+    ['事務・受注・発注', /発注|受注|問い合わせ|問合せ|欠品|事務/],
+    ['動画', /動画|ムービー/],
+    ['撮影', /撮影|撮る/],
+    ['商品画像', /画像|レタッチ|サムネ/],
+    ['LP・文章', /LP|ＬＰ|説明文|タイトル|文章|ページ/],
+    ['商品登録・在庫', /登録|在庫|Shopify|ネクストエンジン|カタログ/],
+    ['販促・SNS・イベント', /告知|販促|メルマガ|LINE|SNS|クラファン|イベント|広告/],
+    ['企画・サンプル', /企画|サンプル|提案|設計/],
+    ['アプリ開発', /アプリ|ツール|開発|システム/]
+  ];
+
+  function d0(){ var d = new Date(); d.setHours(0,0,0,0); return d; }
+  function addDays(d, n){ var x = new Date(d); x.setDate(x.getDate() + n); return x; }
+  function isWork(d){ var w = d.getDay(); return w !== 0 && w !== 6 && !isDutyDay(ymd(d)); }
+  function workDays(from, to){
+    var out = [], t = d0(), d = new Date(Math.max(from, t));
+    for (; d <= to && out.length < 40; d = addDays(d, 1)) if (isWork(d)) out.push(ymd(d));
+    if (!out.length) { d = new Date(Math.max(to, t)); for (var i = 0; i < 14; i++) { d = addDays(d, 1); if (isWork(d)) { out.push(ymd(d)); break; } } }
+    return out;
+  }
+  // 行から期間を読み取る：今日／明日／今週（中）／来週／M/Dまで。なければ今週
+  function windowOf(line){
+    var t = d0(), dow = (t.getDay() + 6) % 7, fri = addDays(t, 4 - dow), mon2 = addDays(t, 7 - dow);
+    var m = line.match(/(\d{1,2})\s*[\/月]\s*(\d{1,2})/);
+    if (m) { var y = t.getFullYear(), dd = new Date(y, +m[1]-1, +m[2]); if (dd < t) dd = new Date(y+1, +m[1]-1, +m[2]); return {key:'d'+ymd(dd), label: jpDate(dd)+'まで', days: workDays(t, dd)}; }
+    if (/明後日/.test(line)) return {key:'a2', label:'明後日', days: workDays(addDays(t,2), addDays(t,2))};
+    if (/明日/.test(line)) return {key:'a1', label:'明日', days: workDays(addDays(t,1), addDays(t,1))};
+    if (/今日|本日/.test(line)) return {key:'a0', label:'今日', days: workDays(t, t)};
+    if (/来週/.test(line)) return {key:'nw', label:'来週', days: workDays(mon2, addDays(mon2, 4))};
+    if (dow >= 5) return {key:'nw', label:'来週', days: workDays(mon2, addDays(mon2, 4))};
+    return {key:'tw', label:'今週', days: workDays(t, fri)};
+  }
+
+  function parse(text){
+    var stages = (DATA.board && DATA.board.stages) || ['企画','撮影','画像','LP','登録','販促'];
+    var pipe = (DATA.board && DATA.board.pipeline) || [], out = [];
+    text.split(/\r?\n/).map(function(l){ return l.replace(/^\s*([・\-\*•●◦]|\d+[\.\)．、])\s*/, '').trim(); }).filter(Boolean).forEach(function(line, li){
+      var win = windowOf(line), label = /今週中|急ぎ|至急|大至急/.test(line) ? '優先' : '通常';
+      var codes = []; (line.match(/[a-zA-Z]{2}\d{3}(?:-\d+set)?/g) || []).forEach(function(c){ c = c.toLowerCase(); if (codes.indexOf(c) < 0) codes.push(c); });
+      var sw = STAGE_WORDS.filter(function(x){ return x[1].test(line); })[0];
+      if (codes.length) {
+        codes.forEach(function(code){
+          var item = pipe.filter(function(x){ return x.code === code; })[0], j;
+          if (sw) j = stages.indexOf(sw[0]);
+          else if (item) { j = (item.s || []).findIndex(function(x){ return x !== 'done'; }); if (j < 0) j = stages.length - 1; }
+          else j = stages.indexOf('撮影');
+          var stage = stages[j];
+          out.push({line:li, code:code, isNew:!item, name: item ? item.name : '', stageIdx:j, stage:stage,
+            category: STAGE_CAT[stage] || 'その他', content: code + (item ? ' ' + item.name : '') + '：' + stage + '（' + line + '）',
+            label:label, who:who, win:win, title: code + ' ' + stage});
+        });
+      } else {
+        var cw = CAT_WORDS.filter(function(x){ return x[1].test(line); })[0];
+        out.push({line:li, code:null, category: cw ? cw[0] : 'その他', content: line, label:label, who:who, win:win, title: line.length > 24 ? line.slice(0,24) + '…' : line});
+      }
+    });
+    // 期間ごとに、上の行から順に平日へ割り振る
+    var groups = {};
+    out.forEach(function(it){ (groups[it.win.key] = groups[it.win.key] || []).push(it); });
+    Object.keys(groups).forEach(function(k){
+      var g = groups[k], D = g[0].win.days.length, n = g.length;
+      g.forEach(function(it, i){
+        if (D >= n) it.days = g[0].win.days.slice(Math.floor(i*D/n), Math.floor((i+1)*D/n));
+        else it.days = [g[0].win.days[Math.floor(i*D/n)]];
+        it.days = it.days.slice(0, 2);                         // 作業予定は1件につき最大2日
+        if (it.win.key[0] === 'd') it.deadline = it.win.key.slice(1);  // 「〇日まで」はその日に締切
+      });
+    });
+    return out;
+  }
+
+  function mount(el){ root = el; render(); }
+  function render(){
+    if (!root || !DATA) return;
+    if (root.firstChild && document.activeElement && root.contains(document.activeElement)) return;  // 入力中は描き直さない
+    var names = knownWho();
+    root.innerHTML =
+      '<section class="sec bulk"><h2>やることに一括変換 <small>1行1件・上の行ほど先に予定を入れます</small></h2>' +
+      '<div class="compose">' +
+        '<textarea id="bulk-text" placeholder="・今週中に lw280 と lw281 の新発を進める&#10;・明日 gc014 撮影&#10;・10/15まで P2発注の確認">'+esc(ls('wb_bulk') || '')+'</textarea>' +
+        '<div class="fld"><span>担当（必須）</span><div class="whopick" id="bulk-who">'+names.map(function(n){ return '<button type="button" data-v="'+esc(n)+'"'+(who === n ? ' aria-pressed="true"' : '')+'>'+esc(n)+'</button>'; }).join('')+'</div></div>' +
+        '<p class="meta" style="margin:0">品番（lw280 など）を書くと、その品番の次の工程が予定になります（未登録なら新発進捗に追加して撮影から）。「今週中・急ぎ」は優先。期間は 今日／明日／今週／来週／10/15まで。土日と担当業務の日は外します。</p>' +
+        '<div class="row"><button class="btn primary" id="bulk-go">変換して確認</button><span class="status" id="bulk-status"></span></div>' +
+      '</div></section>';
+    var ta = root.querySelector('#bulk-text');
+    ta.oninput = function(){ ls('wb_bulk', ta.value); };
+    root.querySelectorAll('#bulk-who button').forEach(function(b){ b.onclick = function(){ who = b.dataset.v; root.querySelectorAll('#bulk-who button').forEach(function(x){ x.setAttribute('aria-pressed', x === b); }); }; });
+    root.querySelector('#bulk-go').onclick = function(){
+      var st = root.querySelector('#bulk-status');
+      if (!ghToken()) return needToken();
+      if (!ta.value.trim()) { st.textContent = '内容を入れてください'; st.className = 'status err'; return; }
+      if (!who) { st.textContent = '担当を選んでください'; st.className = 'status err'; return; }
+      st.textContent = ''; items = parse(ta.value); preview();
+    };
+  }
+
+  function preview(){
+    var names = knownWho(), LABELS = ['最優先','優先','通常','低'];
+    function dlist(days){ return days.map(function(d){ return jpDate(d + 'T00:00:00'); }).join('・'); }
+    Sheet.open(
+      '<h3>この内容で登録します</h3><p class="meta" style="margin:0">'+items.length+'件。内容・担当・優先度はここで直せます。外す行は × を押してください。</p>' +
+      '<div class="bk-list">' + items.map(function(it, i){
+        return '<div class="bk-item" data-i="'+i+'"><div class="bk-top"><span class="bk-no mono">'+(i+1)+'</span>' +
+          (it.code ? '<span class="code">'+esc(it.code)+'</span>'+(it.isNew ? '<span class="tag web">新発進捗に追加</span>' : '')+'<span class="tag cat">'+esc(it.stage)+'</span>' : '<span class="tag cat">'+esc(it.category)+'</span>') +
+          '<button class="bk-x" data-x="'+i+'" aria-label="この行を外す">×</button></div>' +
+          '<input type="text" class="bk-content" value="'+esc(it.content)+'">' +
+          '<div class="row2"><select class="bk-who">'+names.map(function(n){ return '<option'+(n === it.who ? ' selected' : '')+'>'+esc(n)+'</option>'; }).join('')+'</select>' +
+          '<select class="bk-label">'+LABELS.map(function(l){ return '<option'+(l === it.label ? ' selected' : '')+'>'+l+'</option>'; }).join('')+'</select></div>' +
+          '<div class="meta">予定：'+esc(it.win.label)+' → '+dlist(it.days)+(it.deadline ? ' ／ 締切 '+jpDate(it.deadline+'T00:00:00') : '')+'</div></div>';
+      }).join('') + '</div>' +
+      '<div class="row"><button class="btn primary" id="bk-save">登録する</button><button class="btn" data-close>やめる</button></div><span class="status"></span>',
+      function(sh){
+        sh.querySelectorAll('[data-x]').forEach(function(b){ b.onclick = function(){ collect(sh); items.splice(+b.dataset.x, 1); if (items.length) preview(); else Sheet.close(); }; });
+        sh.querySelector('#bk-save').onclick = function(){ collect(sh); commit(sh); };
+      });
+  }
+  function collect(sh){
+    sh.querySelectorAll('.bk-item').forEach(function(row){
+      var it = items[+row.dataset.i]; if (!it) return;
+      it.content = row.querySelector('.bk-content').value.trim() || it.content;
+      it.who = row.querySelector('.bk-who').value; it.label = row.querySelector('.bk-label').value;
+    });
+  }
+
+  async function commit(sh){
+    st(sh, '登録中…');
+    try {
+      var now = new Date().toISOString(), ops = [], evs = [];
+      items.forEach(function(it){
+        it.id = newId();
+        ops.push({op:'add', id:it.id, content:it.content, category:it.category, label:it.label, assignee:it.who, opId:newId(), at:now});
+        it.days.forEach(function(d){ evs.push({date:d, kind:'plan', title:it.title, task:it.id, assignee:it.who}); });
+        if (it.deadline) evs.push({date:it.deadline, kind:'deadline', title:it.title + ' 締切', task:it.id, assignee:it.who});
+      });
+      // 1) タスク
+      await ghUpdate('taskops.enc.json', function(d){ return {ops: ((d && d.ops) || []).concat(ops)}; }, 'bulk tasks');
+      DATA.webOps = (DATA.webOps || []).concat(ops); DATA.pending = mergeOps(DATA.pending, ops);
+      // 2) 予定
+      var er = await ghUpdate('events.enc.json', function(d){ return {events: JSON.parse(JSON.stringify((d && d.events) || DATA.board.events || [])).concat(evs), updated: now}; }, 'bulk events');
+      DATA.board.events = er.events;
+      // 3) 新発進捗
+      var stages = DATA.board.stages || [];
+      var codeItems = items.filter(function(it){ return it.code; });
+      if (codeItems.length) {
+        await savePipeline(function(base){
+          codeItems.forEach(function(it){
+            var x = base.filter(function(p){ return p.code === it.code; })[0];
+            if (!x) { x = {code:it.code, name:'（商品名を入力）', s: stages.map(function(_, j){ return j < it.stageIdx ? 'done' : ''; }), note:'一括変換で追加'}; base.push(x); }
+            if (!x.assignee) x.assignee = it.who;
+            if (x.s[it.stageIdx] !== 'done') { x.s = x.s.slice(); x.s[it.stageIdx] = 'hot'; }
+          });
+        }, 'bulk pipeline');
+      }
+      ls('wb_bulk', null); items = null;
+      Sheet.close(); render(); renderBoard(); Office.update();
+      toast(ops.length + '件をタスク・予定' + (codeItems.length ? '・新発進捗' : '') + 'に登録しました');
+    } catch(err) { st(sh, err.message, true); }
+  }
+  return {mount:mount, render:render};
 })();
 
 /* =====================================================================
