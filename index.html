@@ -110,6 +110,13 @@ select,input[type=date],input[type=time]{font:inherit;color:var(--ink);backgroun
 .seg.wide{display:grid;grid-template-columns:repeat(4,1fr);gap:4px}
 .seg.wide button{border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:9px 0;font-size:.84rem;font-weight:700;color:var(--muted)}
 .seg.wide button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--surface)}
+.btn.danger-fill{background:var(--urgent);border-color:var(--urgent);color:var(--surface)}
+.push-right{margin-left:auto}
+.modal-bg{position:fixed;inset:0;z-index:100;background:rgb(0 0 0 / .5);display:flex;align-items:center;justify-content:center;padding:16px}
+.modal{background:var(--surface);color:var(--ink);border-radius:14px;padding:20px 18px 16px;width:min(400px,100%);display:grid;gap:10px;box-shadow:0 12px 40px rgb(0 0 0 / .3)}
+.modal h3{font-size:1.05rem}
+.cm-body{margin:0;font-size:.88rem;color:var(--muted)}
+.cm-row{justify-content:flex-end;margin-top:4px}
 .btn.ok{color:var(--done);border-color:var(--done)}
 .warnline{margin:0;font-size:.8rem;color:var(--warn)}
 body.noscroll{overflow:hidden}
@@ -407,7 +414,7 @@ function mergeOps(base, ops){
     if (o.op === 'add') { if (!list.some(function(x){ return x.id === o.id; })) list.push({id:o.id, content:o.content, category:o.category, label:o.label, assignee:o.assignee || null, score:LABEL_SCORE[o.label] || 18, recorded:o.at, web:true}); return; }
     var t = list.filter(function(x){ return x.id === o.id; })[0]; if (!t) return;
     if (o.op === 'edit') { if ('assignee' in o) t.assignee = o.assignee || null; if (o.content) t.content = o.content; if (o.category) t.category = o.category; if (o.label) { t.label = o.label; t.score = LABEL_SCORE[o.label]; } t.web = true; }
-    if (o.op === 'done') list = list.filter(function(x){ return x !== t; });
+    if (o.op === 'done' || o.op === 'delete') list = list.filter(function(x){ return x !== t; });
   });
   return list;
 }
@@ -429,6 +436,21 @@ var Sheet = (function(){
   document.addEventListener('keydown', function(e){ if (e.key === 'Escape') close(); });
   return {open:open, close:close};
 })();
+
+function confirmModal(title, body, okLabel, onOk){
+  var bg = document.createElement('div'); bg.className = 'modal-bg';
+  bg.innerHTML = '<div class="modal" role="alertdialog" aria-modal="true" aria-labelledby="cm-title"><h3 id="cm-title">'+esc(title)+'</h3>' +
+    (body ? '<p class="cm-body">'+esc(body)+'</p>' : '') +
+    '<div class="row cm-row"><button class="btn" id="cm-no">キャンセル</button><button class="btn danger-fill" id="cm-ok">'+esc(okLabel)+'</button></div></div>';
+  document.body.appendChild(bg);
+  function close(){ bg.remove(); document.removeEventListener('keydown', key, true); }
+  function key(e){ if (e.key === 'Escape') { e.stopPropagation(); close(); } }
+  document.addEventListener('keydown', key, true);
+  bg.addEventListener('click', function(e){ if (e.target === bg) close(); });
+  bg.querySelector('#cm-no').onclick = close;
+  bg.querySelector('#cm-ok').onclick = function(){ close(); onOk(); };
+  bg.querySelector('#cm-no').focus();
+}
 
 function needToken(){
   Sheet.open('<h3>書き込みの設定が必要です</h3><p style="margin:0;font-size:.9rem">予定やタスクを変更するには、メモタブで GitHub のトークンを一度登録してください。</p><div class="row"><button class="btn primary" id="go-memo">メモタブを開く</button><button class="btn" data-close>閉じる</button></div>',
@@ -453,7 +475,7 @@ function eventSheet(orig, date){
       '<label class="fld"><span>関連するタスク（任意）</span><select id="ev-task">'+taskOpts+'</select></label>' +
       '<p class="warnline" id="ev-warn" hidden>土日は休みの設定です（このまま保存もできます）</p>' +
       '<div class="row"><button class="btn primary" id="ev-save">保存</button><button class="btn" data-close>やめる</button>' +
-      (orig ? (confirmDel ? '<button class="btn danger" id="ev-del2">本当に削除</button>' : '<button class="btn danger" id="ev-del">削除</button>') : '') + '</div>' +
+      (orig ? '<button class="btn danger push-right" id="ev-del">削除</button>' : '') + '</div>' +
       '<span class="status" id="ev-status"></span>',
       function(sh){
         var kind = e.kind, getWho = bindWho(sh, e.assignee);
@@ -462,8 +484,9 @@ function eventSheet(orig, date){
         sh.querySelector('#ev-date').onchange = warn; warn();
         if (!orig) sh.querySelector('#ev-title').focus();
         function collect(){ return {title: sh.querySelector('#ev-title').value.trim(), date: sh.querySelector('#ev-date').value, time: sh.querySelector('#ev-time').value, kind: kind, task: sh.querySelector('#ev-task').value, assignee: getWho()}; }
-        var del = sh.querySelector('#ev-del'); if (del) del.onclick = function(){ e = Object.assign({}, e, collect()); confirmDel = true; draw(); };
-        var del2 = sh.querySelector('#ev-del2'); if (del2) del2.onclick = function(){ commit(null, sh); };
+        var del = sh.querySelector('#ev-del'); if (del) del.onclick = function(){
+          confirmModal('この予定を削除しますか？', '「'+orig.title+'」（'+jpDate(orig.date+'T00:00:00')+'）を削除します。元に戻せません。', '削除する', function(){ commit(null, sh); });
+        };
         sh.querySelector('#ev-save').onclick = function(){
           var v = collect();
           if (!v.title || !v.date) { st(sh, '内容と日付を入れてください', true); return; }
@@ -506,7 +529,7 @@ function taskSheet(t){
       whoField(cur.assignee) +
       '<div class="fld"><span>優先度</span><div class="seg wide" id="tk-label">'+LABELS.map(function(l){ return '<button type="button" data-v="'+l+'"'+(l === cur.label ? ' aria-pressed="true"' : '')+'>'+l+'</button>'; }).join('')+'</div></div>' +
       '<div class="row"><button class="btn primary" id="tk-save">保存</button><button class="btn" data-close>やめる</button>' +
-      (t ? (confirmDone ? '<button class="btn ok" id="tk-done2">完了にする（確定）</button>' : '<button class="btn ok" id="tk-done">完了にする</button>') : '') + '</div>' +
+      (t ? (confirmDone ? '<button class="btn ok" id="tk-done2">完了にする（確定）</button>' : '<button class="btn ok" id="tk-done">完了にする</button>') + '<button class="btn danger push-right" id="tk-del">削除</button>' : '') + '</div>' +
       '<span class="status" id="tk-status"></span><p class="meta" style="margin:0">変更は秘書が取り込むとタスクリスト（tasklist.md）にも反映されます。</p>',
       function(sh){
         var label = cur.label, getWho = bindWho(sh, cur.assignee);
@@ -515,6 +538,9 @@ function taskSheet(t){
         function collect(){ return {content: sh.querySelector('#tk-content').value.trim(), category: sh.querySelector('#tk-cat').value, label: label, assignee: getWho()}; }
         var d1 = sh.querySelector('#tk-done'); if (d1) d1.onclick = function(){ cur = Object.assign({}, cur, collect()); confirmDone = true; draw(); };
         var d2 = sh.querySelector('#tk-done2'); if (d2) d2.onclick = function(){ commit({op:'done', id:t.id}, sh); };
+        var dl = sh.querySelector('#tk-del'); if (dl) dl.onclick = function(){
+          confirmModal('本当に削除しますか？', '「'+t.content.slice(0,50)+(t.content.length > 50 ? '…' : '')+'」を削除します。完了とは違い、完了ログにも残りません。', '削除する', function(){ commit({op:'delete', id:t.id}, sh); });
+        };
         sh.querySelector('#tk-save').onclick = function(){
           var v = collect();
           if (!v.content) { st(sh, '内容を入れてください', true); return; }
