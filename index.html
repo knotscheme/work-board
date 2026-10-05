@@ -87,7 +87,9 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
 .day.dropover{outline:3px solid var(--accent);outline-offset:-2px;background:var(--accent-soft)}
 .toast{position:fixed;left:50%;bottom:calc(92px + env(safe-area-inset-bottom, 0px));transform:translateX(-50%);z-index:90;background:var(--ink);color:var(--surface);border-radius:999px;padding:8px 18px;font-size:.86rem;font-weight:700;box-shadow:0 4px 14px rgb(0 0 0 / .25);max-width:calc(100% - 32px)}
 .toast-act{margin-left:12px;border:0;background:none;color:#9CC0FF;font-weight:700;font-size:.86rem;padding:2px 4px;text-decoration:underline}
-.donebtn{font:inherit;color:inherit;text-align:left;border:0;background:none;width:100%;display:flex;gap:6px;align-items:baseline;padding:4px 6px;margin:-4px -6px;border-radius:6px;cursor:pointer}
+.donebtn{font:inherit;color:inherit;text-align:left;border:0;background:none;width:100%;display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:8px;align-items:baseline;padding:4px 6px;margin:0;border-radius:6px;cursor:pointer}
+.donebtn .dtxt{overflow-wrap:anywhere}
+.done-list li{min-width:0}
 .donebtn:hover{background:var(--bg)}
 .donebtn .undo{margin-left:auto;font-size:.72rem;color:var(--accent);font-weight:700;flex:none}
 .toast.err{background:var(--urgent)}
@@ -1341,7 +1343,7 @@ function renderBoard(){
     }).join('')+'</ul></div>';
   }).join('') || '<p class="muted" style="margin:0">この担当のタスクはありません。</p>';
   var qs = (b.questions||[]).map(function(q){ return '<li><b>'+esc(q.cat)+'</b>：'+esc(q.text)+'</li>'; }).join('');
-  var dn = DATA.done.slice(0,10).map(function(t){ return '<li><button class="donebtn" data-reopen="'+esc(t.id)+'"><span class="mono">'+jpDate(t.done)+'</span> '+esc(t.content)+'<span class="undo">戻す</span></button></li>'; }).join('');
+  var dn = DATA.done.slice(0,10).map(function(t){ return '<li><button class="donebtn" data-reopen="'+esc(t.id)+'"><span class="mono">'+jpDate(t.done)+'</span><span class="dtxt">'+esc(t.content)+'</span><span class="undo">戻す</span></button></li>'; }).join('');
 
   document.getElementById('view-board').innerHTML = todayHtml() +
     '<section class="sec" id="sec-sched"><h2>予定 <small>今週と来週・タップで編集・ドラッグ（スマホは長押し）で別の日へ移動</small></h2>' +
