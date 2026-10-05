@@ -88,6 +88,15 @@ th.st,td.st{text-align:center;width:60px}
 .code{font-family:var(--mono);font-size:.84rem;color:var(--accent);white-space:nowrap}
 .name{font-weight:700}
 .note{color:var(--muted);font-size:.82rem}
+.dotbtn{border:0;background:none;padding:6px;border-radius:50%;line-height:0}
+.dotbtn:hover{background:var(--accent-soft)}
+.dotmenu{position:absolute;z-index:20;background:var(--surface);border:1px solid var(--line);border-radius:10px;box-shadow:0 6px 20px rgb(0 0 0 / .18);padding:6px;display:grid;min-width:170px}
+.dotmenu .dm-h{font-size:.74rem;color:var(--muted);font-weight:700;padding:4px 8px}
+.dotmenu button{border:0;background:none;text-align:left;padding:6px 8px;border-radius:6px;display:flex;gap:8px;align-items:center;font-size:.86rem}
+.dotmenu button:hover,.dotmenu button:focus-visible{background:var(--bg)}
+.dotmenu button[aria-current]{font-weight:700}
+.pipe-note{font-size:.8rem;color:var(--muted)}
+.pipe-note.err{color:var(--urgent)}
 .dot{display:inline-block;width:14px;height:14px;border-radius:50%;background:var(--idle);vertical-align:middle}
 .dot.done{background:var(--done)}
 .dot.now{background:var(--surface);border:3px solid var(--accent)}
@@ -242,6 +251,22 @@ async function encryptJSON(obj){
   var ct = new Uint8Array(await crypto.subtle.encrypt({name:'AES-GCM', iv: iv}, cryptoKey, new TextEncoder().encode(JSON.stringify(obj))));
   return JSON.stringify({v:1, iv: toB64(iv), ct: toB64(ct)});
 }
+function ghToken(){ return ls('wb_token'); }
+function ghFile(file, method, body){
+  return fetch('https://api.github.com/repos/'+REPO+'/contents/'+file, {
+    method: method, cache:'no-store',
+    headers: {'Authorization':'Bearer '+ghToken(), 'Accept':'application/vnd.github+json'},
+    body: body ? JSON.stringify(body) : undefined
+  });
+}
+async function ghRead(file){
+  var r = await ghFile(file, 'GET');
+  if (r.status === 404) return {sha:null, data:null};
+  if (!r.ok) throw new Error(r.status === 401 ? 'トークンが無効です。メモタブで設定し直してください。' : 'GitHub から読み込めませんでした（'+r.status+'）。');
+  var j = await r.json();
+  return {sha:j.sha, data: await decryptJSON(JSON.parse(atob(j.content.replace(/\n/g,''))))};
+}
+
 function fail(text){ app.innerHTML = '<div class="msg"><h1 style="font-size:1.2rem">ボードを開けません</h1><p class="muted">'+text+'</p></div>'; }
 
 /* ---------- 部署の状態 ---------- */
@@ -254,6 +279,17 @@ function eventCat(e){
 function eventsOn(key){ return ((DATA.board && DATA.board.events) || []).filter(function(e){ return e.date === key; }); }
 function isDutyDay(key){ return eventsOn(key).some(function(e){ return e.kind === 'duty'; }); }
 
+var STAGE_CAT = {'企画':'企画・サンプル','撮影':'撮影','画像':'商品画像','LP':'LP・文章','登録':'商品登録・在庫','販促':'販促・SNS・イベント'};
+// 品番がいま担当している工程：今週やる > 次の作業 > 待ち の順で最初のもの
+function activeStage(p, stages){
+  var order = ['hot','now','wait'];
+  for (var k = 0; k < order.length; k++) {
+    var j = (p.s || []).indexOf(order[k]);
+    if (j >= 0) return {code:p.code, name:p.name, stage:stages[j], state:order[k], cat:STAGE_CAT[stages[j]]};
+  }
+  return null;
+}
+
 function deptStates(){
   var b = DATA.board || {}, now = Date.now(), out = {}, today = dayKey(0), soonEnd = dayKey(2);
   var events = b.events || [];
@@ -264,8 +300,9 @@ function deptStates(){
     var mine = events.filter(function(e){ return eventCat(e) === d.cat; });
     var todayEv = mine.filter(function(e){ return e.date === today && e.kind !== 'duty'; });
     var soon = mine.filter(function(e){ return (e.kind === 'deadline' || e.kind === 'event') && e.date >= today && e.date <= soonEnd; });
-    var state = stale.length ? 'stale' : qs.length ? 'decision' : tasks.length ? 'working' : 'idle';
-    out[d.cat] = {dept:d, tasks:tasks, qs:qs, stale:stale, state:state, today:todayEv, soon:soon,
+    var products = (b.pipeline || []).map(function(p){ return activeStage(p, b.stages || []); }).filter(function(a){ return a && a.cat === d.cat; });
+    var state = stale.length ? 'stale' : qs.length ? 'decision' : (tasks.length || products.length) ? 'working' : 'idle';
+    out[d.cat] = {dept:d, tasks:tasks, qs:qs, stale:stale, state:state, today:todayEv, soon:soon, products:products,
       prio: tasks.some(function(t){ return t.label === '優先' || t.label === '最優先'; })};
   });
   return out;
@@ -282,6 +319,12 @@ async function load(){
   } catch(e) {
     return fail('鍵が正しくないか、データを読み込めませんでした。URLの末尾まで正しくコピーされているか確認してください。');
   }
+  try {
+    var pipe = null;
+    if (ghToken()) pipe = (await ghRead('pipeline.enc.json')).data;
+    else { var pr = await fetch('pipeline.enc.json?t=' + Date.now(), {cache:'no-store'}); if (pr.ok) pipe = await decryptJSON(await pr.json()); }
+    if (pipe && pipe.pipeline) { DATA.board.pipeline = pipe.pipeline; DATA.pipeSyncPending = true; }
+  } catch(e) {}
   if (!document.getElementById('shell')) shell();
   renderHeader(); renderBoard(); Office.update();
   if (!Memo.loaded) Memo.load();
@@ -347,7 +390,7 @@ function renderBoard(){
   var stages = b.stages || [], tip = {done:'完了', hot:'今週やる', now:'次の作業', wait:'待ち', '':'未着手／不明'}, pipe = '';
   (b.pipeline || []).forEach(function(p){
     pipe += '<tr><td class="code">'+esc(p.code)+'</td><td class="name">'+esc(p.name)+'</td>';
-    stages.forEach(function(_, j){ var s = (p.s||[])[j] || ''; pipe += '<td class="st"><i class="dot '+esc(s)+'" title="'+tip[s]+'"></i></td>'; });
+    stages.forEach(function(st, j){ var s = (p.s||[])[j] || ''; pipe += '<td class="st"><button class="dotbtn" data-code="'+esc(p.code)+'" data-j="'+j+'" aria-label="'+esc(p.code)+' '+esc(st)+'：'+tip[s]+'（クリックで変更）"><i class="dot '+esc(s)+'"></i></button></td>'; });
     pipe += '<td class="note">'+esc(p.note)+'</td></tr>';
   });
 
@@ -371,14 +414,17 @@ function renderBoard(){
     '<section class="sec"><h2>予定 <small>今週と来週</small></h2>' +
       '<div class="legend"><span><i class="sw" style="background:var(--urgent)"></i>イベント</span><span><i class="sw" style="background:var(--warn)"></i>締切</span><span><i class="sw" style="background:var(--accent)"></i>作業予定</span><span><i class="sw" style="background:var(--muted)"></i>担当業務</span></div>' +
       '<div class="cal">'+cal+'</div></section>' +
-    '<section class="sec"><h2>新商品の進み具合 <small>品番ごと・工程順</small></h2>' +
+    '<section class="sec"><h2>新商品の進み具合 <small>品番ごと・工程順・丸をクリックで変更</small></h2>' +
+      '<div class="pipe-note" id="pipe-status">'+(ghToken() ? (DATA.pipeSyncPending ? 'Webでの変更があります。秘書が取り込むと、タスクの担当工程にも反映されます。' : '丸をクリックすると状態を変えられます。') : '変更するには、メモタブで書き込みの設定（トークン登録）をしてください。')+'</div>' +
       '<div class="legend"><span><i class="dot done"></i>完了</span><span><i class="dot hot"></i>今週やる</span><span><i class="dot now"></i>次の作業</span><span><i class="dot wait"></i>待ち</span><span><i class="dot"></i>未着手／不明</span></div>' +
       '<div class="scroll"><table><thead><tr><th>品番</th><th>商品</th>'+stages.map(function(s){ return '<th class="st">'+esc(s)+'</th>'; }).join('')+'<th>メモ</th></tr></thead><tbody>'+pipe+'</tbody></table></div></section>' +
+    '<div class="dotmenu" id="dotmenu" hidden role="menu"></div>' +
     '<section class="sec"><h2>タスク <small>工程別・優先度順</small></h2><div class="cols">'+cards+'</div></section>' +
     '<section class="sec"><h2>確認と完了</h2><div class="cols">' +
       (qs ? '<div class="card q"><h3>確認が必要</h3><ul>'+qs+'</ul></div>' : '') +
       '<div class="card"><h3>最近の完了</h3><ul class="done-list">'+(dn || '<li>まだありません</li>')+'</ul></div>' +
     '</div></section>';
+  Pipe.bind();
 }
 
 /* =====================================================================
@@ -616,6 +662,7 @@ var Office = (function(){
       var soonOther = s.soon.filter(function(e){ return s.today.indexOf(e) < 0; });
       if (soonOther.length) html += '<div class="lbl">近い締切</div><ul>'+soonOther.map(function(e){ return '<li>'+jpDate(e.date+'T00:00:00')+' '+esc(e.title)+'</li>'; }).join('')+'</ul>';
       if (s.qs.length) html += '<div class="lbl">あなたへの確認（挙手中）</div>' + s.qs.map(function(q){ return '<div class="qbox">'+esc(q.text)+'</div>'; }).join('');
+      if (s.products.length) { var PJ = {hot:'今週やる', now:'次の作業', wait:'待ち'}; html += '<div class="lbl">担当している品番</div><ul>'+s.products.map(function(a){ return '<li><span class="code">'+esc(a.code)+'</span> '+esc(a.name)+' <span class="meta">（'+esc(a.stage)+'・'+PJ[a.state]+'）</span></li>'; }).join('')+'</ul>'; }
       html += '<div class="lbl">担当タスク '+s.tasks.length+'件</div>';
       html += s.tasks.length ? '<ul>'+s.tasks.map(function(t){
         var old = s.stale.indexOf(t) >= 0;
@@ -655,7 +702,7 @@ var Office = (function(){
       dk.state = s.state; dk.hasQ = s.qs.length > 0; dk.isStale = s.stale.length > 0; dk.today = s.today.length > 0; dk.soon = s.soon.length > 0;
       dk.ring.material.color.copy(s.state === 'stale' ? urgent : s.state === 'decision' ? warn : dk.today ? new THREE.Color(0xE8A800) : s.state === 'working' ? accent : idle);
       dk.d.lidMat.emissive.copy(s.tasks.length ? accent : new THREE.Color(0)); dk.d.lidMat.emissiveIntensity = s.tasks.length ? .6 : 0;
-      dk.d.paper.visible = s.tasks.length > 0;
+      dk.d.paper.visible = s.tasks.length > 0 || s.products.length > 0;
       dk.line.material.opacity = s.tasks.length ? .6 : .15;
       dk.label.className = 'nm ' + s.state + (dk.today ? ' today' : '') + (selected === k ? ' sel' : '');
       dk.label.innerHTML = (dk.today ? '<span class="b now">今日</span>' : '') + esc(k) + (s.tasks.length ? '<span class="b">'+s.tasks.length+'</span>' : '');
@@ -794,6 +841,61 @@ var Office = (function(){
   document.addEventListener('visibilitychange', function(){ if (document.hidden) stop(); else if (tab === 'office') start(); });
 
   return {mount:mount, start:start, stop:stop, update:update};
+})();
+
+/* =====================================================================
+   新商品の進み具合を Web で変更（pipeline.enc.json に保存 → 秘書が取り込む）
+   ===================================================================== */
+var Pipe = (function(){
+  var OPTS = [['done','完了'],['hot','今週やる'],['now','次の作業'],['wait','待ち'],['','未着手／不明']];
+  var target = null, busy = false;
+  function status(t, err){ var el = document.getElementById('pipe-status'); if (el) { el.textContent = t; el.classList.toggle('err', !!err); } }
+  function bind(){
+    var menu = document.getElementById('dotmenu');
+    document.querySelectorAll('.dotbtn').forEach(function(b){
+      b.onclick = function(e){
+        e.stopPropagation();
+        if (!ghToken()) { status('変更するには、メモタブで書き込みの設定（トークン登録）をしてください。', true); return; }
+        target = {code: b.dataset.code, j: +b.dataset.j};
+        var item = DATA.board.pipeline.filter(function(x){ return x.code === target.code; })[0], cur = (item.s[target.j] || '');
+        menu.innerHTML = '<div class="dm-h">'+esc(target.code)+' ・ '+esc(DATA.board.stages[target.j])+'</div>' + OPTS.map(function(o){
+          return '<button role="menuitem" data-v="'+o[0]+'"'+(o[0] === cur ? ' aria-current="true"' : '')+'><i class="dot '+o[0]+'"></i>'+o[1]+'</button>';
+        }).join('');
+        var r = b.getBoundingClientRect();
+        menu.style.left = Math.min(window.innerWidth - 190, r.left + window.scrollX - 60) + 'px';
+        menu.style.top = (r.bottom + window.scrollY + 6) + 'px';
+        menu.hidden = false;
+        menu.querySelectorAll('button').forEach(function(mb){ mb.onclick = function(){ menu.hidden = true; save(target.code, target.j, mb.dataset.v); }; });
+        menu.querySelector('button').focus();
+      };
+    });
+  }
+  document.addEventListener('click', function(e){ var m = document.getElementById('dotmenu'); if (m && !m.hidden && !m.contains(e.target)) m.hidden = true; });
+  document.addEventListener('keydown', function(e){ var m = document.getElementById('dotmenu'); if (e.key === 'Escape' && m) m.hidden = true; });
+
+  async function save(code, j, v){
+    if (busy) return; busy = true; status('保存中…');
+    try {
+      for (var attempt = 0; attempt < 2; attempt++) {
+        var cur = await ghRead('pipeline.enc.json');
+        var base = JSON.parse(JSON.stringify((cur.data && cur.data.pipeline) || DATA.board.pipeline));
+        base.forEach(function(x){ if (x.code === code) { x.s = x.s.slice(); x.s[j] = v; } });
+        var body = {message:'update pipeline', content: btoa(await encryptJSON({pipeline: base, updated: new Date().toISOString()}))};
+        if (cur.sha) body.sha = cur.sha;
+        var put = await ghFile('pipeline.enc.json', 'PUT', body);
+        if (put.ok) {
+          DATA.board.pipeline = base; DATA.pipeSyncPending = true;
+          renderBoard(); Office.update();
+          status('保存しました。オフィスに反映済み。秘書が取り込むと、タスクの担当工程にも反映されます。');
+          return;
+        }
+        if (put.status !== 409 && put.status !== 422) throw new Error('保存できませんでした（'+put.status+'）。');
+      }
+      throw new Error('ほかの端末と同時に保存されました。もう一度選んでください。');
+    } catch(e) { status(e.message, true); }
+    finally { busy = false; }
+  }
+  return {bind: bind};
 })();
 
 /* =====================================================================
