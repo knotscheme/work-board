@@ -1,0 +1,232 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow,noarchive">
+<meta name="referrer" content="no-referrer">
+<title>やることボード</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;500;700&family=IBM+Plex+Mono:wght@500&display=swap">
+<style>
+:root{
+  color-scheme:light;
+  --bg:#F4F5F2; --surface:#FFFFFF; --line:#E1E3DE; --ink:#1D2127; --muted:#666C74;
+  --accent:#2E4C88; --accent-soft:#E6ECF7;
+  --urgent:#B93A12; --urgent-soft:#FBEAE3;
+  --done:#2D7A4C; --done-soft:#E3F2E8;
+  --warn:#9A6A0B; --warn-soft:#FBF1DC;
+  --idle:#C9CCC6; --today:#FFF8E6;
+  --sans:"Zen Kaku Gothic New","Hiragino Sans","Yu Gothic UI","Meiryo",sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,"Consolas",monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    color-scheme:dark;
+    --bg:#15181D; --surface:#1D2128; --line:#2E333C; --ink:#E8EAED; --muted:#9AA0A9;
+    --accent:#8FAEE8; --accent-soft:#25304A;
+    --urgent:#F08A62; --urgent-soft:#3A2219;
+    --done:#6CC892; --done-soft:#1B3326;
+    --warn:#E3B556; --warn-soft:#352B14;
+    --idle:#3A3F48; --today:#2A2618;
+  }
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.7;padding-inline:16px;padding-block:28px 56px}
+.wrap{max-width:1100px;margin-inline:auto;display:grid;gap:36px}
+h1,h2,h3{text-wrap:balance;margin:0;line-height:1.3}
+h1{font-size:1.65rem}
+h2{font-size:1.1rem;display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+h2 small{font-size:.8rem;font-weight:500;color:var(--muted)}
+.mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.sec{display:grid;gap:14px}
+.muted{color:var(--muted)}
+
+.top{display:grid;grid-template-columns:1fr auto;gap:20px;align-items:end}
+.top p{margin:4px 0 0;color:var(--muted);font-size:.86rem}
+.count{background:var(--urgent-soft);color:var(--urgent);border-radius:10px;padding:12px 18px;display:grid;gap:2px;text-align:right}
+.count .lbl{font-size:.78rem;font-weight:700;letter-spacing:.04em}
+.count .num{font-size:1.9rem;font-weight:700;line-height:1.1}
+.count .num span{font-size:.95rem;margin-left:2px}
+.count .sub{font-size:.75rem}
+
+/* calendar */
+.cal{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px}
+.dow{font-size:.75rem;color:var(--muted);font-weight:700;text-align:center;letter-spacing:.06em}
+.day{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:8px;min-height:104px;display:flex;flex-direction:column;gap:5px}
+.day.past{opacity:.55}
+.day.today{background:var(--today);border-color:var(--warn)}
+.day .dn{font-family:var(--mono);font-size:.8rem;color:var(--muted);display:flex;justify-content:space-between}
+.day.today .dn b{color:var(--warn)}
+.day.sun .dn{color:var(--urgent)}
+.ev{font-size:.78rem;line-height:1.45;border-radius:5px;padding:4px 6px;background:var(--accent-soft);color:var(--ink);border-left:3px solid var(--accent)}
+.ev.deadline{background:var(--warn-soft);border-left-color:var(--warn)}
+.ev.event{background:var(--urgent-soft);border-left-color:var(--urgent);font-weight:700}
+.ev .tm{font-family:var(--mono);margin-right:4px}
+.legend{display:flex;flex-wrap:wrap;gap:16px;font-size:.8rem;color:var(--muted)}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.sw{width:12px;height:12px;border-radius:3px;display:inline-block}
+
+/* pipeline */
+.scroll{overflow-x:auto;background:var(--surface);border:1px solid var(--line);border-radius:10px}
+table{border-collapse:collapse;width:100%;min-width:760px;font-size:.88rem}
+th,td{padding:10px 12px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+tr:last-child td{border-bottom:none}
+th{font-size:.76rem;color:var(--muted);font-weight:700;letter-spacing:.04em;background:var(--bg)}
+th.st,td.st{text-align:center;width:60px}
+.code{font-family:var(--mono);font-size:.84rem;color:var(--accent);white-space:nowrap}
+.name{font-weight:700}
+.note{color:var(--muted);font-size:.82rem}
+.dot{display:inline-block;width:14px;height:14px;border-radius:50%;background:var(--idle);vertical-align:middle}
+.dot.done{background:var(--done)}
+.dot.now{background:var(--surface);border:3px solid var(--accent)}
+.dot.hot{background:var(--surface);border:3px solid var(--urgent)}
+.dot.wait{background:var(--surface);border:3px dashed var(--warn)}
+
+/* tasks */
+.cols{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:16px 18px;display:grid;gap:10px;align-content:start}
+.card h3{font-size:.95rem;display:flex;justify-content:space-between;gap:8px}
+.card h3 .mono{color:var(--muted);font-weight:500;font-size:.8rem}
+.card ul{margin:0;padding:0;list-style:none;display:grid;gap:10px;font-size:.88rem}
+.task{display:grid;gap:3px}
+.tag{font-size:.72rem;font-weight:700;border-radius:999px;padding:1px 8px;justify-self:start}
+.tag.優先{background:var(--urgent-soft);color:var(--urgent)}
+.tag.通常{background:var(--accent-soft);color:var(--accent)}
+.tag.未分類,.tag.後回し{background:var(--bg);color:var(--muted)}
+.meta{font-size:.74rem;color:var(--muted)}
+.q{border-color:var(--warn)}
+.q h3{color:var(--warn)}
+.q ul{list-style:disc;padding-left:1.2em}
+.done-list li{color:var(--muted)}
+footer{color:var(--muted);font-size:.78rem}
+.msg{max-width:520px;margin:80px auto;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:24px}
+
+@media (max-width:720px){
+  .top{grid-template-columns:1fr}
+  .count{text-align:left}
+  .cal{grid-template-columns:1fr}
+  .dow{display:none}
+  .day{min-height:0}
+  .day.empty{display:none}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div id="app"><div class="msg">読み込み中…</div></div>
+
+<script>
+(function(){
+  var app = document.getElementById('app');
+  var W = ['日','月','火','水','木','金','土'];
+
+  function esc(s){ return String(s == null ? '' : s).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+  function b64(s){ s = s.replace(/-/g,'+').replace(/_/g,'/'); while(s.length % 4) s += '='; var b = atob(s), u = new Uint8Array(b.length); for (var i=0;i<b.length;i++) u[i] = b.charCodeAt(i); return u; }
+  function ymd(d){ return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+  function jpDate(iso){ var d = new Date(iso); return (d.getMonth()+1)+'/'+d.getDate()+'（'+W[d.getDay()]+'）'; }
+  function jpDateTime(iso){ var d = new Date(iso); return jpDate(iso)+' '+String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0'); }
+
+  function fail(text){ app.innerHTML = '<div class="msg"><h1 style="font-size:1.2rem">ボードを開けません</h1><p class="muted">'+text+'</p></div>'; }
+
+  async function load(){
+    var key = location.hash.slice(1);
+    if (!key) return fail('鍵付きのURL（末尾に # から始まる文字列があるもの）で開いてください。');
+    try {
+      var res = await fetch('data.enc.json?t=' + Date.now(), {cache:'no-store'});
+      var enc = await res.json();
+      var k = await crypto.subtle.importKey('raw', b64(key), 'AES-GCM', false, ['decrypt']);
+      var buf = await crypto.subtle.decrypt({name:'AES-GCM', iv: b64(enc.iv)}, k, b64(enc.ct));
+      render(JSON.parse(new TextDecoder().decode(buf)));
+    } catch(e) {
+      fail('鍵が正しくないか、データを読み込めませんでした。URLの末尾まで正しくコピーされているか確認してください。');
+    }
+  }
+
+  function render(data){
+    var b = data.board || {}, events = b.events || [], now = new Date();
+    var byId = {}; data.pending.forEach(function(t){ byId[t.id] = t; });
+
+    // 次のイベントまでのカウントダウン
+    var next = events.filter(function(e){ return e.kind === 'event'; })
+      .map(function(e){ return Object.assign({at: new Date(e.date+'T'+(e.time||'00:00')+':00+09:00')}, e); })
+      .filter(function(e){ return e.at > now; })
+      .sort(function(a,b){ return a.at - b.at; })[0];
+    var countHtml = '';
+    if (next) {
+      var ms = next.at - now, d = Math.floor(ms/86400000), h = Math.floor(ms%86400000/3600000);
+      countHtml = '<div class="count"><div class="lbl">'+esc(next.title)+' まで</div><div class="num mono">'+(d>0? d+'<span>日</span> ':'')+h+'<span>時間</span></div><div class="sub mono">'+jpDate(next.at)+' '+esc(next.time||'')+'</div></div>';
+    }
+
+    // 2週間カレンダー（今週の月曜から）
+    var start = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    start.setDate(start.getDate() - ((start.getDay()+6)%7));
+    var today = ymd(now), cal = '';
+    ['月','火','水','木','金','土','日'].forEach(function(w){ cal += '<div class="dow">'+w+'</div>'; });
+    for (var i=0;i<14;i++){
+      var day = new Date(start); day.setDate(start.getDate()+i);
+      var key = ymd(day);
+      var evs = events.filter(function(e){ return e.date === key; })
+        .sort(function(a,b){ return (a.time||'99').localeCompare(b.time||'99'); });
+      var cls = 'day' + (key === today ? ' today' : key < today ? ' past' : '') + (day.getDay()===0 ? ' sun' : '') + (evs.length ? '' : ' empty');
+      cal += '<div class="'+cls+'"><div class="dn"><b>'+(day.getMonth()+1)+'/'+day.getDate()+'（'+W[day.getDay()]+'）</b>'+(key===today?'<span>今日</span>':'')+'</div>';
+      evs.forEach(function(e){
+        cal += '<div class="ev '+esc(e.kind)+'">'+(e.time?'<span class="tm">'+esc(e.time)+'</span>':'')+esc(e.title)+'</div>';
+      });
+      cal += '</div>';
+    }
+
+    // 品番パイプライン
+    var stages = b.stages || [], pipe = '';
+    var tip = {done:'完了', hot:'今週やる', now:'次の作業', wait:'待ち', '':'未着手／不明'};
+    (b.pipeline || []).forEach(function(p){
+      pipe += '<tr><td class="code">'+esc(p.code)+'</td><td class="name">'+esc(p.name)+'</td>';
+      stages.forEach(function(_, j){ var s = (p.s||[])[j] || ''; pipe += '<td class="st"><i class="dot '+esc(s)+'" title="'+tip[s]+'"></i></td>'; });
+      pipe += '<td class="note">'+esc(p.note)+'</td></tr>';
+    });
+
+    // 工程別タスク
+    var cats = [], groups = {};
+    data.pending.slice().sort(function(a,b){ return b.score - a.score; }).forEach(function(t){
+      if (!groups[t.category]) { groups[t.category] = []; cats.push(t.category); }
+      groups[t.category].push(t);
+    });
+    var order = ['企画・サンプル','撮影','商品画像','動画','LP・文章','商品登録・在庫','事務・受注・発注','販促・SNS・イベント','OEM事業','アプリ開発','Web制作','クライアント案件','その他'];
+    cats.sort(function(a,b){ return order.indexOf(a) - order.indexOf(b); });
+    var planned = {}; events.forEach(function(e){ if (e.task) (planned[e.task] = planned[e.task] || []).push(e.date); });
+    var taskCards = cats.map(function(c){
+      return '<div class="card"><h3>'+esc(c)+'<span class="mono">'+groups[c].length+'件</span></h3><ul>'+groups[c].map(function(t){
+        var p = planned[t.id] ? ' ・ 予定 '+planned[t.id].sort().map(function(d){ return jpDate(d+'T00:00:00'); }).join('、') : '';
+        return '<li class="task"><span class="tag '+esc(t.label)+'">'+esc(t.label)+'</span><span>'+esc(t.content)+'</span><span class="meta mono">記録 '+jpDate(t.recorded)+p+'</span></li>';
+      }).join('')+'</ul></div>';
+    }).join('');
+
+    var qs = (b.questions||[]).map(function(q){ return '<li>'+esc(q)+'</li>'; }).join('');
+    var dn = data.done.slice(0,6).map(function(t){ return '<li><span class="mono">'+jpDate(t.done)+'</span> '+esc(t.content)+'</li>'; }).join('');
+
+    app.innerHTML =
+      '<div class="wrap">' +
+      '<header class="top"><div><h1>やることボード</h1><p>DAYSARTClassic / DAYSART ・ 未完了 <span class="mono">'+data.pending.length+'</span> 件 ・ 更新 <span class="mono">'+jpDateTime(data.updated)+'</span></p></div>'+countHtml+'</header>' +
+      '<section class="sec"><h2>予定 <small>今週と来週</small></h2>' +
+        '<div class="legend"><span><i class="sw" style="background:var(--urgent)"></i>イベント</span><span><i class="sw" style="background:var(--warn)"></i>締切</span><span><i class="sw" style="background:var(--accent)"></i>作業予定</span></div>' +
+        '<div class="cal">'+cal+'</div></section>' +
+      '<section class="sec"><h2>新商品の進み具合 <small>品番ごと・工程順</small></h2>' +
+        '<div class="legend"><span><i class="dot done"></i>完了</span><span><i class="dot hot"></i>今週やる</span><span><i class="dot now"></i>次の作業</span><span><i class="dot wait"></i>待ち</span><span><i class="dot"></i>未着手／不明</span></div>' +
+        '<div class="scroll"><table><thead><tr><th>品番</th><th>商品</th>'+stages.map(function(s){ return '<th class="st">'+esc(s)+'</th>'; }).join('')+'<th>メモ</th></tr></thead><tbody>'+pipe+'</tbody></table></div></section>' +
+      '<section class="sec"><h2>タスク <small>工程別・優先度順</small></h2><div class="cols">'+taskCards+'</div></section>' +
+      '<section class="sec"><h2>確認と完了</h2><div class="cols">' +
+        (qs ? '<div class="card q"><h3>確認が必要</h3><ul>'+qs+'</ul></div>' : '') +
+        '<div class="card"><h3>最近の完了</h3><ul class="done-list">'+(dn || '<li>まだありません</li>')+'</ul></div>' +
+      '</div></section>' +
+      '<footer>秘書（00_secretary）でタスクを追加・完了すると、自動でこのページに反映されます。5分ごとに再読み込みします。</footer>' +
+      '</div>';
+  }
+
+  load();
+  setInterval(load, 300000);
+  window.addEventListener('hashchange', load);
+})();
+</script>
+</body>
+</html>
