@@ -88,6 +88,17 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
 .addev:hover{border-color:var(--accent);color:var(--accent)}
 .tbtn{font:inherit;color:inherit;text-align:left;border:0;background:none;padding:6px;margin:-6px;border-radius:8px;width:calc(100% + 12px);cursor:pointer}
 .tbtn:hover{background:var(--bg)}
+.card{grid-template-columns:minmax(0,1fr)}
+.card > *,.card li{min-width:0}
+.tbtn.tcard{overflow-wrap:anywhere}
+.card ul:has(.tcard){gap:8px}
+.tbtn.tcard{margin:0;width:100%;padding:10px 12px;background:var(--bg);border-radius:10px;border:1px solid var(--line);border-left:4px solid var(--accent);gap:5px}
+.tbtn.tcard:hover{border-color:var(--accent)}
+.tbtn.tcard[data-p="最優先"]{border-left-color:var(--urgent)}
+.tbtn.tcard[data-p="優先"]{border-left-color:#E07A2E}
+.tbtn.tcard[data-p="通常"]{border-left-color:var(--accent)}
+.tbtn.tcard[data-p="低"],.tbtn.tcard[data-p="未分類"]{border-left-color:var(--idle)}
+.tbtn.tcard > span:nth-child(2){font-weight:500;line-height:1.55}
 .tagrow{display:flex;gap:4px;flex-wrap:wrap}
 .tag.cat{background:var(--bg);color:var(--muted)}
 .tag.whotag{background:var(--done-soft);color:var(--done)}
@@ -1167,9 +1178,9 @@ function renderBoard(){
   else keys.sort(function(a,b){ return ORDER.indexOf(a) - ORDER.indexOf(b); });
   var cards = keys.map(function(k){
     return '<div class="card"><h3>'+esc(k)+'<span class="mono">'+groups[k].length+'件</span></h3><ul>'+groups[k].map(function(t){
-      var p = planned[t.id] ? ' ・ 予定 '+planned[t.id].sort().map(function(d){ return jpDate(d+'T00:00:00'); }).join('、') : '';
+      var p = planned[t.id] ? ' ・ 予定 '+planned[t.id].filter(function(d, i, a){ return a.indexOf(d) === i; }).sort().map(function(d){ return jpDate(d+'T00:00:00'); }).join('、') : '';
       var sub = taskView === 'who' ? '<span class="tag cat">'+esc(t.category)+'</span>' : (t.assignee ? whoTag(t.assignee) : '');
-      return '<li><button class="task tbtn" data-tid="'+esc(t.id)+'"><span class="tagrow"><span class="tag '+esc(t.label)+'">'+esc(t.label)+'</span>'+sub+(recLabelOf(t) ? '<span class="tag rec">'+esc(recLabelOf(t))+'</span>' : '')+(t.web ? '<span class="tag web">取り込み待ち</span>' : '')+'</span><span>'+esc(t.content)+'</span><span class="meta mono">記録 '+jpDate(t.recorded)+p+'</span></button></li>';
+      return '<li><button class="task tbtn tcard" data-p="'+esc(t.label)+'" data-tid="'+esc(t.id)+'"><span class="tagrow"><span class="tag '+esc(t.label)+'">'+esc(t.label)+'</span>'+sub+(recLabelOf(t) ? '<span class="tag rec">'+esc(recLabelOf(t))+'</span>' : '')+(t.web ? '<span class="tag web">取り込み待ち</span>' : '')+'</span><span>'+esc(t.content)+'</span><span class="meta mono">記録 '+jpDate(t.recorded)+p+'</span></button></li>';
     }).join('')+'</ul></div>';
   }).join('') || '<p class="muted" style="margin:0">この担当のタスクはありません。</p>';
   var qs = (b.questions||[]).map(function(q){ return '<li><b>'+esc(q.cat)+'</b>：'+esc(q.text)+'</li>'; }).join('');
