@@ -102,6 +102,9 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
 .td-head b{font-size:1rem}
 .td-dot{width:14px;height:14px;border-radius:50%;background:var(--pc)}
 .td-duty{font-size:.7rem;font-weight:700;background:var(--bg);color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:1px 8px}
+.td-duty.off{background:#EFE8FA;color:#6B4E9B;border-color:#D8CCEE}
+.ev.off{background:#EFE8FA;border-left-color:#B7A6D6;color:#6B4E9B;font-weight:700}
+.tag.offtag{background:#EFE8FA;color:#6B4E9B}
 .td-n{margin-left:auto;font-size:.78rem;color:var(--muted)}
 .td-card ul{list-style:none;margin:0;padding:0;display:grid;gap:8px}
 .td-item{display:flex;gap:6px;align-items:stretch}
@@ -173,6 +176,8 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
 .row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 select,input[type=date],input[type=time]{font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:10px 12px;width:100%}
 .seg.wide{display:grid;grid-template-columns:repeat(4,1fr);gap:4px}
+#ev-kind.seg.wide{grid-template-columns:repeat(5,1fr)}
+#ev-kind.seg.wide button{font-size:.76rem;padding:9px 0}
 .seg.wide button{border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:9px 0;font-size:.84rem;font-weight:700;color:var(--muted)}
 .seg.wide button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--surface)}
 .btn.ok-fill{background:var(--done);border-color:var(--done);color:var(--surface)}
@@ -741,7 +746,7 @@ function needToken(){
     function(sh){ sh.querySelector('#go-memo').onclick = function(){ Sheet.close(); setTab('memo'); }; });
 }
 
-var KIND_JP = [['plan','作業予定'],['deadline','締切'],['event','イベント'],['duty','担当業務']];
+var KIND_JP = [['plan','作業予定'],['deadline','締切'],['event','イベント'],['duty','担当業務'],['off','休み']];
 // 定期タスクの予定なら「毎日」などの名前を返す（そうでなければ空）
 // 予定にひも付くタスクが完了済みか
 function isDoneEvent(e){
@@ -818,7 +823,7 @@ async function carryOver(){
   } catch(e) {} finally { CARRY_RUNNING = false; }
 }
 
-function evGroup(e){ return e.kind === 'duty' ? 2 : recLabelOfEvent(e) ? 1 : 0; }
+function evGroup(e){ return e.kind === 'off' ? 3 : e.kind === 'duty' ? 2 : recLabelOfEvent(e) ? 1 : 0; }
 function evOrder(events){ return function(a, b){ return (evGroup(a) - evGroup(b)) || (a.time||'99').localeCompare(b.time||'99') || ((a.order == null ? 999 : a.order) - (b.order == null ? 999 : b.order)) || events.indexOf(a) - events.indexOf(b); }; }
 function sameEv(a, b){ return a.date === b.date && a.title === b.title && a.kind === b.kind && (a.time||'') === (b.time||''); }
 
@@ -1302,7 +1307,7 @@ function todayHtml(){
   function add(map, who, e){ (map[who] = map[who] || []).push(e); }
   evs.forEach(function(e, i){
     var who = whoOfEvent(e) || '担当なし';
-    if (e.kind === 'duty') { if (e.date === today) add(duty, e.assignee || '全員', e); return; }
+    if (e.kind === 'duty' || e.kind === 'off') { if (e.date === today) add(duty, e.assignee || '全員', e); return; }
     if (e.kind === 'event') return;
     if (e.date === today) add(items, who, Object.assign({_i:i}, e));
     else if (e.kind === 'deadline' && e.date < today && e.task && pend[e.task]) add(overdue, who, Object.assign({_i:i}, e));
@@ -1328,9 +1333,9 @@ function todayHtml(){
         '</li>';
     }
     return '<div class="td-card" style="--pc:'+c+'"><div class="td-head"><span class="td-dot"></span><b>'+esc(n)+'</b>' +
-      (dt.length ? '<span class="td-duty">担当業務</span>' : '') + '<span class="mono td-n">'+(list.length + od.length)+'件</span></div>' +
+      dt.map(function(x){ return '<span class="td-duty'+(x.kind === 'off' ? ' off' : '')+'">'+(x.kind === 'off' ? esc(x.title || '休み') : '担当業務')+'</span>'; }).join('') + '<span class="mono td-n">'+(list.length + od.length)+'件</span></div>' +
       ((list.length || od.length || fin.length) ? '<ul>'+od.map(function(e){ return row(e, true); }).join('')+list.map(function(e){ return row(e, false); }).join('')+fin.map(function(e){ return row(e, false); }).join('')+'</ul>'
-        : '<p class="td-empty">'+(dt.length ? '今日は担当業務の日です。' : '今日の予定はありません。')+'</p>') + '</div>';
+        : '<p class="td-empty">'+(dt.some(function(x){ return x.kind === 'off'; }) ? '今日はお休みです。' : dt.length ? '今日は担当業務の日です。' : '今日の予定はありません。')+'</p>') + '</div>';
   }).join('');
   var d = new Date();
   return '<section class="sec" id="sec-today"><div class="h2row"><h2>今日やること <small>'+jpDate(d)+' ・ '+total+'件</small></h2></div>' +
@@ -1377,7 +1382,8 @@ function eventCat(e){
   return t ? t.category : null;
 }
 function eventsOn(key){ return ((DATA.board && DATA.board.events) || []).filter(function(e){ return e.date === key; }); }
-function isDutyDay(key, who){ return eventsOn(key).some(function(e){ return e.kind === 'duty' && (!who || !e.assignee || e.assignee === who); }); }
+function isDutyDay(key, who){ return eventsOn(key).some(function(e){ return (e.kind === 'duty' || e.kind === 'off') && (!who || !e.assignee || e.assignee === who); }); }
+function isOffDay(key, who){ return eventsOn(key).some(function(e){ return e.kind === 'off' && (!who || !e.assignee || e.assignee === who); }); }
 function dutyNames(key){ return eventsOn(key).filter(function(e){ return e.kind === 'duty'; }).map(function(e){ return e.assignee || '全員'; }); }
 
 var STAGE_CAT = {'企画':'企画・サンプル','撮影':'撮影','画像':'商品画像','LP':'LP・文章','登録':'商品登録・在庫','販促':'販促・SNS・イベント'};
@@ -1413,7 +1419,7 @@ function deptStates(owner, depts){
 }
 
 /* ---------- 読み込み ---------- */
-var LAST_SIG = '', LOADING = false, BUILD = 'c31d704ed471';
+var LAST_SIG = '', LOADING = false, BUILD = 'e538cbc44f34';
 // 新しい版が公開されていたら、キャッシュを避けて読み直す
 async function checkVersion(){
   if (BUILD.indexOf('BUILD') >= 0) return;
@@ -1581,7 +1587,7 @@ function renderBoard(){
 
   document.getElementById('view-board').innerHTML = todayHtml() +
     '<section class="sec" id="sec-sched"><h2>予定 <small>今週と来週・タップで編集・ドラッグ（スマホは長押し）で並べ替え・別の日へ移動</small></h2>' +
-      '<div class="legend"><span><i class="sw" style="background:var(--urgent)"></i>イベント</span><span><i class="sw" style="background:var(--warn)"></i>締切</span><span><i class="sw" style="background:var(--accent)"></i>作業予定</span><span><i class="sw" style="background:var(--muted)"></i>担当業務</span></div>' +
+      '<div class="legend"><span><i class="sw" style="background:var(--urgent)"></i>イベント</span><span><i class="sw" style="background:var(--warn)"></i>締切</span><span><i class="sw" style="background:var(--accent)"></i>作業予定</span><span><i class="sw" style="background:var(--muted)"></i>担当業務</span><span><i class="sw" style="background:#B7A6D6"></i>休み</span></div>' +
       whoFilterHtml() +
       '<div class="cal">'+cal+'</div></section>' +
     '<section class="sec" id="sec-pipe"><div class="h2row"><h2>新商品の進み具合 <small>丸をタップで工程の状態・品番をタップで編集</small></h2><button class="btn primary" id="add-product">＋ 新商品を登録</button></div>' +
@@ -2358,10 +2364,28 @@ var Bulk = (function(){
     return bs >= .6 ? best : null;
   }
 
+  // 休みの行：日付（10/12、10/12〜10/14、今日／明日／明後日）を読み取り、その日を休みにする
+  function offItem(line, li){
+    var t = d0(), days = [], y = t.getFullYear();
+    function dt(m, d){ var x = new Date(y, m - 1, d); if (x < addDays(t, -60)) x = new Date(y + 1, m - 1, d); return x; }
+    var rg = line.match(/(\d{1,2})\s*[\/月]\s*(\d{1,2})\s*日?\s*[〜～\-ー－から]+\s*(?:(\d{1,2})\s*[\/月]\s*)?(\d{1,2})/);
+    if (rg) {
+      var a = dt(+rg[1], +rg[2]), b = dt(rg[3] ? +rg[3] : +rg[1], +rg[4]);
+      for (var d = new Date(a); d <= b && days.length < 31; d = addDays(d, 1)) days.push(ymd(d));
+    } else {
+      var all = line.match(/\d{1,2}\s*[\/月]\s*\d{1,2}/g) || [];
+      all.forEach(function(x){ var m = x.match(/(\d{1,2})\s*[\/月]\s*(\d{1,2})/); days.push(ymd(dt(+m[1], +m[2]))); });
+      if (!days.length) days.push(ymd(/明後日/.test(line) ? addDays(t, 2) : /明日/.test(line) ? addDays(t, 1) : t));
+    }
+    var kind = (line.match(/有給|有休|代休|半休|欠勤|公休|振休|休暇/) || ['休み'])[0];
+    return {line:li, off:true, title: kind === '有休' ? '有給' : kind, days: days, who: who, content: line, label:'通常', win:{label:'休み'}, mode:'new'};
+  }
+
   function parse(text){
     var stages = (DATA.board && DATA.board.stages) || ['企画','撮影','画像','LP','登録','販促'];
     var pipe = (DATA.board && DATA.board.pipeline) || [], out = [];
     text.split(/\r?\n/).map(function(l){ return l.replace(/^\s*([・\-\*•●◦]|\d+[\.\)．、])\s*/, '').trim(); }).filter(Boolean).forEach(function(line, li){
+      if (/有給|有休|休み|休暇|代休|半休|欠勤|公休|振休/.test(line)) { out.push(offItem(line, li)); return; }
       var win = windowOf(line), label = /今週中|急ぎ|至急|大至急/.test(line) ? '優先' : '通常';
       var codes = []; (line.match(/[a-zA-Z]{2}\d{3}(?:-\d+set)?/g) || []).forEach(function(c){ c = c.toLowerCase(); if (codes.indexOf(c) < 0) codes.push(c); });
       var sw = STAGE_WORDS.filter(function(x){ return x[1].test(line); })[0];
@@ -2383,7 +2407,7 @@ var Bulk = (function(){
     });
     // 期間ごとに、上の行から順に平日へ割り振る
     var groups = {};
-    out.forEach(function(it){ (groups[it.win.key] = groups[it.win.key] || []).push(it); });
+    out.forEach(function(it){ if (it.off) return; (groups[it.win.key] = groups[it.win.key] || []).push(it); });  // 休みは割り振らない
     Object.keys(groups).forEach(function(k){
       var g = groups[k], D = g[0].win.days.length, n = g.length;
       g.forEach(function(it, i){
@@ -2428,6 +2452,10 @@ var Bulk = (function(){
     Sheet.open(
       '<h3>この内容で登録します</h3><p class="meta" style="margin:0">'+items.length+'件。内容・担当・優先度はここで直せます。外す行は × を押してください。</p>' +
       '<div class="bk-list">' + items.map(function(it, i){
+        if (it.off) return '<div class="bk-item" data-i="'+i+'"><div class="bk-top"><span class="bk-no mono">'+(i+1)+'</span><span class="tag offtag">休み</span><span class="tag cat">'+esc(it.title)+'</span>' +
+          '<button class="bk-x" data-x="'+i+'" aria-label="この行を外す">×</button></div>' +
+          '<div class="row2"><select class="bk-who">'+names.map(function(n){ return '<option'+(n === it.who ? ' selected' : '')+'>'+esc(n)+'</option>'; }).join('')+'</select><span></span></div>' +
+          '<div class="meta">カレンダーに休みとして入れます（タスクにはしません）：'+dlist(it.days)+'</div></div>';
         return '<div class="bk-item" data-i="'+i+'"><div class="bk-top"><span class="bk-no mono">'+(i+1)+'</span>' +
           (it.code ? '<span class="code">'+esc(it.code)+'</span>'+(it.isNew ? '<span class="tag web">新発進捗に追加</span>' : '')+'<span class="tag cat">'+esc(it.stage)+'</span>' : '<span class="tag cat">'+esc(it.category)+'</span>') +
           '<button class="bk-x" data-x="'+i+'" aria-label="この行を外す">×</button></div>' +
@@ -2450,6 +2478,7 @@ var Bulk = (function(){
   function collect(sh){
     sh.querySelectorAll('.bk-item').forEach(function(row){
       var it = items[+row.dataset.i]; if (!it) return;
+      if (it.off) { it.who = row.querySelector('.bk-who').value; return; }
       if (it.mode !== 'link') it.content = row.querySelector('.bk-content').value.trim() || it.content;
       it.who = row.querySelector('.bk-who').value; it.label = row.querySelector('.bk-label').value;
     });
@@ -2461,6 +2490,12 @@ var Bulk = (function(){
       var now = new Date().toISOString(), ops = [], evs = [], linked = 0, skipped = 0;
       var use = items.filter(function(it){ if (it.mode === 'skip') { skipped++; return false; } return true; });
       if (!use.length) { Sheet.close(); toast('登録するものはありませんでした'); return; }
+      var offs = 0;
+      use = use.filter(function(it){
+        if (!it.off) return true;
+        it.days.forEach(function(d){ evs.push({date:d, kind:'off', title:it.title, assignee:it.who}); });
+        offs++; return false;
+      });
       use.forEach(function(it){
         if (it.mode === 'link') {
           it.id = it.dup.id; linked++;
@@ -2499,7 +2534,8 @@ var Bulk = (function(){
       ls('wb_bulk', null); items = null;
       Sheet.close(); render(); renderBoard(); Office.update();
       var added = use.length - linked;
-      toast([added ? '新規 ' + added + '件' : '', linked ? '既存に予定追加 ' + linked + '件' : '', skipped ? '登録しない ' + skipped + '件' : ''].filter(Boolean).join('・') + ' で登録しました');
+      if (offs) { added = added; }
+      toast([offs ? '休み ' + offs + '件' : '', added ? '新規 ' + added + '件' : '', linked ? '既存に予定追加 ' + linked + '件' : '', skipped ? '登録しない ' + skipped + '件' : ''].filter(Boolean).join('・') + ' で登録しました');
     } catch(err) { st(sh, err.message, true); }
   }
   return {mount:mount, render:render};
