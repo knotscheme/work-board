@@ -347,6 +347,10 @@ footer{color:var(--muted);font-size:.78rem}
 .panel .qbox{line-height:1.6}
 .tools{display:flex;flex-wrap:wrap;gap:6px}
 .tools span{font-family:var(--mono);font-size:.72rem;background:var(--bg);border-radius:5px;padding:2px 7px}
+.qbtn{font:inherit;color:inherit;text-align:left;width:100%;border:0;cursor:pointer;display:flex;gap:8px;align-items:flex-start;justify-content:space-between;background:none;padding:4px 0}
+.qbox.qbtn{background:var(--warn-soft);border-radius:8px;padding:8px 10px}
+.qact{flex:none;font-size:.72rem;font-weight:700;color:var(--warn);border:1px solid var(--warn);border-radius:999px;padding:1px 8px;margin-top:2px;background:var(--surface)}
+.q ul{list-style:none;padding-left:0}
 .qbox{background:var(--warn-soft);border-radius:8px;padding:8px 10px;font-size:.84rem}
 
 /* memo */
@@ -561,7 +565,7 @@ async function readWeb(file){
 }
 // 最新を読み直して mutate を当て、競合したらもう一度
 // 予定・進み具合・定期タスクの元になる最新のボード（端末に残った古い一覧は使わない）
-var SNAP_KEY = {'events.enc.json':'events', 'pipeline.enc.json':'pipeline', 'recurring.enc.json':'recurring'};
+var SNAP_KEY = {'events.enc.json':'events', 'pipeline.enc.json':'pipeline', 'recurring.enc.json':'recurring', 'questions.enc.json':'questions'};
 async function latestBoard(){
   try { var r = await ghRead('data.enc.json'); if (r.data && r.data.board) return r.data.board; } catch(e) {}
   return DATA.board;
@@ -1396,6 +1400,34 @@ function bindToday(vb){
   });
 }
 
+function questionSheet(q){
+  if (!q) return;
+  if (!ghToken()) return needToken();
+  Sheet.open('<h3>確認事項</h3><div class="tagrow"><span class="tag cat">'+esc(q.cat)+'</span></div>' +
+    '<p style="margin:0;font-size:.95rem;line-height:1.7">'+esc(q.text)+'</p>' +
+    '<label class="fld"><span>回答（任意・秘書に伝わります）</span><textarea id="q-ans" rows="3" placeholder="例：既存品なのでこのままでOK"></textarea></label>' +
+    '<div class="row"><button class="btn ok-fill" id="q-done">確認済みにする</button><button class="btn" data-close>やめる</button></div><span class="status"></span>',
+    function(sh){
+      sh.querySelector('#q-done').onclick = async function(){
+        var ans = sh.querySelector('#q-ans').value.trim();
+        st(sh, '保存中…');
+        try {
+          var res = await ghUpdate('questions.enc.json', function(d){
+            var list = JSON.parse(JSON.stringify((d && d.questions) || []));
+            var answered = JSON.parse(JSON.stringify((d && d.answered) || DATA.board.answered || []));
+            var k = list.findIndex(function(x){ return x.cat === q.cat && x.text === q.text; });
+            if (k >= 0) list.splice(k, 1);
+            answered.push({cat: q.cat, text: q.text, answer: ans, at: new Date().toISOString()});
+            return {questions: list, answered: answered, updated: new Date().toISOString()};
+          }, 'answer question');
+          DATA.board.questions = res.questions; DATA.board.answered = res.answered;
+          Sheet.close(); renderBoard(); Office.update(); toast('確認済みにしました');
+        } catch(err) { st(sh, err.message, true); }
+      };
+    });
+}
+function findQuestion(cat, text){ return ((DATA.board && DATA.board.questions) || []).filter(function(x){ return x.cat === cat && x.text === text; })[0]; }
+
 function st(sh, text, err){ var el = sh.querySelector('.status'); if (el) { el.textContent = text; el.classList.toggle('err', !!err); } }
 
 function fail(text){ app.innerHTML = '<div class="msg"><h1 style="font-size:1.2rem">ボードを開けません</h1><p class="muted">'+text+'</p></div>'; }
@@ -1447,7 +1479,7 @@ function deptStates(owner, depts){
 }
 
 /* ---------- 読み込み ---------- */
-var LAST_SIG = '', LOADING = false, BUILD = '176de53397a7';
+var LAST_SIG = '', LOADING = false, BUILD = '56beb642a483';
 // 新しい版が公開されていたら、キャッシュを避けて読み直す
 async function checkVersion(){
   if (BUILD.indexOf('BUILD') >= 0) return;
@@ -1481,6 +1513,8 @@ async function loadInner(force){
     if (pipe && pipe.pipeline) { DATA.board.pipeline = pipe.pipeline; DATA.pipeSyncPending = true; }
     var ev = await readWeb('events.enc.json');
     if (ev && ev.events) DATA.board.events = ev.events;
+    var qq = await readWeb('questions.enc.json');
+    if (qq && qq.questions) { DATA.board.questions = qq.questions; DATA.board.answered = qq.answered || []; }
     var rc = await readWeb('recurring.enc.json');
     if (rc && rc.recurring) DATA.board.recurring = rc.recurring;
     var to = await readWeb('taskops.enc.json');
@@ -1620,7 +1654,7 @@ function renderBoard(){
       return '<li><button class="task tbtn tcard" data-p="'+esc(t.label)+'" data-tid="'+esc(t.id)+'"><span class="tagrow"><span class="tag '+esc(t.label)+'">'+esc(t.label)+'</span>'+sub+(recLabelOf(t) ? '<span class="tag rec">'+esc(recLabelOf(t))+'</span>' : '')+(t.web ? '<span class="tag web">取り込み待ち</span>' : '')+'</span><span>'+esc(t.content)+'</span><span class="meta mono">記録 '+jpDate(t.recorded)+p+'</span></button></li>';
     }).join('')+'</ul></div>';
   }).join('') || '<p class="muted" style="margin:0">この担当のタスクはありません。</p>';
-  var qs = (b.questions||[]).map(function(q){ return '<li><b>'+esc(q.cat)+'</b>：'+esc(q.text)+'</li>'; }).join('');
+  var qs = (b.questions||[]).map(function(q, i){ return '<li><button class="qbtn" data-qi="'+i+'"><span><b>'+esc(q.cat)+'</b>：'+esc(q.text)+'</span><span class="qact">確認する</span></button></li>'; }).join('');
   var dn = DATA.done.slice(0,10).map(function(t){ return '<li><button class="donebtn" data-reopen="'+esc(t.id)+'"><span class="mono">'+jpDate(t.done)+'</span><span class="dtxt">'+esc(t.content)+'</span><span class="undo">戻す</span></button></li>'; }).join('');
 
   document.getElementById('view-board').innerHTML = todayHtml() +
@@ -1649,6 +1683,7 @@ function renderBoard(){
   vb.querySelectorAll('.ev[data-ei]').forEach(function(b){ b.onclick = function(){ if (b.dataset.dragged) return; eventSheet(DATA.board.events[+b.dataset.ei]); }; });
   bindEventDrag(vb);
   bindToday(vb);
+  vb.querySelectorAll('[data-qi]').forEach(function(b){ b.onclick = function(){ questionSheet((DATA.board.questions || [])[+b.dataset.qi]); }; });
   vb.querySelectorAll('[data-reopen]').forEach(function(b){
     b.onclick = function(){
       var t = DATA.done.filter(function(x){ return x.id === b.dataset.reopen; })[0]; if (!t) return;
@@ -2045,7 +2080,7 @@ var Office = (function(){
     } else if (u.person) {
       html += '<div class="pn-head"><span class="pn-av" style="background:'+whoColor(u.person)+'"></span><h3>'+esc(u.person)+'</h3><span class="state '+s.state+'">'+STATE_JP[s.state]+'</span></div>' + statRow(s);
       html += evList('今日の予定', s.today) + evList('近い締切', s.soon.filter(function(e){ return s.today.indexOf(e) < 0; }));
-      if (s.qs.length) html += '<div class="lbl">あなたへの確認</div><div class="pn-list">' + s.qs.map(function(q){ return '<div class="qbox"><b>'+esc(q.cat)+'</b><br>'+esc(q.text)+'</div>'; }).join('') + '</div>';
+      if (s.qs.length) html += '<div class="lbl">あなたへの確認</div><div class="pn-list">' + s.qs.map(function(q){ return '<button class="qbox qbtn" data-qc="'+esc(q.cat)+'" data-qt="'+esc(q.text)+'"><span><b>'+esc(q.cat)+'</b><br>'+esc(q.text)+'</span><span class="qact">確認する</span></button>'; }).join('') + '</div>';
       html += '<div class="lbl">担当タスク（工程ごと・タップで編集）</div>' + taskList(s.tasks, true);
       html += '<div class="row"><button class="btn" id="team-close">チームをしまう</button></div>';
     } else {
@@ -2053,7 +2088,7 @@ var Office = (function(){
       html += '<h3>'+esc(d.cat)+'担当 <span class="meta">（'+esc(teamOwner)+'チーム）</span></h3><span class="state '+s.state+'">'+STATE_JP[s.state]+'</span>' +
         '<div class="meta mono">Works/'+esc(d.folder)+'/</div>';
       html += evList('今日の予定', s.today) + evList('近い締切', s.soon.filter(function(e){ return s.today.indexOf(e) < 0; }));
-      if (s.qs.length) html += '<div class="lbl">あなたへの確認（挙手中）</div>' + s.qs.map(function(q){ return '<div class="qbox">'+esc(q.text)+'</div>'; }).join('');
+      if (s.qs.length) html += '<div class="lbl">あなたへの確認（挙手中）</div>' + s.qs.map(function(q){ return '<button class="qbox qbtn" data-qc="'+esc(q.cat)+'" data-qt="'+esc(q.text)+'"><span>'+esc(q.text)+'</span><span class="qact">確認する</span></button>'; }).join('');
       if (s.products.length) { var PJ = {hot:'今週やる', now:'次の作業', wait:'待ち'}; html += '<div class="lbl">担当している品番</div><ul>'+s.products.map(function(a){ return '<li><span class="code">'+esc(a.code)+'</span> '+esc(a.name)+' <span class="meta">（'+esc(a.stage)+'・'+PJ[a.state]+'）</span></li>'; }).join('')+'</ul>'; }
       html += '<div class="lbl">担当タスク '+s.tasks.length+'件（タップで編集）</div>' + taskList(s.tasks, false);
       html += '<div class="lbl">道具（AI・ツール）</div><div class="tools">'+(d.tools || []).map(function(t){ return '<span>'+esc(t)+'</span>'; }).join('')+'</div>';
@@ -2061,6 +2096,7 @@ var Office = (function(){
     panelEl.innerHTML = html; panelEl.hidden = false;
     renderStrip();
     panelEl.querySelector('.x').onclick = function(){ select(null); };
+    panelEl.querySelectorAll('[data-qc]').forEach(function(b){ b.onclick = function(){ questionSheet(findQuestion(b.dataset.qc, b.dataset.qt)); }; });
     panelEl.querySelectorAll('[data-ptid]').forEach(function(b){ b.onclick = function(){ var t = DATA.pending.filter(function(x){ return x.id === b.dataset.ptid; })[0]; if (t) taskSheet(t); }; });
     var tc = panelEl.querySelector('#team-close');
     if (tc) tc.onclick = function(){ collapse(); select(null); update(); };
