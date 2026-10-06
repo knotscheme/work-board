@@ -1413,7 +1413,7 @@ function deptStates(owner, depts){
 }
 
 /* ---------- 読み込み ---------- */
-var LAST_SIG = '', LOADING = false, BUILD = '884f9159ef94';
+var LAST_SIG = '', LOADING = false, BUILD = '571b68549c55';
 // 新しい版が公開されていたら、キャッシュを避けて読み直す
 async function checkVersion(){
   if (BUILD.indexOf('BUILD') >= 0) return;
@@ -1672,8 +1672,11 @@ var Office = (function(){
       hairM.visible = false;
       var buzzM = mat(0x2F2C2A);
       var buzz = new THREE.Mesh(new THREE.SphereGeometry(.281,24,16,0,Math.PI*2,0,Math.PI*.52), buzzM); buzz.rotation.x = -.5; buzz.position.z = -.005; headG.add(buzz);
-      var topH = new THREE.Mesh(new THREE.SphereGeometry(.288,24,14,0,Math.PI*2,0,Math.PI*.4), hair); topH.scale.set(.9,1.08,1.0); topH.position.set(0,.03,-.01); topH.rotation.x = -.15; topH.castShadow = true; headG.add(topH);
-      var quiff = new THREE.Mesh(new THREE.SphereGeometry(.15,16,12), hair); quiff.scale.set(1.25,.62,.85); quiff.position.set(0,.25,.13); quiff.rotation.x = -.45; quiff.castShadow = true; headG.add(quiff);
+      var topH = new THREE.Mesh(new THREE.SphereGeometry(.288,24,14,0,Math.PI*2,0,Math.PI*.4), hair); topH.scale.set(.92,1.14,1.0); topH.position.set(0,.03,-.01); topH.rotation.x = -.15; topH.castShadow = true; headG.add(topH);
+      // 前髪：丸みのある束を2つ重ねて、少し横に流しながら立ち上げる（角ばらないように）
+      [[.05,.255,.12,1.05,.72,.85,-.5,-.25,.13],[-.07,.235,.1,.9,.6,.8,-.35,.2,.11]].forEach(function(q){
+        var m = new THREE.Mesh(new THREE.SphereGeometry(q[8],16,12), hair); m.scale.set(q[3],q[4],q[5]); m.position.set(q[0],q[1],q[2]); m.rotation.set(q[6],0,q[7]); m.castShadow = true; headG.add(m);
+      });
     } else if (st === 'medium') { // ミディアムロング（肩につくくらい）
       var mh = new THREE.Mesh(new THREE.SphereGeometry(.3,20,14), hair); mh.scale.set(1.04,1.2,.86); mh.position.set(0,-.08,-.08); mh.castShadow = true; headG.add(mh);
       [-1,1].forEach(function(sd){ var side = new THREE.Mesh(new THREE.SphereGeometry(.11,10,8), hair); side.scale.set(.8,1.8,.9); side.position.set(sd*.24,-.1,.06); headG.add(side); });
