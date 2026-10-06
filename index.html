@@ -1413,7 +1413,7 @@ function deptStates(owner, depts){
 }
 
 /* ---------- 読み込み ---------- */
-var LAST_SIG = '', LOADING = false, BUILD = '571b68549c55';
+var LAST_SIG = '', LOADING = false, BUILD = 'c31d704ed471';
 // 新しい版が公開されていたら、キャッシュを避けて読み直す
 async function checkVersion(){
   if (BUILD.indexOf('BUILD') >= 0) return;
@@ -1767,7 +1767,7 @@ var Office = (function(){
   var teamOwner = null, teamKeys = [], hintEl = null;
   var LOOK = {
     '佐藤':{hair:0x3B2A20, style:'longish', shirt:0xB8AC9C},   // 少し長めの髪・グレージュの服
-    '白川':{hair:0x141414, style:'twoblock'},                                   // 黒髪
+    '白川':{hair:0x141414},                                   // 黒髪
     '鳥居':{hair:0xE8C25A, cap:0x161616},                     // 金髪・黒のキャップ
     '藤田':{hair:0x141414, style:'medium'},                   // 黒髪ミディアムロング
     '佐々木':{hair:0x2B2118, style:'ponytail'}                // ポニーテール
