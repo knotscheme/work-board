@@ -771,6 +771,21 @@ var EV_ICONS = [
   ['mail', '<rect x="3.5" y="6" width="17" height="12" rx="1.5"/><path d="M4 7l8 6 8-6"/>', ''],
   ['meet', '<circle cx="8.5" cy="9" r="2.6"/><circle cx="16" cy="9" r="2.6"/><path d="M3.8 18c.6-2.8 2.5-4.2 4.7-4.2s4.1 1.4 4.7 4.2"/><path d="M12.2 15c.9-.8 2.2-1.2 3.8-1.2 2.2 0 4.1 1.4 4.7 4.2"/>', '']
 ];
+function guessIcon(text, stage){
+  var t = text || '';
+  var shoot = /撮影|撮る|物撮り|ロケ/.test(t) || stage === '撮影';
+  if (shoot && /午前|AM|朝/i.test(t)) return 'cam_am';
+  if (shoot && /午後|PM|夕方|夕/i.test(t)) return 'cam_pm';
+  if (shoot) return 'cam';
+  if (/画像|レタッチ|サムネ|白抜き/.test(t) || stage === '画像') return 'img';
+  if (/告知|メルマガ|LINE|ライン|SNS|クラファン|広告|販促/i.test(t) || stage === '販促') return 'mega';
+  if (/LP|ＬＰ|ページ|説明文|タイトル|原稿|文章/.test(t) || stage === 'LP') return 'pen';
+  if (/メール|問い合わせ|問合せ|返信/.test(t)) return 'mail';
+  if (/打ち合わせ|打合せ|会議|ミーティング|MTG|面談|商談/i.test(t)) return 'meet';
+  if (/発注|配送|発送|納品|入荷/.test(t)) return 'truck';
+  if (/登録|在庫|Shopify|ショッピファイ|ZOZO|ネクストエンジン|カタログ/i.test(t) || stage === '登録') return 'box';
+  return '';
+}
 function evIconHtml(key){
   var ic = EV_ICONS.filter(function(x){ return x[0] === key; })[0];
   if (!ic) return '';
@@ -1508,7 +1523,7 @@ function deptStates(owner, depts){
 }
 
 /* ---------- 読み込み ---------- */
-var LAST_SIG = '', LOADING = false, BUILD = '2d11528ca427';
+var LAST_SIG = '', LOADING = false, BUILD = 'e4f87c7f4c8a';
 // 新しい版が公開されていたら、キャッシュを避けて読み直す
 async function checkVersion(){
   if (BUILD.indexOf('BUILD') >= 0) return;
@@ -2510,11 +2525,11 @@ var Bulk = (function(){
           var stage = stages[j];
           out.push({line:li, code:code, isNew:!item, name: item ? item.name : '', stageIdx:j, stage:stage,
             category: STAGE_CAT[stage] || 'その他', content: code + (item ? ' ' + item.name : '') + '：' + stage + '（' + line + '）',
-            label:label, who:who, win:win, title: code + ' ' + stage});
+            label:label, who:who, win:win, title: code + ' ' + stage, icon: guessIcon(line, stage)});
         });
       } else {
         var cw = CAT_WORDS.filter(function(x){ return x[1].test(line); })[0];
-        out.push({line:li, code:null, category: cw ? cw[0] : 'その他', content: line, label:label, who:who, win:win, title: line.length > 24 ? line.slice(0,24) + '…' : line});
+        out.push({line:li, code:null, category: cw ? cw[0] : 'その他', content: line, label:label, who:who, win:win, title: line.length > 24 ? line.slice(0,24) + '…' : line, icon: guessIcon(line, '')});
       }
     });
     // 期間ごとに、上の行から順に平日へ割り振る
@@ -2569,7 +2584,7 @@ var Bulk = (function(){
           '<div class="row2"><select class="bk-who">'+names.map(function(n){ return '<option'+(n === it.who ? ' selected' : '')+'>'+esc(n)+'</option>'; }).join('')+'</select><span></span></div>' +
           '<div class="meta">カレンダーに'+(it.half ? '半日休み' : '休み')+'として入れます（タスクにはしません）：'+dlist(it.days)+'</div></div>';
         return '<div class="bk-item" data-i="'+i+'"><div class="bk-top"><span class="bk-no mono">'+(i+1)+'</span>' +
-          (it.code ? '<span class="code">'+esc(it.code)+'</span>'+(it.isNew ? '<span class="tag web">新発進捗に追加</span>' : '')+'<span class="tag cat">'+esc(it.stage)+'</span>' : '<span class="tag cat">'+esc(it.category)+'</span>') +
+          evIconHtml(it.icon) + (it.code ? '<span class="code">'+esc(it.code)+'</span>'+(it.isNew ? '<span class="tag web">新発進捗に追加</span>' : '')+'<span class="tag cat">'+esc(it.stage)+'</span>' : '<span class="tag cat">'+esc(it.category)+'</span>') +
           '<button class="bk-x" data-x="'+i+'" aria-label="この行を外す">×</button></div>' +
           (it.dup ? '<div class="bk-dup"><b>既存のタスクと重複：</b>'+esc(it.dup.content.slice(0,60))+(it.dup.content.length > 60 ? '…' : '') +
             '<div class="seg wide bk-mode" data-m="'+i+'">' + [['link','予定だけ追加'],['new','新しく追加'],['skip','登録しない']].map(function(m){ return '<button type="button" data-v="'+m[0]+'"'+(it.mode === m[0] ? ' aria-pressed="true"' : '')+'>'+m[1]+'</button>'; }).join('') + '</div></div>' : '') +
@@ -2619,7 +2634,7 @@ var Bulk = (function(){
           it.id = newId();
           ops.push({op:'add', id:it.id, content:it.content, category:it.category, label:it.label, assignee:it.who, opId:newId(), at:now});
         }
-        it.days.forEach(function(d){ evs.push({date:d, kind:'plan', title:it.title, task:it.id, assignee:it.who}); });
+        it.days.forEach(function(d){ var ev = {date:d, kind:'plan', title:it.title, task:it.id, assignee:it.who}; if (it.icon) ev.icon = it.icon; evs.push(ev); });
         if (it.deadline) evs.push({date:it.deadline, kind:'deadline', title:it.title + ' 締切', task:it.id, assignee:it.who});
       });
       // 1) タスク
