@@ -56,6 +56,14 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
 .top{display:grid;grid-template-columns:1fr auto;gap:16px 20px;align-items:end}
 .top p{margin:4px 0 0;color:var(--muted);font-size:.86rem}
 .count{background:var(--urgent-soft);color:var(--urgent);border-radius:10px;padding:10px 16px;display:grid;gap:2px;text-align:right}
+.count{display:block;position:relative;overflow:hidden;width:min(300px,100%);padding:0!important}
+.count.multi{cursor:pointer}
+.cslides{display:flex;transition:transform .55s cubic-bezier(.4,0,.2,1)}
+.cslide{flex:0 0 100%;min-width:0;display:grid;gap:2px;padding:10px 16px}
+.cdots{display:flex;gap:5px;justify-content:flex-end;padding:0 16px 8px;margin-top:-4px}
+.cdots i{width:6px;height:6px;border-radius:50%;background:currentColor;opacity:.25;transition:opacity .3s}
+.cdots i.on{opacity:1}
+@media (prefers-reduced-motion:reduce){.cslides{transition:none}}
 .count .lbl{font-size:.76rem;font-weight:700;letter-spacing:.04em}
 .count .num{font-size:1.7rem;font-weight:700;line-height:1.1}
 .count .num span{font-size:.9rem;margin-left:2px}
@@ -415,7 +423,9 @@ textarea{min-height:140px;resize:vertical;line-height:1.6}
   .wrap{gap:22px}
   h1{font-size:1.3rem}
   .top{gap:10px}
-  .count{padding:8px 12px;grid-template-columns:1fr auto;align-items:baseline;column-gap:10px;justify-self:stretch}
+  .count{padding:8px 12px;justify-self:stretch;width:100%}
+  .cslide{grid-template-columns:1fr auto;align-items:baseline;column-gap:10px;padding:8px 12px}
+  .cdots{justify-content:flex-start;padding:0 12px 6px}
   .count .num{font-size:1.35rem;grid-row:span 2}
   .tabs{position:fixed;left:0;right:0;bottom:0;z-index:40;justify-self:stretch;width:100%;border-radius:0;border:0;border-top:1px solid color-mix(in srgb, var(--line) 70%, transparent);
     padding:2px 6px calc(2px + env(safe-area-inset-bottom, 0px));gap:0;justify-content:stretch;box-shadow:none;
@@ -1523,7 +1533,7 @@ function deptStates(owner, depts){
 }
 
 /* ---------- 読み込み ---------- */
-var LAST_SIG = '', LOADING = false, BUILD = 'e4f87c7f4c8a';
+var LAST_SIG = '', LOADING = false, BUILD = '31a65fb443ef';
 // 新しい版が公開されていたら、キャッシュを避けて読み直す
 async function checkVersion(){
   if (BUILD.indexOf('BUILD') >= 0) return;
@@ -1633,6 +1643,21 @@ function setTab(t){
   if (t === 'office') Office.start(); else Office.stop();
 }
 
+function upcomingEvents(){
+  var now = new Date();
+  return ((DATA.board && DATA.board.events) || []).filter(function(e){ return e.kind === 'event'; })
+    .map(function(e){ return Object.assign({at: new Date(e.date+'T'+(e.time||'00:00')+':00+09:00')}, e); })
+    .filter(function(e){ return e.at > now; }).sort(function(a,b){ return a.at - b.at; });
+}
+// カウントダウン：イベントが複数あれば横にスライドして切り替える
+var COUNT_I = 0, COUNT_T = null;
+function countSlide(step){
+  var box = document.querySelector('.count'); if (!box) return;
+  var slides = box.querySelectorAll('.cslide'), n = slides.length; if (n < 2) return;
+  COUNT_I = (COUNT_I + (step || 1) + n) % n;
+  box.querySelector('.cslides').style.transform = 'translateX(' + (-100 * COUNT_I) + '%)';
+  box.querySelectorAll('.cdots i').forEach(function(d, k){ d.classList.toggle('on', k === COUNT_I); });
+}
 function nextEvent(){
   var now = new Date();
   return ((DATA.board && DATA.board.events) || []).filter(function(e){ return e.kind === 'event'; })
@@ -1641,15 +1666,22 @@ function nextEvent(){
 }
 
 function renderHeader(){
-  var next = nextEvent(), countHtml = '';
-  if (next) {
-    var ms = next.at - new Date(), d = Math.floor(ms/86400000), h = Math.floor(ms%86400000/3600000);
-    countHtml = '<div class="count"><div class="lbl">'+esc(next.title)+' まで</div><div class="num mono">'+(d>0? d+'<span>日</span> ':'')+h+'<span>時間</span></div><div class="sub mono">'+jpDate(next.at)+' '+esc(next.time||'')+'</div></div>';
+  var ups = upcomingEvents().slice(0, 5), countHtml = '';
+  if (ups.length) {
+    if (COUNT_I >= ups.length) COUNT_I = 0;
+    countHtml = '<div class="count'+(ups.length > 1 ? ' multi' : '')+'" role="region" aria-label="これからのイベント"><div class="cslides" style="transform:translateX('+(-100*COUNT_I)+'%)">' + ups.map(function(next){
+      var ms = next.at - new Date(), d = Math.floor(ms/86400000), h = Math.floor(ms%86400000/3600000);
+      return '<div class="cslide"><div class="lbl">'+esc(next.title)+' まで</div><div class="num mono">'+(d>0? d+'<span>日</span> ':'')+h+'<span>時間</span></div><div class="sub mono">'+jpDate(next.at)+' '+esc(next.time||'')+'</div></div>';
+    }).join('') + '</div>' + (ups.length > 1 ? '<div class="cdots">'+ups.map(function(_, k){ return '<i'+(k === COUNT_I ? ' class="on"' : '')+'></i>'; }).join('')+'</div>' : '') + '</div>';
   }
   document.getElementById('hdr').innerHTML =
     '<div><h1>やることボード</h1><p>アジアンアーツ制作部 ・ 未完了 <span class="mono">'+DATA.pending.length+'</span> 件 ・ 更新 <span class="mono">'+jpDateTime(DATA.updated)+'</span> <button class="reload" id="reload" aria-label="最新の内容を読み込む">↻ 更新</button></p></div>'+countHtml+
     '<nav class="tabs" role="tablist" aria-label="メニュー"><button role="tab" data-t="today"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 11.2 12 4l8.5 7.2"/><path d="M6 9.6V20h12V9.6"/><path d="M10 20v-5.2h4V20"/></svg><span>今日</span></button><button role="tab" data-t="sched"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15.5" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/><path d="M7.5 14h3M13.5 14h3M7.5 17.2h3"/></svg><span>予定</span></button><button role="tab" data-t="pipe"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 7.8L12 3.5l8.5 4.3v8.4L12 20.5l-8.5-4.3z"/><path d="M3.5 7.8L12 12l8.5-4.2M12 12v8.5"/><path d="M7.7 5.6l8.5 4.3"/></svg><span>新発進捗</span></button><button role="tab" data-t="tasks"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6.5l1.6 1.6L8.8 5"/><path d="M4 12.5l1.6 1.6L8.8 11"/><path d="M4.6 18.5h2.6"/><path d="M11.5 6.5H20M11.5 12.5H20M11.5 18.5H20"/></svg><span>タスク</span></button><button role="tab" data-t="office"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="7.5" r="2.6"/><circle cx="16.5" cy="7.5" r="2.6"/><path d="M3.5 15.5c.6-2.6 2.4-4 4.5-4s3.9 1.4 4.5 4"/><path d="M12 15.5c.6-2.6 2.4-4 4.5-4s3.9 1.4 4.5 4"/><rect x="2.5" y="15.5" width="19" height="3" rx="1"/><path d="M5 18.5v2.5M19 18.5v2.5"/></svg><span>オフィス</span></button><button role="tab" data-t="memo"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5.5 3.5h9l4 4v13h-13z"/><path d="M14.5 3.5v4h4"/><path d="M8.5 12h7M8.5 15.5h7M8.5 8.5h3"/></svg><span>メモ</span></button></nav>';
   document.querySelectorAll('.tabs button').forEach(function(b){ b.onclick = function(){ setTab(b.dataset.t); window.scrollTo(0, 0); }; });
+  var cb = document.querySelector('.count.multi');
+  if (cb) cb.onclick = function(){ countSlide(1); clearInterval(COUNT_T); COUNT_T = setInterval(function(){ if (!document.hidden) countSlide(1); }, 4000); };
+  clearInterval(COUNT_T);
+  if (cb) COUNT_T = setInterval(function(){ if (!document.hidden) countSlide(1); }, 4000);
   var rb = document.getElementById('reload'); if (rb) rb.onclick = async function(){ rb.disabled = true; await load(true); rb.disabled = false; toast('最新にしました'); };
   setTab(tab);
 }
