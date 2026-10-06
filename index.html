@@ -144,6 +144,13 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
 .tag.cat{background:var(--bg);color:var(--muted)}
 .tag.whotag{background:var(--done-soft);color:var(--done)}
 .ctag{display:inline-block;font-size:.64rem;font-weight:700;background:var(--warn-soft);color:var(--warn);border-radius:999px;padding:0 6px;margin-right:4px;vertical-align:1px}
+.evicon{display:inline-flex;align-items:center;gap:1px;vertical-align:-3px;margin-right:4px;color:var(--accent)}
+.evicon svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.evicon b{font-size:.62rem;font-weight:700;line-height:1;background:var(--accent);color:var(--surface);border-radius:4px;padding:2px 3px;margin-left:1px}
+.iconpick{display:flex;flex-wrap:wrap;gap:6px}
+.iconpick button{border:1px solid var(--line);background:var(--surface);border-radius:10px;min-width:44px;height:40px;padding:0 8px;font-size:.78rem;font-weight:700;color:var(--muted)}
+.iconpick button[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft);color:var(--accent);box-shadow:0 0 0 1px var(--accent)}
+.iconpick .evicon{margin:0}
 .rtag{display:inline-block;font-size:.64rem;font-weight:700;border:1px dashed var(--accent);color:var(--accent);border-radius:999px;padding:0 5px;margin-right:4px;vertical-align:1px;background:var(--surface)}
 .ev.recur{border-left-style:dashed}
 .ev .who{display:inline-block;font-size:.68rem;font-weight:700;background:var(--done-soft);color:var(--done);border-radius:999px;padding:0 6px;margin-right:5px;vertical-align:1px}
@@ -751,6 +758,24 @@ function needToken(){
     function(sh){ sh.querySelector('#go-memo').onclick = function(){ Sheet.close(); setTab('memo'); }; });
 }
 
+var CAM = '<path d="M3.5 8.2h3.2l1.6-2.2h7.4l1.6 2.2h3.2v10.3H3.5z"/><circle cx="12" cy="13.2" r="3.4"/>';
+var EV_ICONS = [
+  ['cam_am', CAM, '午前'],
+  ['cam_pm', CAM, '午後'],
+  ['cam', CAM, ''],
+  ['img', '<rect x="3.5" y="5" width="17" height="14" rx="2"/><circle cx="9" cy="10" r="1.6"/><path d="M4 17l5-4.5 3.5 3 3-2.5 4.5 4"/>', ''],
+  ['pen', '<path d="M5 19l1-4L15.5 5.5a2 2 0 0 1 3 3L9 18z"/><path d="M13.5 7.5l3 3"/>', ''],
+  ['box', '<path d="M3.5 7.8L12 3.5l8.5 4.3v8.4L12 20.5l-8.5-4.3z"/><path d="M3.5 7.8L12 12l8.5-4.2M12 12v8.5"/>', ''],
+  ['truck', '<path d="M3 6.5h11v9H3z"/><path d="M14 9.5h4l3 3v3h-7"/><circle cx="7" cy="17" r="1.8"/><circle cx="17" cy="17" r="1.8"/>', ''],
+  ['mega', '<path d="M4 10v4h3l7 4V6L7 10z"/><path d="M17 9.5a3.5 3.5 0 0 1 0 5"/>', ''],
+  ['mail', '<rect x="3.5" y="6" width="17" height="12" rx="1.5"/><path d="M4 7l8 6 8-6"/>', ''],
+  ['meet', '<circle cx="8.5" cy="9" r="2.6"/><circle cx="16" cy="9" r="2.6"/><path d="M3.8 18c.6-2.8 2.5-4.2 4.7-4.2s4.1 1.4 4.7 4.2"/><path d="M12.2 15c.9-.8 2.2-1.2 3.8-1.2 2.2 0 4.1 1.4 4.7 4.2"/>', '']
+];
+function evIconHtml(key){
+  var ic = EV_ICONS.filter(function(x){ return x[0] === key; })[0];
+  if (!ic) return '';
+  return '<span class="evicon"><svg viewBox="0 0 24 24" aria-hidden="true">'+ic[1]+'</svg>'+(ic[2] ? '<b>'+ic[2]+'</b>' : '')+'</span>';
+}
 var KIND_JP = [['plan','作業予定'],['deadline','締切'],['event','イベント'],['duty','担当業務'],['off','休み']];
 // 定期タスクの予定なら「毎日」などの名前を返す（そうでなければ空）
 // 予定にひも付くタスクが完了済みか
@@ -856,6 +881,8 @@ function eventSheet(orig, date){
       '<label class="fld"><span>時刻（任意）</span><input type="time" id="ev-time" value="'+esc(e.time||'')+'"></label></div>' +
       '<div class="fld"><span>種類</span><div class="seg wide" id="ev-kind">'+KIND_JP.map(function(k){ return '<button type="button" data-v="'+k[0]+'"'+(k[0] === e.kind ? ' aria-pressed="true"' : '')+'>'+k[1]+'</button>'; }).join('')+'</div></div>' +
       whoField(e.assignee) +
+      '<div class="fld"><span>アイコン（任意）</span><div class="iconpick" id="ev-icon"><button type="button" data-v=""'+(!e.icon ? ' aria-pressed="true"' : '')+'>なし</button>' +
+        EV_ICONS.map(function(ic){ return '<button type="button" data-v="'+ic[0]+'"'+(e.icon === ic[0] ? ' aria-pressed="true"' : '')+' aria-label="'+(ic[2] || ic[0])+'">'+evIconHtml(ic[0])+'</button>'; }).join('') + '</div></div>' +
       '<label class="fld"><span>関連するタスク（任意）<small class="meta" id="ev-task-hint"> 担当を選ぶと、その人のタスクに絞られます</small></span><select id="ev-task">'+taskOpts+'</select></label>' +
       '<p class="warnline" id="ev-warn" hidden>土日は休みの設定です（このまま保存もできます）</p>' +
       '<div class="row"><button class="btn primary" id="ev-save">保存</button><button class="btn" data-close>やめる</button>' +
@@ -863,6 +890,7 @@ function eventSheet(orig, date){
       '<span class="status" id="ev-status"></span>',
       function(sh){
         var kind = e.kind, getWho = bindWho(sh, e.assignee);
+        sh.querySelectorAll('#ev-icon button').forEach(function(b){ b.onclick = function(){ sh.querySelectorAll('#ev-icon button').forEach(function(x){ x.setAttribute('aria-pressed', x === b); }); }; });
         var tsel = sh.querySelector('#ev-task'), hint = sh.querySelector('#ev-task-hint');
         function refreshTasks(){
           var w = getWho(), keep = tsel.value;
@@ -881,7 +909,7 @@ function eventSheet(orig, date){
         sh.querySelectorAll('#ev-kind button').forEach(function(b){ b.onclick = function(){ kind = b.dataset.v; sh.querySelectorAll('#ev-kind button').forEach(function(x){ x.setAttribute('aria-pressed', x === b); }); warn(); }; });
         sh.querySelector('#ev-date').onchange = warn; warn();
         if (!orig) sh.querySelector('#ev-title').focus();
-        function collect(){ return {title: sh.querySelector('#ev-title').value.trim(), date: sh.querySelector('#ev-date').value, time: sh.querySelector('#ev-time').value, kind: kind, task: sh.querySelector('#ev-task').value, assignee: getWho()}; }
+        function collect(){ return {title: sh.querySelector('#ev-title').value.trim(), date: sh.querySelector('#ev-date').value, time: sh.querySelector('#ev-time').value, kind: kind, task: sh.querySelector('#ev-task').value, assignee: getWho(), icon: (sh.querySelector('#ev-icon [aria-pressed="true"]') || {dataset:{v:''}}).dataset.v}; }
         var del = sh.querySelector('#ev-del'); if (del) del.onclick = function(){
           confirmModal('この予定を削除しますか？', '「'+orig.title+'」（'+jpDate(orig.date+'T00:00:00')+'）を削除します。元に戻せません。', '削除する', function(){ commit(null, sh); });
         };
@@ -891,6 +919,7 @@ function eventSheet(orig, date){
           var ne = {date: v.date, kind: v.kind, title: v.title};
           if (v.time) ne.time = v.time;
           if (v.task) ne.task = v.task;
+          if (v.icon) ne.icon = v.icon;
           if (v.assignee) ne.assignee = v.assignee;
           if (orig && orig.cat) ne.cat = orig.cat;
           commit(ne, sh);
@@ -1358,7 +1387,7 @@ function todayHtml(){
       return '<li class="td-item'+(late ? ' late' : '')+(fin ? ' fin' : '')+'"><button class="td-main" data-ei="'+e._i+'"'+(t ? ' data-tk="'+esc(t.id)+'"' : '')+'>' +
         '<span class="td-kind '+(fin ? 'fin' : late ? 'late' : e.kind)+'">'+(fin ? '✓ 完了' : late ? '期限切れ '+jpDate(e.date+'T00:00:00') : e.kind === 'deadline' ? '締切' : '作業')+'</span>' +
         (e.time ? '<span class="mono td-time">'+esc(e.time)+'</span>' : '') +
-        '<span class="td-title">'+(e.carried ? '<span class="ctag">持ち越し</span>' : '')+esc(e.title)+(recLabelOfEvent(e) ? ' <span class="rtag">'+esc(recLabelOfEvent(e).replace('（平日）',''))+'</span>' : '')+'</span>' +
+        '<span class="td-title">'+(e.carried ? '<span class="ctag">持ち越し</span>' : '')+evIconHtml(e.icon)+esc(e.title)+(recLabelOfEvent(e) ? ' <span class="rtag">'+esc(recLabelOfEvent(e).replace('（平日）',''))+'</span>' : '')+'</span>' +
         (t ? '<span class="td-task">'+esc(t.content.slice(0,60))+(t.content.length > 60 ? '…' : '')+'</span>' : '') + '</button>' +
         '</li>';
     }
@@ -1479,7 +1508,7 @@ function deptStates(owner, depts){
 }
 
 /* ---------- 読み込み ---------- */
-var LAST_SIG = '', LOADING = false, BUILD = 'd01d8b06e64f';
+var LAST_SIG = '', LOADING = false, BUILD = '2d11528ca427';
 // 新しい版が公開されていたら、キャッシュを避けて読み直す
 async function checkVersion(){
   if (BUILD.indexOf('BUILD') >= 0) return;
@@ -1623,7 +1652,7 @@ function renderBoard(){
     var evs = events.filter(function(e){ return e.date === key && (e.kind === 'event' || whoMatch(whoOfEvent(e))); }).sort(evOrder(events));
     cal += '<div data-date="'+key+'" class="day'+(key === today ? ' today' : key < today ? ' past' : '')+(day.getDay()===0 ? ' sun' : '')+(day.getDay()%6===0 ? ' wkend' : '')+(evs.length ? '' : ' empty')+'"><div class="dn"><b>'+(day.getMonth()+1)+'/'+day.getDate()+'（'+W[day.getDay()]+'）</b>'+(key===today?'<span>今日</span>':'')+'</div>';
     recurringOn(key).forEach(function(r){ var daily = r.rule.type === 'daily'; cal += '<div class="ev '+(daily ? 'plan' : 'deadline')+' virtual" title="定期タスク（その日になると自動でタスクになります）">'+(r.assignee ? whoChip(r.assignee) : '')+'<span class="rtag">'+esc(recRuleLabel(r).replace('（平日）',''))+'</span>'+esc(r.title)+(daily ? '' : ' 締切')+'</div>'; });
-    evs.forEach(function(e){ var who = whoOfEvent(e); var rl = recLabelOfEvent(e); cal += '<button class="ev '+esc(e.kind)+(isHalfOff(e) ? ' half' : '')+(rl ? ' recur' : '')+(isDoneEvent(e) ? ' evdone' : '')+'" data-ei="'+events.indexOf(e)+'">'+(who ? whoChip(who) : '')+(rl ? '<span class="rtag">'+esc(rl.replace('（平日）',''))+'</span>' : '')+(e.carried ? '<span class="ctag">持ち越し</span>' : '')+(e.time?'<span class="tm">'+esc(e.time)+'</span>':'')+esc(e.title)+'</button>'; });
+    evs.forEach(function(e){ var who = whoOfEvent(e); var rl = recLabelOfEvent(e); cal += '<button class="ev '+esc(e.kind)+(isHalfOff(e) ? ' half' : '')+(rl ? ' recur' : '')+(isDoneEvent(e) ? ' evdone' : '')+'" data-ei="'+events.indexOf(e)+'">'+(who ? whoChip(who) : '')+(rl ? '<span class="rtag">'+esc(rl.replace('（平日）',''))+'</span>' : '')+(e.carried ? '<span class="ctag">持ち越し</span>' : '')+evIconHtml(e.icon)+(e.time?'<span class="tm">'+esc(e.time)+'</span>':'')+esc(e.title)+'</button>'; });
     if (key >= today) cal += '<button class="addev" data-date="'+key+'" aria-label="'+key+' に予定を追加">＋ 追加</button>';
     cal += '</div>';
   }
@@ -2054,7 +2083,7 @@ var Office = (function(){
       var rl = recLabelOfEvent(e);
       return '<div class="pn-ev '+esc(e.kind)+'"><span class="td-kind '+esc(e.kind)+'">'+(e.kind === 'deadline' ? '締切' : e.kind === 'event' ? 'イベント' : '作業')+'</span>' +
         (label === '今日の予定' ? '' : '<span class="mono pn-date">'+jpDate(e.date+'T00:00:00')+'</span>') +
-        (e.time ? '<span class="mono pn-date">'+esc(e.time)+'</span>' : '') + '<b>'+esc(e.title)+'</b>' + (rl ? '<span class="rtag">'+esc(rl.replace('（平日）',''))+'</span>' : '') + '</div>';
+        (e.time ? '<span class="mono pn-date">'+esc(e.time)+'</span>' : '') + evIconHtml(e.icon) + '<b>'+esc(e.title)+'</b>' + (rl ? '<span class="rtag">'+esc(rl.replace('（平日）',''))+'</span>' : '') + '</div>';
     }).join('')+'</div>';
   }
   function statRow(s){
