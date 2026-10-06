@@ -103,6 +103,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
 .td-dot{width:14px;height:14px;border-radius:50%;background:var(--pc)}
 .td-duty{font-size:.7rem;font-weight:700;background:var(--bg);color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:1px 8px}
 .td-duty.off{background:#EFE8FA;color:#6B4E9B;border-color:#D8CCEE}
+.ev.off.half,.td-duty.off.half{background:#F6F2FC;border-left-style:dashed;opacity:.85}
 .ev.off{background:#EFE8FA;border-left-color:#B7A6D6;color:#6B4E9B;font-weight:700}
 .tag.offtag{background:#EFE8FA;color:#6B4E9B}
 .td-n{margin-left:auto;font-size:.78rem;color:var(--muted)}
@@ -1333,9 +1334,9 @@ function todayHtml(){
         '</li>';
     }
     return '<div class="td-card" style="--pc:'+c+'"><div class="td-head"><span class="td-dot"></span><b>'+esc(n)+'</b>' +
-      dt.map(function(x){ return '<span class="td-duty'+(x.kind === 'off' ? ' off' : '')+'">'+(x.kind === 'off' ? esc(x.title || '休み') : '担当業務')+'</span>'; }).join('') + '<span class="mono td-n">'+(list.length + od.length)+'件</span></div>' +
+      dt.map(function(x){ return '<span class="td-duty'+(x.kind === 'off' ? ' off' : '')+(isHalfOff(x) ? ' half' : '')+'">'+(x.kind === 'off' ? esc(x.title || '休み') : '担当業務')+'</span>'; }).join('') + '<span class="mono td-n">'+(list.length + od.length)+'件</span></div>' +
       ((list.length || od.length || fin.length) ? '<ul>'+od.map(function(e){ return row(e, true); }).join('')+list.map(function(e){ return row(e, false); }).join('')+fin.map(function(e){ return row(e, false); }).join('')+'</ul>'
-        : '<p class="td-empty">'+(dt.some(function(x){ return x.kind === 'off'; }) ? '今日はお休みです。' : dt.length ? '今日は担当業務の日です。' : '今日の予定はありません。')+'</p>') + '</div>';
+        : '<p class="td-empty">'+(dt.some(function(x){ return x.kind === 'off' && !isHalfOff(x); }) ? '今日はお休みです。' : dt.some(isHalfOff) ? '今日は半日お休みです。' : dt.length ? '今日は担当業務の日です。' : '今日の予定はありません。')+'</p>') + '</div>';
   }).join('');
   var d = new Date();
   return '<section class="sec" id="sec-today"><div class="h2row"><h2>今日やること <small>'+jpDate(d)+' ・ '+total+'件</small></h2></div>' +
@@ -1382,7 +1383,9 @@ function eventCat(e){
   return t ? t.category : null;
 }
 function eventsOn(key){ return ((DATA.board && DATA.board.events) || []).filter(function(e){ return e.date === key; }); }
-function isDutyDay(key, who){ return eventsOn(key).some(function(e){ return (e.kind === 'duty' || e.kind === 'off') && (!who || !e.assignee || e.assignee === who); }); }
+// 半日休み（午前・午後・半休・AM・PM）は作業を入れてよい日として扱う
+function isHalfOff(e){ return e.kind === 'off' && (e.half || /午前|午後|半休|半日|AM|PM/i.test(e.title || '')); }
+function isDutyDay(key, who){ return eventsOn(key).some(function(e){ return (e.kind === 'duty' || (e.kind === 'off' && !isHalfOff(e))) && (!who || !e.assignee || e.assignee === who); }); }
 function isOffDay(key, who){ return eventsOn(key).some(function(e){ return e.kind === 'off' && (!who || !e.assignee || e.assignee === who); }); }
 function dutyNames(key){ return eventsOn(key).filter(function(e){ return e.kind === 'duty'; }).map(function(e){ return e.assignee || '全員'; }); }
 
@@ -1419,7 +1422,7 @@ function deptStates(owner, depts){
 }
 
 /* ---------- 読み込み ---------- */
-var LAST_SIG = '', LOADING = false, BUILD = 'cf39522f2306';
+var LAST_SIG = '', LOADING = false, BUILD = 'da58c380c2c3';
 // 新しい版が公開されていたら、キャッシュを避けて読み直す
 async function checkVersion(){
   if (BUILD.indexOf('BUILD') >= 0) return;
@@ -1561,7 +1564,7 @@ function renderBoard(){
     var evs = events.filter(function(e){ return e.date === key && (e.kind === 'event' || whoMatch(whoOfEvent(e))); }).sort(evOrder(events));
     cal += '<div data-date="'+key+'" class="day'+(key === today ? ' today' : key < today ? ' past' : '')+(day.getDay()===0 ? ' sun' : '')+(day.getDay()%6===0 ? ' wkend' : '')+(evs.length ? '' : ' empty')+'"><div class="dn"><b>'+(day.getMonth()+1)+'/'+day.getDate()+'（'+W[day.getDay()]+'）</b>'+(key===today?'<span>今日</span>':'')+'</div>';
     recurringOn(key).forEach(function(r){ var daily = r.rule.type === 'daily'; cal += '<div class="ev '+(daily ? 'plan' : 'deadline')+' virtual" title="定期タスク（その日になると自動でタスクになります）">'+(r.assignee ? whoChip(r.assignee) : '')+'<span class="rtag">'+esc(recRuleLabel(r).replace('（平日）',''))+'</span>'+esc(r.title)+(daily ? '' : ' 締切')+'</div>'; });
-    evs.forEach(function(e){ var who = whoOfEvent(e); var rl = recLabelOfEvent(e); cal += '<button class="ev '+esc(e.kind)+(rl ? ' recur' : '')+(isDoneEvent(e) ? ' evdone' : '')+'" data-ei="'+events.indexOf(e)+'">'+(who ? whoChip(who) : '')+(rl ? '<span class="rtag">'+esc(rl.replace('（平日）',''))+'</span>' : '')+(e.carried ? '<span class="ctag">持ち越し</span>' : '')+(e.time?'<span class="tm">'+esc(e.time)+'</span>':'')+esc(e.title)+'</button>'; });
+    evs.forEach(function(e){ var who = whoOfEvent(e); var rl = recLabelOfEvent(e); cal += '<button class="ev '+esc(e.kind)+(isHalfOff(e) ? ' half' : '')+(rl ? ' recur' : '')+(isDoneEvent(e) ? ' evdone' : '')+'" data-ei="'+events.indexOf(e)+'">'+(who ? whoChip(who) : '')+(rl ? '<span class="rtag">'+esc(rl.replace('（平日）',''))+'</span>' : '')+(e.carried ? '<span class="ctag">持ち越し</span>' : '')+(e.time?'<span class="tm">'+esc(e.time)+'</span>':'')+esc(e.title)+'</button>'; });
     if (key >= today) cal += '<button class="addev" data-date="'+key+'" aria-label="'+key+' に予定を追加">＋ 追加</button>';
     cal += '</div>';
   }
@@ -2387,15 +2390,15 @@ var Bulk = (function(){
       all.forEach(function(x){ var m = x.match(/(\d{1,2})\s*[\/月]\s*(\d{1,2})/); days.push(ymd(dt(+m[1], +m[2]))); });
       if (!days.length) days.push(ymd(/明後日/.test(line) ? addDays(t, 2) : /明日/.test(line) ? addDays(t, 1) : t));
     }
-    var kind = (line.match(/有給|有休|代休|半休|欠勤|公休|振休|休暇/) || ['休み'])[0];
-    return {line:li, off:true, title: kind === '有休' ? '有給' : kind, days: days, who: who, content: line, label:'通常', win:{label:'休み'}, mode:'new'};
+    var kind = /午前|AM/i.test(line) ? '午前休' : /午後|PM/i.test(line) ? '午後休' : (line.match(/有給|有休|代休|半休|欠勤|公休|振休|休暇/) || ['休み'])[0];
+    return {line:li, off:true, half: /午前休|午後休|半休/.test(kind), title: kind === '有休' ? '有給' : kind, days: days, who: who, content: line, label:'通常', win:{label:'休み'}, mode:'new'};
   }
 
   function parse(text){
     var stages = (DATA.board && DATA.board.stages) || ['企画','撮影','画像','LP','登録','販促'];
     var pipe = (DATA.board && DATA.board.pipeline) || [], out = [];
     text.split(/\r?\n/).map(function(l){ return l.replace(/^\s*([・\-\*•●◦]|\d+[\.\)．、])\s*/, '').trim(); }).filter(Boolean).forEach(function(line, li){
-      if (/有給|有休|休み|休暇|代休|半休|欠勤|公休|振休/.test(line)) { out.push(offItem(line, li)); return; }
+      if (/有給|有休|休み|休暇|代休|半休|欠勤|公休|振休|午前休|午後休|AM休|PM休/i.test(line)) { out.push(offItem(line, li)); return; }
       var win = windowOf(line), label = /今週中|急ぎ|至急|大至急/.test(line) ? '優先' : '通常';
       var codes = []; (line.match(/[a-zA-Z]{2}\d{3}(?:-\d+set)?/g) || []).forEach(function(c){ c = c.toLowerCase(); if (codes.indexOf(c) < 0) codes.push(c); });
       var sw = STAGE_WORDS.filter(function(x){ return x[1].test(line); })[0];
@@ -2465,7 +2468,7 @@ var Bulk = (function(){
         if (it.off) return '<div class="bk-item" data-i="'+i+'"><div class="bk-top"><span class="bk-no mono">'+(i+1)+'</span><span class="tag offtag">休み</span><span class="tag cat">'+esc(it.title)+'</span>' +
           '<button class="bk-x" data-x="'+i+'" aria-label="この行を外す">×</button></div>' +
           '<div class="row2"><select class="bk-who">'+names.map(function(n){ return '<option'+(n === it.who ? ' selected' : '')+'>'+esc(n)+'</option>'; }).join('')+'</select><span></span></div>' +
-          '<div class="meta">カレンダーに休みとして入れます（タスクにはしません）：'+dlist(it.days)+'</div></div>';
+          '<div class="meta">カレンダーに'+(it.half ? '半日休み' : '休み')+'として入れます（タスクにはしません）：'+dlist(it.days)+'</div></div>';
         return '<div class="bk-item" data-i="'+i+'"><div class="bk-top"><span class="bk-no mono">'+(i+1)+'</span>' +
           (it.code ? '<span class="code">'+esc(it.code)+'</span>'+(it.isNew ? '<span class="tag web">新発進捗に追加</span>' : '')+'<span class="tag cat">'+esc(it.stage)+'</span>' : '<span class="tag cat">'+esc(it.category)+'</span>') +
           '<button class="bk-x" data-x="'+i+'" aria-label="この行を外す">×</button></div>' +
@@ -2503,7 +2506,7 @@ var Bulk = (function(){
       var offs = 0;
       use = use.filter(function(it){
         if (!it.off) return true;
-        it.days.forEach(function(d){ evs.push({date:d, kind:'off', title:it.title, assignee:it.who}); });
+        it.days.forEach(function(d){ var o = {date:d, kind:'off', title:it.title, assignee:it.who}; if (it.half) o.half = true; evs.push(o); });
         offs++; return false;
       });
       use.forEach(function(it){
