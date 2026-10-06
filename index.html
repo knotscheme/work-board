@@ -1479,7 +1479,7 @@ function deptStates(owner, depts){
 }
 
 /* ---------- 読み込み ---------- */
-var LAST_SIG = '', LOADING = false, BUILD = '56beb642a483';
+var LAST_SIG = '', LOADING = false, BUILD = 'aa8673f63a4f';
 // 新しい版が公開されていたら、キャッシュを避けて読み直す
 async function checkVersion(){
   if (BUILD.indexOf('BUILD') >= 0) return;
@@ -2461,7 +2461,12 @@ var Bulk = (function(){
     text.split(/\r?\n/).map(function(l){ return l.replace(/^\s*([・\-\*•●◦]|\d+[\.\)．、])\s*/, '').trim(); }).filter(Boolean).forEach(function(line, li){
       if (/有給|有休|休み|休暇|代休|半休|欠勤|公休|振休|午前休|午後休|AM休|PM休/i.test(line)) { out.push(offItem(line, li)); return; }
       var win = windowOf(line), label = /今週中|急ぎ|至急|大至急/.test(line) ? '優先' : '通常';
-      var codes = []; (line.match(/[a-zA-Z]{2}\d{3}(?:-\d+set)?/g) || []).forEach(function(c){ c = c.toLowerCase(); if (codes.indexOf(c) < 0) codes.push(c); });
+      // 品番：登録済みの品番を優先して探し（長いものから）、残りから新しい品番を読み取る（ab- 付き・-2set 付きなども）
+      var codes = [], rest = line.toLowerCase();
+      pipe.map(function(x){ return x.code; }).sort(function(a, b){ return b.length - a.length; }).forEach(function(c){
+        var lc = c.toLowerCase(); if (lc && rest.indexOf(lc) >= 0) { codes.push(c); rest = rest.split(lc).join(' '); }
+      });
+      (rest.match(/[a-z]{2}(?:-[a-z]{2})?\d{3}(?:-(?:[a-z]{2}-)?[a-z]{2}\d{3})*(?:-\d+set)?/g) || []).forEach(function(c){ if (codes.indexOf(c) < 0) codes.push(c); });
       var sw = STAGE_WORDS.filter(function(x){ return x[1].test(line); })[0];
       if (codes.length) {
         codes.forEach(function(code){
@@ -2601,6 +2606,7 @@ var Bulk = (function(){
             var x = base.filter(function(p){ return p.code === it.code; })[0];
             if (!x) { x = {code:it.code, name:'（商品名を入力）', s: stages.map(function(_, j){ return j < it.stageIdx ? 'done' : ''; }), note:'一括変換で追加'}; base.push(x); }
             if (!x.assignee) x.assignee = it.who;
+            if (x.note && /^いったん保留/.test(x.note)) x.note = x.note.replace(/^いったん保留[^。]*。?/, '').trim();  // 動かしたら保留を外す
             if (x.s[it.stageIdx] !== 'done') { x.s = x.s.slice(); x.s[it.stageIdx] = 'hot'; }
           });
         }, 'bulk pipeline');
