@@ -1479,7 +1479,7 @@ function deptStates(owner, depts){
 }
 
 /* ---------- 読み込み ---------- */
-var LAST_SIG = '', LOADING = false, BUILD = 'aa8673f63a4f';
+var LAST_SIG = '', LOADING = false, BUILD = 'aec93386afe4';
 // 新しい版が公開されていたら、キャッシュを避けて読み直す
 async function checkVersion(){
   if (BUILD.indexOf('BUILD') >= 0) return;
@@ -2464,7 +2464,11 @@ var Bulk = (function(){
       // 品番：登録済みの品番を優先して探し（長いものから）、残りから新しい品番を読み取る（ab- 付き・-2set 付きなども）
       var codes = [], rest = line.toLowerCase();
       pipe.map(function(x){ return x.code; }).sort(function(a, b){ return b.length - a.length; }).forEach(function(c){
-        var lc = c.toLowerCase(); if (lc && rest.indexOf(lc) >= 0) { codes.push(c); rest = rest.split(lc).join(' '); }
+        var lc = c.toLowerCase(); if (!lc) return;
+        // 前後が英数字・ハイフンで続くときは別の品番（例：lw515 と ab-lw515 は別物）
+        var esc2 = lc.replace(/[.*+?^${}()|[\]\\/]/g, '\$&');
+        var re = new RegExp('(^|[^a-z0-9-])' + esc2 + '(?![a-z0-9])');
+        if (re.test(rest)) { codes.push(c); rest = rest.replace(new RegExp('(^|[^a-z0-9-])' + esc2 + '(?![a-z0-9])', 'g'), '$1 '); }
       });
       (rest.match(/[a-z]{2}(?:-[a-z]{2})?\d{3}(?:-(?:[a-z]{2}-)?[a-z]{2}\d{3})*(?:-\d+set)?/g) || []).forEach(function(c){ if (codes.indexOf(c) < 0) codes.push(c); });
       var sw = STAGE_WORDS.filter(function(x){ return x[1].test(line); })[0];
