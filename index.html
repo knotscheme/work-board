@@ -832,7 +832,18 @@ function eventSheet(orig, date){
   if (!ghToken()) return needToken();
   var e = orig || {date: date, kind: 'plan', title: ''}, confirmDel = false;
   var linkedDone = e.task && !DATA.pending.some(function(t){ return t.id === e.task; }) ? (DATA.done || []).filter(function(t){ return t.id === e.task; }) : [];
-  var taskOpts = '<option value="">（なし）</option>' + DATA.pending.concat(linkedDone).map(function(t){ return '<option value="'+esc(t.id)+'"'+(t.id === e.task ? ' selected' : '')+'>'+(t.done ? '［完了］' : '')+esc(t.content.slice(0,40))+'</option>'; }).join('');
+  // 関連するタスク：選んだ担当者のタスクだけを、工程ごとに優先度順で並べる（今のひも付きは必ず残す）
+  function taskOptsFor(who){
+    var list = DATA.pending.concat(linkedDone).filter(function(t){ return !who || t.assignee === who || (who === '白川' && !t.assignee) || t.id === e.task; });
+    list.sort(function(a,b){ return ORDER.indexOf(a.category) - ORDER.indexOf(b.category) || (b.score || 0) - (a.score || 0); });
+    var html = '<option value="">（なし）</option>', cat = null;
+    list.forEach(function(t){
+      if (t.category !== cat) { if (cat !== null) html += '</optgroup>'; cat = t.category; html += '<optgroup label="'+esc(cat)+'">'; }
+      html += '<option value="'+esc(t.id)+'"'+(t.id === e.task ? ' selected' : '')+'>'+(t.done ? '［完了］' : '')+(t.label === '最優先' || t.label === '優先' ? '★ ' : '')+esc(t.content.slice(0,40))+'</option>';
+    });
+    return html + (cat !== null ? '</optgroup>' : '') ;
+  }
+  var taskOpts = taskOptsFor(e.assignee || (e.task ? '' : ''));
   function draw(){
     Sheet.open(
       '<h3>'+(orig ? '予定を編集' : '予定を追加')+'</h3>' +
@@ -841,13 +852,27 @@ function eventSheet(orig, date){
       '<label class="fld"><span>時刻（任意）</span><input type="time" id="ev-time" value="'+esc(e.time||'')+'"></label></div>' +
       '<div class="fld"><span>種類</span><div class="seg wide" id="ev-kind">'+KIND_JP.map(function(k){ return '<button type="button" data-v="'+k[0]+'"'+(k[0] === e.kind ? ' aria-pressed="true"' : '')+'>'+k[1]+'</button>'; }).join('')+'</div></div>' +
       whoField(e.assignee) +
-      '<label class="fld"><span>関連するタスク（任意）</span><select id="ev-task">'+taskOpts+'</select></label>' +
+      '<label class="fld"><span>関連するタスク（任意）<small class="meta" id="ev-task-hint"> 担当を選ぶと、その人のタスクに絞られます</small></span><select id="ev-task">'+taskOpts+'</select></label>' +
       '<p class="warnline" id="ev-warn" hidden>土日は休みの設定です（このまま保存もできます）</p>' +
       '<div class="row"><button class="btn primary" id="ev-save">保存</button><button class="btn" data-close>やめる</button>' +
       (orig ? '<button class="btn danger push-right" id="ev-del">削除</button>' : '') + '</div>' +
       '<span class="status" id="ev-status"></span>',
       function(sh){
         var kind = e.kind, getWho = bindWho(sh, e.assignee);
+        var tsel = sh.querySelector('#ev-task'), hint = sh.querySelector('#ev-task-hint');
+        function refreshTasks(){
+          var w = getWho(), keep = tsel.value;
+          tsel.innerHTML = taskOptsFor(w);
+          if (keep && [].some.call(tsel.options, function(o){ return o.value === keep; })) tsel.value = keep;
+          hint.textContent = w ? ' ' + w + 'さんのタスク' : ' 担当を選ぶと、その人のタスクに絞られます';
+        }
+        sh.querySelectorAll('#who-pick button').forEach(function(b){ b.addEventListener('click', function(){ setTimeout(refreshTasks, 0); }); });
+        sh.querySelector('#who-new').addEventListener('input', refreshTasks);
+        tsel.addEventListener('change', function(){
+          var ti = sh.querySelector('#ev-title'), t = DATA.pending.filter(function(x){ return x.id === tsel.value; })[0];
+          if (t && !ti.value.trim()) ti.value = t.content.replace(/^【[^】]*】\s*/, '').slice(0, 30);
+        });
+        refreshTasks();
         function warn(){ var d = new Date(sh.querySelector('#ev-date').value + 'T00:00:00'); sh.querySelector('#ev-warn').hidden = !((kind === 'plan' || kind === 'deadline') && (d.getDay() === 0 || d.getDay() === 6)); }
         sh.querySelectorAll('#ev-kind button').forEach(function(b){ b.onclick = function(){ kind = b.dataset.v; sh.querySelectorAll('#ev-kind button').forEach(function(x){ x.setAttribute('aria-pressed', x === b); }); warn(); }; });
         sh.querySelector('#ev-date').onchange = warn; warn();
@@ -1422,7 +1447,7 @@ function deptStates(owner, depts){
 }
 
 /* ---------- 読み込み ---------- */
-var LAST_SIG = '', LOADING = false, BUILD = 'da58c380c2c3';
+var LAST_SIG = '', LOADING = false, BUILD = '176de53397a7';
 // 新しい版が公開されていたら、キャッシュを避けて読み直す
 async function checkVersion(){
   if (BUILD.indexOf('BUILD') >= 0) return;
