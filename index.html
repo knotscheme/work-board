@@ -1419,7 +1419,7 @@ function deptStates(owner, depts){
 }
 
 /* ---------- 読み込み ---------- */
-var LAST_SIG = '', LOADING = false, BUILD = 'e538cbc44f34';
+var LAST_SIG = '', LOADING = false, BUILD = 'c15fd77dc702';
 // 新しい版が公開されていたら、キャッシュを避けて読み直す
 async function checkVersion(){
   if (BUILD.indexOf('BUILD') >= 0) return;
@@ -1461,7 +1461,7 @@ async function loadInner(force){
   DATA.pending = mergeOps(DATA.pending, (DATA.pendingOps || []).concat(DATA.webOps || []));
   var sig = JSON.stringify([DATA.updated, DATA.pending, DATA.done, DATA.board]);
   var first = !document.getElementById('shell');
-  if (first) shell();
+  if (first) { shell(); setTimeout(restoreScroll, 50); }
   else if (sig === LAST_SIG && !force) return;   // 変わっていなければ何もしない
   LAST_SIG = sig;
   setTimeout(carryOver, 0);
@@ -1470,7 +1470,9 @@ async function loadInner(force){
 }
 
 function shell(){
-  tab = 'today';  // トップは今日のダッシュボード
+  // 新しく開いたときは「今日」。同じ画面での再読み込み（自動の版切り替えを含む）は直前のタブのまま
+  tab = 'today';
+  try { var keep = sessionStorage.getItem('wb_tab_s'); if (keep) tab = keep; } catch(e) {}
   app.innerHTML =
     '<div class="wrap" id="shell">' +
       '<header class="top" id="hdr"></header>' +
@@ -1506,6 +1508,14 @@ function applyBoardSections(){
   new MutationObserver(place).observe(document.documentElement, {childList:true, subtree:false});
   setInterval(place, 1000);
 })();
+// 再読み込みの前に、見ていたタブとスクロール位置を覚えておく
+window.addEventListener('pagehide', function(){ try { sessionStorage.setItem('wb_tab_s', tab); sessionStorage.setItem('wb_scroll', String(window.scrollY)); } catch(e) {} });
+function restoreScroll(){
+  try {
+    var y = +sessionStorage.getItem('wb_scroll'); sessionStorage.removeItem('wb_scroll');
+    if (y > 0) requestAnimationFrame(function(){ window.scrollTo(0, y); });
+  } catch(e) {}
+}
 function setTab(t){
   if (!document.getElementById('view-' + (TAB_SECTIONS[t] ? 'board' : t))) t = 'sched';
   tab = t; ls('wb_tab', t);
