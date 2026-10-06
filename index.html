@@ -1419,7 +1419,7 @@ function deptStates(owner, depts){
 }
 
 /* ---------- 読み込み ---------- */
-var LAST_SIG = '', LOADING = false, BUILD = 'c15fd77dc702';
+var LAST_SIG = '', LOADING = false, BUILD = 'cf39522f2306';
 // 新しい版が公開されていたら、キャッシュを避けて読み直す
 async function checkVersion(){
   if (BUILD.indexOf('BUILD') >= 0) return;
@@ -1518,7 +1518,7 @@ function restoreScroll(){
 }
 function setTab(t){
   if (!document.getElementById('view-' + (TAB_SECTIONS[t] ? 'board' : t))) t = 'sched';
-  tab = t; ls('wb_tab', t);
+  tab = t; ls('wb_tab', t); try { sessionStorage.setItem('wb_tab_s', t); } catch(e) {}
   document.getElementById('view-board').hidden = !TAB_SECTIONS[t];
   ['office','memo'].forEach(function(k){ document.getElementById('view-'+k).hidden = k !== t; });
   applyBoardSections();
