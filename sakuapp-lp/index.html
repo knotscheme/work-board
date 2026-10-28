@@ -939,6 +939,57 @@ html.js .rv.rv-l,html.js .rv.rv-r{transform:translate3d(0,16px,0)}
 .faq details,details{box-shadow:none!important}
 .alt .sim .result,.result{border:1px solid var(--text)!important;box-shadow:none!important;border-radius:20px!important;background:#fff!important}
 .result .big,.result [data-m],.result .total b{color:var(--text)!important}
+
+/* =====================================================================
+   BRIGHT VARIANT — keep the minimal layout, drop the heavy black
+   ===================================================================== */
+:root{--dark:#0e7c8c;--bg:#f7fbfa}
+.alt{background:#fff}
+section:not(.alt):not(.band):not(.hero2):not(.vhero){background:#f5faf9}
+/* hero: light, airy */
+.hero2{background:linear-gradient(180deg,#e8f6f4 0%,#f5fbfa 100%)!important;color:var(--text)!important}
+.hero2::before{background:radial-gradient(circle,rgba(14,124,140,.16),transparent 62%)!important}
+.hero2::after{background:radial-gradient(circle,rgba(255,200,61,.28),transparent 65%)!important}
+.hero2 .tag{border-color:rgba(14,124,140,.25)!important;color:var(--brand)!important;background:#fff!important}
+.l1{color:var(--muted)!important}
+.big b{-webkit-text-fill-color:var(--text)!important;color:var(--text)!important}
+.big small{color:var(--text)!important}
+.l3 span{color:var(--brand)!important}
+.hero2 .sub{color:var(--muted)!important}
+.anchor{color:var(--muted)!important}.anchor b{background:var(--brand)!important;color:#fff!important}
+.anchor s{text-decoration-color:#e0a000}
+.hero2 .sim-link{color:var(--text)!important;border-color:var(--text)!important}
+.stats{border-color:rgba(14,124,140,.15)!important}
+.stats b{color:var(--brand)!important}.stats small{color:var(--muted)!important}
+.hero2 .eband,.hero2 .estimate{box-shadow:0 20px 40px -30px rgba(14,80,95,.35)!important;border:1px solid var(--line)!important}
+/* colored sections: flat teal instead of black */
+.band{background:var(--brand)!important}
+.band .lead,.band p{color:#dff2f3!important}
+.band .ico{background:rgba(255,255,255,.14)!important;color:#fff!important}
+#contact::after{background:linear-gradient(90deg,rgba(14,124,140,.93) 0%,rgba(14,124,140,.82) 45%,rgba(14,124,140,.45) 100%)!important}
+@media(max-width:860px){#contact::after{background:linear-gradient(180deg,rgba(14,124,140,.78),rgba(14,124,140,.9))!important}}
+#contact .cta p{color:#eaf7f8!important}
+.cta .limited{background:var(--accent)!important;color:#141716!important;border:0}
+/* emphasis blocks + selected states: teal */
+.sim .chip[aria-pressed="true"],#price .chip[aria-pressed="true"]{background:var(--brand)!important;border-color:var(--brand)!important}
+.tl2 .dot{background:var(--brand)!important}
+#usecase .swp .dots i.on{background:var(--brand)}
+.uct .tab[aria-selected="true"]{color:var(--brand)!important;border-color:var(--brand)!important}
+#usecase .tg[aria-pressed="true"]{border-color:var(--brand)!important;background:#f2fafa!important}
+#usecase .tg[aria-pressed="true"]::before{background:var(--brand)!important;color:#fff!important}
+#usecase .tg[aria-pressed="true"]::after{background-color:var(--brand)!important;box-shadow:inset 0 0 0 2px var(--brand)!important}
+.pr1.first{background:#eef7f6!important;box-shadow:inset 3px 0 0 var(--brand)!important}
+.xb i{background:var(--brand)!important}
+.mk.g2{background:var(--brand)!important}
+.result{border-color:var(--brand)!important}
+.result .big,.result [data-m],.result .total b{color:var(--brand)!important}
+.rows .n{-webkit-text-stroke-color:var(--brand)!important}
+.bub.chat{background:#eef5f4!important}
+.endline{color:var(--brand)!important}
+.cmp-hl{color:var(--brand)}
+.xf strong{-webkit-text-fill-color:var(--brand)!important;color:var(--brand)!important}
+header#hd .hbar{background:rgba(14,124,140,.92)!important}
+.tag,.xl{color:var(--brand)!important;border-color:rgba(14,124,140,.25)!important;background:#fff!important}
 </style>
 <style>
 /* ヘッダー：ヒーロー（動画ヒーロー＋#intro）を過ぎてから表示 */
