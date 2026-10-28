@@ -1014,6 +1014,29 @@ header#hd .hbar{background:rgba(14,124,140,.92)!important}
 .pst-cloud{right:-16%!important;top:-17%!important}
 .pst-bulb{right:-14%!important;top:-20%!important}
 .pfig.tint-y{align-self:start!important;margin-top:-8px!important}@media(max-width:600px){.pfig.tint-y{margin-top:-64px!important}}
+
+/* hero: price anchor card + tiles (mobile-friendly) */
+.anc2{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:10px;margin:22px 0 0;padding:12px;border-radius:16px;background:#fff;border:1px solid var(--line);max-width:460px}
+.anc2>div{display:flex;flex-direction:column;gap:2px;padding:6px 10px;border-radius:10px}
+.anc2 small{font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.04em}
+.anc2 s{white-space:nowrap;line-height:1.3;font-size:18px;font-weight:700;color:#9aa5a4;text-decoration-thickness:2px;text-decoration-color:#e0a000}
+.anc2 i{font-style:normal;color:var(--brand);font-weight:700}
+.anc2 .a-new{background:#eef7f6}
+.anc2 .a-new small{color:var(--brand)}
+.anc2 .a-new b{line-height:1.3;font-size:20px;font-weight:800;color:var(--brand);font-family:"Inter","Noto Sans JP",sans-serif;white-space:nowrap}
+@media(max-width:600px){
+.hero2 .l1{font-size:14px!important}
+.big b{font-size:clamp(72px,22vw,96px)!important}
+.l3{font-size:clamp(20px,6vw,24px)!important}
+.hero2 .sub{font-size:15px;line-height:1.85;margin-top:18px}
+.hero2 .cta2{margin-top:22px}
+.hero2 .cta2 .btn{width:100%}
+.stats{display:grid!important;grid-template-columns:repeat(3,1fr);gap:8px!important;border:0!important;padding-top:0!important;margin-top:28px!important}
+.stats>div{background:#fff;border:1px solid var(--line);border-radius:14px;padding:12px 10px;text-align:center}
+.stats b{font-size:20px!important;display:block}
+.stats small{font-size:11px!important;line-height:1.5;display:block;margin-top:2px}
+}
+@media(max-width:350px){.anc2{gap:6px;padding:10px}.anc2>div{padding:6px}.anc2 s{font-size:15px}.anc2 .a-new b{font-size:17px}.anc2 small{font-size:10px}}
 </style>
 <style>
 /* ヘッダー：ヒーロー（動画ヒーロー＋#intro）を過ぎてから表示 */
@@ -1081,7 +1104,7 @@ header#hd .btn{min-height:34px;padding:0 16px;font-size:13px;border-radius:999px
   <div class="hl">
    <span class="tag">個人事業主・副業の方のための<wbr>アプリ開発</span>
    <h1><span class="l1">初期費用</span><span class="big"><b class="cu" data-to="7700">7,700</b><small>円</small></span><span class="l3"><span>で、本物のアプリを。</span></span></h1>
-   <p class="anchor"><span>開発会社の相場</span><s>数十万円〜</s><i>→</i><b>7,700円〜</b></p>
+   <div class="anc2"><div class="a-old"><small>開発会社の相場</small><s>数十万円〜</s></div><i aria-hidden="true">→</i><div class="a-new"><small>サクアプなら</small><b>7,700円〜</b></div></div>
    <p class="sub">予約も、決済も、お客様の管理も。あなた専用のアプリで、売り逃しと手作業をなくします。料金は「基本料金＋追加機能」だけ。</p>
    <div class="cta2"><a class="btn main" href="#contact">【無料】LINE/DMで<wbr>アプリの相談をする</a><a class="sim-link" href="#price">30秒で概算がわかる →</a></div>
    <div class="stats"><div><b><span class="cu" data-to="1">1</span>ヶ月</b><small>最短の開発期間</small></div><div><b><span class="cu" data-to="0.4" data-dec="1">0.4</span>円</b><small>追加機能は1文字</small></div><div><b><span class="cu" data-to="738">738</span>円〜</b><small>月々の分割払い</small></div></div>
