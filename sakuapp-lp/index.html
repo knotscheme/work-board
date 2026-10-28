@@ -678,6 +678,27 @@ img.lz.ld{opacity:1;transform:none}
 @keyframes tdot{0%,60%,100%{opacity:.35;transform:translateY(0)}30%{opacity:1;transform:translateY(-3px)}}
 @media(max-width:600px){.bub.chat{padding:0 12px 16px;border-radius:20px}.bub.chat .chd{margin:0 -12px 4px}.bub.chat .bb{max-width:calc(100% - 84px)}.bub.chat .bb b{font-size:15px}.bub.chat .av{width:30px;height:30px}}
 .spbr{display:none}@media(max-width:600px){.spbr{display:inline}}@media(max-width:350px){.phead h2{font-size:19px!important}}
+
+/* mobile: text wraps around the figure silhouette */
+@media(max-width:600px){
+.phead{display:block!important}
+.phead::after{content:"";display:block;clear:both}
+.pfig{float:right;margin:max(calc(-28.2vw - 4px),-118px) -6px 0 10px!important;width:clamp(146px,44vw,186px)!important;position:relative;z-index:1}
+.phead h2{z-index:3!important}
+.phead+.bub.chat,.phead+.rows{margin-top:0!important}
+.pfig img{display:block}
+.phead h2{margin-right:0!important;padding-top:6px}
+.phead .lead{margin:12px 0 0!important;padding-bottom:16px}
+.pfig::before{width:100%!important}
+.pfig.tint-y{margin-top:6px!important}
+section{overflow-x:clip}
+}
+html,body{overflow-x:hidden}@supports(overflow:clip){html,body{overflow-x:clip}}
+main{overflow-x:clip}
+h1,h2,h3,.lead,.endline{line-break:strict}
+.nw{white-space:nowrap}
+.chip,.chips button,p,li,b,span{line-break:strict}
+@media(max-width:350px){h2{font-size:clamp(18px,7vw,23px)}.endline{font-size:18px}}
 </style>
 <style>
 /* ヘッダー：ヒーロー（動画ヒーロー＋#intro）を過ぎてから表示 */
@@ -780,25 +801,27 @@ header#hd .btn{min-height:34px;padding:0 16px;font-size:13px;border-radius:999px
 <!-- PAIN -->
 <section class="alt"><div class="wrap">
  <div class="phead">
- <h2>アプリを<br class="spbr">つくりたい。<br class="spbr">でも、<wbr>現実は。</h2>
+ <h2>アプリを<br class="spbr"><span class="nw">つくりたい。</span><br class="spbr"><span class="nw">でも、</span><wbr>現実は。</h2>
+ <figure class="pfig tint-m"><img src="worry.webp" alt="予算の壁に悩み、腕を組んで考え込む女性" width="840" height="1073" loading="lazy" decoding="async"></figure>
  <p class="lead">こんな理由で、あきらめていませんか？</p>
- <figure class="pfig tint-m"><img src="worry.webp" alt="予算の壁に悩み、腕を組んで考え込む女性" width="840" height="1073" loading="lazy" decoding="async"></figure></div>
+</div>
  <div class="bub chat" role="list" aria-label="よくある悩み"><div class="chd" aria-hidden="true"><img src="avatar.webp" alt="" width="120" height="120"><span>心の声</span><i></i></div><div class="b" role="listitem"><img class="av" src="avatar.webp" alt="" width="120" height="120" aria-hidden="true"><div class="bb"><b>「見積もりが<wbr>100万円超え…」</b><span>開発会社に相談したら、個人の副業やお店の予算では最初の一歩すら踏み出せない。</span></div><time aria-hidden="true">23:41</time></div><div class="b" role="listitem"><span class="av" aria-hidden="true"></span><div class="bb"><b>「制限が多くて<wbr>断念…」</b><span>ノーコードで自作したら、やりたいことの半分しか実現できず、時間だけが過ぎていく。</span></div><time aria-hidden="true">23:42</time></div><div class="b" role="listitem"><span class="av" aria-hidden="true"></span><div class="bb"><b>「後からいくら<wbr>請求されるか不安…」</b><span>安い見積もりを見つけても、総額が見えないままでは頼む決心がつかない。</span></div><time aria-hidden="true">23:44</time></div><div class="b" role="listitem"><span class="av" aria-hidden="true"></span><div class="bb"><b>「安いアプリは<wbr>セキュリティが心配…」</b><span>お客様のデータを預かるなら、個人情報や決済が絡むからこそ妥協したくない。</span></div><time aria-hidden="true">23:47</time></div><div class="b me" aria-label="サクアプが入力中"><div class="bb"><span class="dots"><i></i><i></i><i></i></span></div></div></div>
- <p class="endline"><span>資金を理由に、あきらめるのはやめませんか？</span></p>
+ <p class="endline"><span>資金を理由に、<br class="spbr">あきらめるのはやめませんか？</span></p>
 </div></section>
 
 <!-- WHY -->
 <section id="why"><div class="wrap">
  <div class="phead">
- <h2>安さにも<br class="spbr">速さにも、<wbr>理由があります。</h2>
+ <h2><span class="nw">安さにも速さにも、</span><br class="spbr">理由があります。</h2>
+ <figure class="pfig tint-y"><img src="smile.webp" alt="スマートフォンを手に、笑顔を見せる女性" width="900" height="1044" loading="lazy" decoding="async"></figure>
  <p class="lead">AIと一緒に作ることで、開発の手間を大きく減らし、その分を価格に反映しています。</p>
- <figure class="pfig tint-y"><img src="smile.webp" alt="スマートフォンを手に、笑顔を見せる女性" width="900" height="1044" loading="lazy" decoding="async"></figure></div>
- <div class="rows"><div class="r"><span class="n">01</span><div><span class="tag">スピード</span><h3>AIと作るから<wbr>最短1ヶ月</h3></div><p>プログラムを書く作業をAIと進めて、開発時間を大きく圧縮。かかる手間が減ったぶん、価格にも反映しています。</p></div><div class="r"><span class="n">02</span><div><span class="tag">本物のコード</span><h3>既製品ではなく<wbr>オーダーメイド</h3></div><p>ノーコードのような「できないこと」が出にくく、事業と一緒に育てられます。</p></div><div class="r"><span class="n">03</span><div><span class="tag">明朗会計</span><h3>ごまかし一切なしの<wbr>「1文字<span class="nb">0.4円</span>」</h3></div><p>何にいくらかかるのかを、見積もりの時点で全部お見せします。</p></div></div>
+</div>
+ <div class="rows"><div class="r"><span class="n">01</span><div><span class="tag">スピード</span><h3>AIと作るから<wbr>最短1ヶ月</h3></div><p>プログラムを書く作業をAIと進めて、開発時間を大きく圧縮。かかる手間が減ったぶん、価格にも反映しています。</p></div><div class="r"><span class="n">02</span><div><span class="tag">本物のコード</span><h3>既製品ではなく<wbr>オーダーメイド</h3></div><p>ノーコードのような「できないこと」が出にくく、事業と一緒に育てられます。</p></div><div class="r"><span class="n">03</span><div><span class="tag">明朗会計</span><h3>ごまかし一切なしの<wbr>「1文字<span class="nb">0.4円」</span></h3></div><p>何にいくらかかるのかを、見積もりの時点で全部お見せします。</p></div></div>
 </div></section>
 
 <!-- SHOWCASE -->
 <section class="alt"><div class="wrap">
- <h2 style="text-align:center">こんな画面が、<wbr>あなたのアプリに<wbr>なります。</h2>
+ <h2 style="text-align:center"><span class="nw">こんな画面が、</span><wbr>あなたのアプリに<wbr>なります。</h2>
  <p class="lead" style="margin:0 auto 36px;text-align:center">お店の管理画面はPCで、お客様の予約画面はスマホで。どちらも使いやすく作ります。</p>
  <figure class="scene"><img src="salon.webp" alt="サロンの受付でタブレットの予約管理画面を確認する店主" width="1376" height="768" loading="lazy" decoding="async"></figure>
  <div class="stage"><figure class="win" style="margin:0" aria-label="予約管理画面のイメージ"><div aria-hidden="true">
@@ -816,7 +839,7 @@ header#hd .btn{min-height:34px;padding:0 16px;font-size:13px;border-radius:999px
 
 <!-- USE CASES -->
 <section id="usecase"><div class="wrap">
- <h2>あなたの商売に、<wbr>そのまま使える5つ。</h2>
+ <h2><span class="nw">あなたの商売に、</span><wbr>そのまま使える5つ。</h2>
  <p class="lead">業種を選んで、「追加できる機能」を押してみてください。画面と金額が、その場で変わります。</p>
  <div id="ucx"><div class="uct" role="tablist" aria-label="業種"><button class="tab" role="tab" aria-selected="false" type="button"><svg class="ico" aria-hidden="true"><use href="#i-qr"/></svg>飲食店</button><button class="tab" role="tab" aria-selected="false" type="button"><svg class="ico" aria-hidden="true"><use href="#i-cal"/></svg>個人サロン</button><button class="tab" role="tab" aria-selected="false" type="button"><svg class="ico" aria-hidden="true"><use href="#i-ticket"/></svg>整体・スクール</button><button class="tab" role="tab" aria-selected="false" type="button"><svg class="ico" aria-hidden="true"><use href="#i-crown"/></svg>クリエイター</button><button class="tab" role="tab" aria-selected="false" type="button"><svg class="ico" aria-hidden="true"><use href="#i-board"/></svg>イラストレーター</button></div><div class="ucp" role="tabpanel"><div class="uci"><img class="ucimg" src="uc-food.webp" alt="カフェのテーブルに置かれた卓上QRコードスタンドとコーヒー" width="800" height="800" loading="lazy" decoding="async" style="object-position:50% 70%"><span class="tag">飲食店向け</span><h3>卓上QRコード注文システム</h3><p>基本の7,700円：テーブルのQRからメニューを開き、注文を送れる仕組み。</p><div class="tgs"><small>追加できる機能（押して足してみる）</small><button class="tg" type="button" data-k="a" aria-pressed="false"><span>事前決済</span><em>+6,000円</em></button><button class="tg" type="button" data-k="b" aria-pressed="false"><span>注文のLINE通知</span><em>+6,000円</em></button></div><div class="sum">合計の目安<b data-t>7,700円</b><span>12回払いなら 月々<b data-m>738円</b></span></div></div><div class="bd" style="--b1:#f6dcd6;--b2:#fbeed3" aria-hidden="true"><div class="pho" style="--pm:#a62b1f;--pd:#7d1d14;--pb:#fbf5ec;--pa:#d9a441;--pt:#2a1a14;--ps:#fff;--pl:#eadfcf;--pmu:#8a7566;--sbm:84px"><span class="isl"></span><div class="sb2"><b>9:41</b><span class="bat"></span></div><div class="ah"><span class="lgm sf">S</span><b class="sf">Trattoria Sole</b><span class="chp">Table 5</span></div><div class="hero3"><small>本日のおすすめ</small><b class="sf">Buon appetito<br>手打ちパスタ</b><svg class="dec" viewBox="0 0 96 96"><circle cx="56" cy="56" r="40" fill="rgba(255,255,255,.16)"/><circle cx="56" cy="56" r="32" fill="#fff"/><circle cx="56" cy="56" r="25" fill="#e8b25a"/><path d="M38 56c6-10 12 10 18 0s12 10 17 0M42 66c6-8 10 8 16 0s9 6 12 2" fill="none" stroke="#c9822b" stroke-width="3" stroke-linecap="round"/><circle cx="48" cy="46" r="4" fill="#2f7d3f"/><circle cx="64" cy="60" r="3.6" fill="#c0392b"/></svg></div><div class="cats"><span class="on">おすすめ</span><span>パスタ</span><span>サラダ</span><span>ドリンク</span></div><div class="mrow"><svg viewBox="0 0 56 56"><rect width="56" height="56" rx="12" fill="#f3dcc0"/><circle cx="28" cy="28" r="19" fill="#fff"/><circle cx="28" cy="28" r="14" fill="#e8b25a"/><path d="M17 28c4-6 8 6 12 0s8 6 11 0M19 33c4-5 7 5 11 0s6 4 8 1" fill="none" stroke="#c9822b" stroke-width="2.2" stroke-linecap="round"/><circle cx="24" cy="24" r="2.4" fill="#2f7d3f"/><circle cx="33" cy="30" r="2.2" fill="#c0392b"/></svg><div><b>本日のパスタ</b><small>トマトとバジル</small></div><em>¥1,200</em><span class="plus">+</span></div><div class="mrow"><svg viewBox="0 0 56 56"><rect width="56" height="56" rx="12" fill="#dfeacb"/><circle cx="28" cy="28" r="19" fill="#fff"/><ellipse cx="22" cy="26" rx="7" ry="4" fill="#5c9a47" transform="rotate(-25 22 26)"/><ellipse cx="33" cy="25" rx="7" ry="4" fill="#7db55f" transform="rotate(25 33 25)"/><ellipse cx="28" cy="33" rx="8" ry="4" fill="#4a8a3a"/><circle cx="32" cy="30" r="3" fill="#d9442f"/><circle cx="23" cy="32" r="2.4" fill="#e8b25a"/></svg><div><b>シーザーサラダ</b><small>自家製ドレッシング</small></div><em>¥800</em><span class="plus">+</span></div><div class="mrow"><svg viewBox="0 0 56 56"><rect width="56" height="56" rx="12" fill="#efd6d6"/><path d="M20 12h16c0 11-2 17-8 19-6-2-8-8-8-19z" fill="#8e2a3a"/><path d="M20 12h16" stroke="#fff" stroke-width="1.2" opacity=".6"/><path d="M28 31v12M21 45h14" stroke="#5a4a4a" stroke-width="2.2" stroke-linecap="round"/></svg><div><b>ハウスワイン</b><small>赤 ・ グラス</small></div><em>¥700</em><span class="plus">+</span></div><div class="mrow"><svg viewBox="0 0 56 56"><rect width="56" height="56" rx="12" fill="#efe3d3"/><rect x="13" y="19" width="30" height="9" rx="2" fill="#e8d3b0"/><rect x="13" y="28" width="30" height="7" fill="#7a4a2b"/><rect x="13" y="35" width="30" height="7" rx="2" fill="#f3e6cf"/><path d="M15 19h26" stroke="#5a3820" stroke-width="3" stroke-linecap="round" opacity=".7"/></svg><div><b>ティラミス</b><small>マスカルポーネ</small></div><em>¥600</em><span class="plus">+</span></div><div class="cart3"><span>カート 3点</span><span>注文する　¥2,700</span></div><div class="sheet ad ad-a"><span class="ck">✓</span><div><b>事前決済：カードで支払い済み</b><small>¥2,700 ・ Stripeで安全に処理</small></div></div><div class="ntf ad ad-b"><span class="app">L</span><div><b>ご注文を受け付けました</b><small>LINE通知 ・ テーブル5 ・ 約15分でお届け</small></div></div></div></div></div><div class="ucp" role="tabpanel"><div class="uci"><img class="ucimg" src="uc-salon.webp" alt="木枠の鏡と施術椅子がある、明るいプライベートヘアサロン" width="800" height="800" loading="lazy" decoding="async" style="object-position:50% 55%"><span class="tag">個人サロン向け</span><h3>顧客カルテ一体型 Web予約システム</h3><p>基本の7,700円：予約の受付と、お客様ごとの記録ページ。</p><div class="tgs"><small>追加できる機能（押して足してみる）</small><button class="tg" type="button" data-k="a" aria-pressed="false"><span>カード決済</span><em>+6,000円</em></button><button class="tg" type="button" data-k="b" aria-pressed="false"><span>LINEでのリマインド通知</span><em>+6,000円</em></button></div><div class="sum">合計の目安<b data-t>7,700円</b><span>12回払いなら 月々<b data-m>738円</b></span></div></div><div class="bd" style="--b1:#f6dfe4;--b2:#f9ecdb" aria-hidden="true"><div class="pho" style="--pm:#b5667f;--pd:#8f4a63;--pb:#fbf3f3;--pa:#d8b88a;--pt:#3a2530;--ps:#fff;--pl:#f0dfe0;--pmu:#98808a;--sbm:70px"><span class="isl"></span><div class="sb2"><b>9:41</b><span class="bat"></span></div><div class="ah"><span class="lgm sf">M</span><b class="sf">Salon Mio</b><span class="chp">表参道</span></div><div class="hero3 slim"><small>Autumn Season</small><b class="sf">11月のご予約<br>受付中</b><svg class="dec" viewBox="0 0 120 90"><path d="M10 84C32 50 56 36 104 10M44 58c-9-11-7-23 3-31M66 44c0-13 9-22 22-25M28 70c-11-5-15-13-13-24" fill="none" stroke="rgba(255,255,255,.75)" stroke-width="1.8" stroke-linecap="round"/></svg></div><div class="sty"><div class="on"><i>佐</i>佐藤</div><div><i>田</i>田中</div><div><i>鈴</i>鈴木</div></div><div class="mrow sel"><div><b>カット</b><small>60分 ・ カルテ作成つき</small></div><em>¥5,500</em><span class="plus">✓</span></div><div class="mrow"><div><b>カラー</b><small>90分</small></div><em>¥8,800</em></div><div class="dts"><span class="on">月<br>2</span><span>火<br>3</span><span>水<br>4</span><span>木<br>5</span><span>金<br>6</span></div><div class="slt"><span>10:00</span><span class="on">11:30</span><span>13:00</span></div><div class="cta3">予約を確定する</div><div class="tbar"><span class="on"><svg class="ti"><use href="#i-cal"/></svg>予約</span><span><svg class="ti"><use href="#i-chat"/></svg>履歴</span><span><svg class="ti"><use href="#i-db"/></svg>カルテ</span><span><svg class="ti"><use href="#i-key"/></svg>マイページ</span></div><div class="sheet ad ad-a"><span class="ck">✓</span><div><b>カード決済が完了しました</b><small>¥5,500 ・ 予約と同時にお支払い</small></div></div><div class="ntf ad ad-b"><span class="app">M</span><div><b>明日11:30のご予約です</b><small>LINEリマインド ・ Salon Mio</small></div></div></div></div></div><div class="ucp" role="tabpanel"><div class="uci"><img class="ucimg" src="uc-seitai.webp" alt="タオルが置かれた施術ベッドのある、整体院の施術室" width="800" height="800" loading="lazy" decoding="async" style="object-position:50% 60%"><span class="tag">整体・スクール向け</span><h3>デジタル回数券・チケット管理マイページ</h3><p>基本の7,700円：残り回数をお客様自身が確認できるマイページ。</p><div class="tgs"><small>追加できる機能（押して足してみる）</small><button class="tg" type="button" data-k="a" aria-pressed="false"><span>回数券のオンライン購入</span><em>+6,000円</em></button><button class="tg" type="button" data-k="b" aria-pressed="false"><span>有効期限の通知</span><em>+6,000円</em></button></div><div class="sum">合計の目安<b data-t>7,700円</b><span>12回払いなら 月々<b data-m>738円</b></span></div></div><div class="bd" style="--b1:#dcebe2;--b2:#f4ecd3" aria-hidden="true"><div class="pho" style="--pm:#3f6e59;--pd:#2c5242;--pb:#f4f7f2;--pa:#e5c07b;--pt:#1f2e27;--ps:#fff;--pl:#dfe8dc;--pmu:#70827a;--sbm:70px"><span class="isl"></span><div class="sb2"><b>9:41</b><span class="bat"></span></div><div class="ah"><span class="lgm sf">ひ</span><b class="sf">ひだまり整骨院</b><span class="chp">会員</span></div><div class="tkt"><small>整体 回数券 ・ 10回</small><div class="big3 sf">4<span>回 残り</span></div><div class="stp"><i>✓</i><i>✓</i><i>✓</i><i>✓</i><i>✓</i><i>✓</i><i class="e">·</i><i class="e">·</i><i class="e">·</i><i class="e">·</i></div><div class="tkr"><span>有効期限</span><b>2026/12/31</b></div></div><div class="mrow"><div><b>前回のご利用</b><small>10/20 ・ 担当 山田</small></div><em>6回目</em></div><div class="nxt"><div><svg class="ti"><use href="#i-cal"/></svg><span><small>次回のご予約</small><b>11/2（月）11:30</b></span></div><i>変更</i></div><div class="mrow"><div><b>お知らせ</b><small>年末年始の営業時間について</small></div><em class="tg1">NEW</em></div><div class="tbar"><span class="on"><svg class="ti"><use href="#i-cal"/></svg>回数券</span><span><svg class="ti"><use href="#i-chat"/></svg>予約</span><span><svg class="ti"><use href="#i-db"/></svg>履歴</span><span><svg class="ti"><use href="#i-key"/></svg>設定</span></div><div class="sheet ad ad-a"><span class="ck">✓</span><div><b>回数券10回を購入しました</b><small>¥33,000 ・ その場でカード決済</small></div></div><div class="ntf ad ad-b"><span class="app">ひ</span><div><b>有効期限のお知らせ</b><small>12/31まで ・ 残り4回 ・ ひだまり整骨院</small></div></div></div></div></div><div class="ucp" role="tabpanel"><div class="uci"><img class="ucimg" src="uc-creator.webp" alt="ノートパソコンとカメラが置かれた、自宅の作業デスク" width="800" height="800" loading="lazy" decoding="async" style="object-position:50% 62%"><span class="tag">クリエイター向け</span><h3>Stripe連動・有料メンバーシップサロン</h3><p>基本の7,700円：会員だけが読めるページと、会員登録の仕組み。</p><div class="tgs"><small>追加できる機能（押して足してみる）</small><button class="tg" type="button" data-k="a" aria-pressed="false"><span>月額課金の自動化</span><em>+6,000円</em></button><button class="tg" type="button" data-k="b" aria-pressed="false"><span>会員限定の投稿機能</span><em>+6,000円</em></button></div><div class="sum">合計の目安<b data-t>7,700円</b><span>12回払いなら 月々<b data-m>738円</b></span></div></div><div class="bd" style="--b1:#d9d4fb;--b2:#ffdbe6" aria-hidden="true"><div class="pho" style="--pm:#7c6cf0;--pd:#5a49cf;--pb:#14121f;--pa:#ff8fb1;--pt:#f1eefe;--ps:#1f1c30;--pl:#2d2945;--pmu:#9a96b8;--sbm:70px"><span class="isl"></span><div class="sb2"><b>9:41</b><span class="bat"></span></div><div class="ah"><span class="lgm">C</span><b>Creator Lab</b><span class="chp">128人</span></div><div class="cov"><svg viewBox="0 0 280 110" preserveAspectRatio="xMidYMid slice"><rect width="280" height="110" fill="#5a49cf"/><circle cx="60" cy="30" r="70" fill="#7c6cf0" opacity=".9"/><circle cx="230" cy="90" r="80" fill="#ff8fb1" opacity=".75"/><circle cx="150" cy="60" r="38" fill="#fff" opacity=".12"/><circle cx="196" cy="24" r="14" fill="#fff" opacity=".25"/></svg><div><small>NEW ・ 10/27</small><b>制作の裏側 vol.12</b></div></div><div class="pst"><div><b>制作日記 #12</b><small>2日前 ・ 公開</small></div><i>公開</i></div><div class="pst lkd"><div class="bl"><b>制作の裏側 vol.11</b><small>ラフから完成までの全工程を…</small></div><span class="lkb"><svg class="ti"><use href="#i-lock"/></svg>メンバー限定</span></div><div class="pst"><div><b>制作日記 #11</b><small>1週間前 ・ 公開</small></div><i>公開</i></div><div class="cta3 grad">メンバーになる　¥980 / 月</div><div class="tbar"><span class="on"><svg class="ti"><use href="#i-board"/></svg>ホーム</span><span><svg class="ti"><use href="#i-chat"/></svg>投稿</span><span><svg class="ti"><use href="#i-db"/></svg>メンバー</span><span><svg class="ti"><use href="#i-key"/></svg>設定</span></div><div class="sheet ad ad-a"><span class="ck">✓</span><div><b>月額課金を自動化</b><small>毎月1日に ¥980 ・ 次回 12/1</small></div></div><div class="ntf ad ad-b"><span class="app">C</span><div><b>新着：会員限定の投稿</b><small>Creator Lab ・ メンバーだけに先行公開</small></div></div></div></div></div><div class="ucp" role="tabpanel"><div class="uci"><img class="ucimg" src="uc-illust.webp" alt="ペンタブレットとスケッチブック、色鉛筆が置かれた作業デスク" width="800" height="800" loading="lazy" decoding="async" style="object-position:50% 68%"><span class="tag">イラストレーター向け</span><h3>オーダーメイド受注＆制作進捗ボード</h3><p>基本の7,700円：依頼の受付と、進み具合を依頼主に見せるボード。</p><div class="tgs"><small>追加できる機能（押して足してみる）</small><button class="tg" type="button" data-k="a" aria-pressed="false"><span>見積もりの自動計算</span><em>+6,000円</em></button><button class="tg" type="button" data-k="b" aria-pressed="false"><span>納品時の決済</span><em>+6,000円</em></button></div><div class="sum">合計の目安<b data-t>7,700円</b><span>12回払いなら 月々<b data-m>738円</b></span></div></div><div class="bd" style="--b1:#ffe0d6;--b2:#fff0cf" aria-hidden="true"><div class="pho" style="--pm:#ee6c4d;--pd:#c9503a;--pb:#fff8f0;--pa:#2b2a3a;--pt:#2b2a3a;--ps:#fff;--pl:#f0e2d2;--pmu:#8b8394;--sbm:70px"><span class="isl"></span><div class="sb2"><b>9:41</b><span class="bat"></span></div><div class="ah"><span class="lgm sf">N</span><b class="sf">Studio Nori</b><span class="chp">依頼中 3</span></div><div class="prj"><div class="pt1"><svg viewBox="0 0 64 64"><rect width="64" height="64" rx="12" fill="#ffe3d6"/><path d="M14 36c0-16 8-24 18-24s18 8 18 24c-4-8-10-12-18-12s-14 4-18 12z" fill="#2b2a3a"/><circle cx="32" cy="38" r="14" fill="#fff4ea"/><circle cx="27" cy="38" r="1.8" fill="#2b2a3a"/><circle cx="37" cy="38" r="1.8" fill="#2b2a3a"/><path d="M29 44q3 2.4 6 0" fill="none" stroke="#ee6c4d" stroke-width="1.6" stroke-linecap="round"/></svg><div><b>キャラクターイラスト</b><small>山田さま ・ 納期 11/10</small></div></div><div class="pbar"><i></i></div><div class="stps"><span class="d">ラフ</span><span class="d">線画</span><span class="c">着色</span><span>納品</span></div></div><div class="lbl">ほかのご依頼</div><div class="mrow"><div><b>ロゴ案</b><small>打ち合わせ中</small></div><em class="tg1">進行</em></div><div class="mrow"><div><b>表紙イラスト</b><small>ラフ確認待ち</small></div><em class="tg1 w">確認待ち</em></div><div class="mrow"><div><b>名刺デザイン</b><small>見積もり中</small></div><em class="tg1">進行</em></div><div class="cta3">イラストレーターにメッセージ</div><div class="tbar"><span class="on"><svg class="ti"><use href="#i-board"/></svg>進み具合</span><span><svg class="ti"><use href="#i-chat"/></svg>メッセージ</span><span><svg class="ti"><use href="#i-yen"/></svg>お支払い</span><span><svg class="ti"><use href="#i-key"/></svg>設定</span></div><div class="sheet ad ad-a"><span class="ck">✓</span><div><b>見積もりを自動計算</b><small>線画＋着色＋商用利用 → ¥24,000</small></div></div><div class="ntf ad ad-b"><span class="app">N</span><div><b>納品・お支払い完了</b><small>¥24,000 ・ カードで決済済み</small></div></div></div></div></div></div>
  <p class="note" style="margin-top:20px">※金額は目安です。正式な金額は、無料相談のあとのお見積もりで確定します。</p>
@@ -824,7 +847,7 @@ header#hd .btn{min-height:34px;padding:0 16px;font-size:13px;border-radius:999px
 
 <!-- COMPARE -->
 <section class="alt"><div class="wrap">
- <h2>ほかの方法と、<wbr>くらべてみてください。</h2>
+ <h2><span class="nw">ほかの方法と、</span><wbr>くらべてみてください。</h2>
  <p class="lead">横にスクロールして比較できます。</p>
  <div class="scroll" tabindex="0"><table>
   <thead><tr><th></th><th>開発会社に依頼</th><th>ノーコードで自作</th><th class="us">このサービス</th></tr></thead>
@@ -840,7 +863,7 @@ header#hd .btn{min-height:34px;padding:0 16px;font-size:13px;border-radius:999px
 
 <!-- SECURITY -->
 <section class="band"><div class="wrap"><div class="split">
- <div class="sl2"><h2>安くても、<wbr>守りは削りません。</h2><p class="lead">お客様の個人情報や決済に関わるアプリだからこそ、自前で作り込まず、世界中で使われている仕組みを土台にします。</p><figure class="secviz" aria-hidden="true"><svg viewBox="0 0 320 320" role="img">
+ <div class="sl2"><h2><span class="nw">安くても、</span><wbr>守りは削りません。</h2><p class="lead">お客様の個人情報や決済に関わるアプリだからこそ、自前で作り込まず、世界中で使われている仕組みを土台にします。</p><figure class="secviz" aria-hidden="true"><svg viewBox="0 0 320 320" role="img">
 <defs>
 <radialGradient id="sg-glow" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#ffc247" stop-opacity=".35"/><stop offset=".55" stop-color="#ffc247" stop-opacity=".08"/><stop offset="1" stop-color="#ffc247" stop-opacity="0"/></radialGradient>
 <linearGradient id="sg-sh" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffffff" stop-opacity=".22"/><stop offset="1" stop-color="#ffffff" stop-opacity=".06"/></linearGradient>
@@ -871,7 +894,7 @@ header#hd .btn{min-height:34px;padding:0 16px;font-size:13px;border-radius:999px
 
 <!-- PRICE -->
 <section class="alt" id="price"><div class="wrap">
- <h2>基本料金＋1文字<span class="nb">0.4円</span>。<wbr>これだけです。</h2>
+ <h2>基本料金＋1文字<span class="nb">0.4円。</span><wbr>これだけです。</h2>
  <p class="lead">まずは「かんたんWebサービス」から。必要になったら機能を足せます。</p>
  <div class="plist"><div class="pr1 first"><div><span class="tag">まずはここから</span><h3>かんたんWebサービス</h3><p>ログインと管理画面のあるシンプルなWebサービス</p></div><div class="pp"><b>7,700<small>円</small></b><span>月々 738円</span></div></div><div class="pr1"><div><h3>SNS</h3><p>投稿・フォロー・コミュニティの仕組み</p></div><div class="pp"><b>15,000<small>円</small></b><span>月々 1,438円</span></div></div><div class="pr1"><div><h3>マッチング</h3><p>人と人、人と仕事を引き合わせる仕組み</p></div><div class="pp"><b>25,000<small>円</small></b><span>月々 2,396円</span></div></div><div class="pr1"><div><h3>ネットショップ</h3><p>商品・カート・決済までそろった販売サイト</p></div><div class="pp"><b>35,000<small>円</small></b><span>月々 3,354円</span></div></div></div>
  <div class="grid g2 extra">
@@ -911,7 +934,7 @@ header#hd .btn{min-height:34px;padding:0 16px;font-size:13px;border-radius:999px
 <!-- OPTION -->
 <section id="option"><div class="wrap">
  <span class="tag">オプション</span>
- <h2>公開までの面倒な作業も、<wbr>おまかせください。</h2>
+ <h2><span class="nw">公開までの面倒な作業も、</span><wbr>おまかせください。</h2>
  <p class="lead">ドメインやサーバーの契約など、むずかしい手続きを代行します。公開後の保守も、まとめて頂けます。</p>
  <div class="opt">
   <div class="card"><h3>代行サービス</h3><p>必要な作業だけ、選んでお願いできます。</p>
@@ -941,20 +964,20 @@ header#hd .btn{min-height:34px;padding:0 16px;font-size:13px;border-radius:999px
 
 <!-- FLOW -->
 <section id="flow" class="alt"><div class="wrap">
- <h2>ご相談から運用開始まで、<wbr>4ステップ。</h2>
+ <h2><span class="nw">ご相談から運用開始まで、</span><wbr>4ステップ。</h2>
  <p class="lead">むずかしい言葉は使いません。ざっくりしたアイデアで大丈夫です。</p>
  <ol class="tl2"><li><span class="dot">1</span><h3>無料相談</h3><p>アイデアをお聞かせください。LINEかXのDMで気軽にどうぞ。</p><img class="stimg" src="consult.webp" alt="スマートフォンのトーク画面で気軽に相談している様子" width="960" height="720" loading="lazy" decoding="async"></li><li><span class="dot">2</span><h3>明朗お見積もり</h3><p>基本料金と追加機能の文字数で金額を出します。見てから決められます。</p></li><li><span class="dot">3</span><h3>爆速開発</h3><p>AIと進めて、1週間〜1ヶ月で形にします。</p></li><li><span class="dot g">4</span><h3>確認＆<wbr>運用スタート</h3><p>動きを確かめたら、その日から使いはじめられます。</p></li></ol>
 </div></section>
 
 <!-- FAQ -->
 <section id="faq"><div class="wrap" style="max-width:760px">
- <h2>お申し込み前の不安を、<wbr>先に解消します。</h2>
+ <h2><span class="nw">お申し込み前の不安を、</span><wbr>先に解消します。</h2>
  <p class="lead" style="margin-bottom:24px">よくある質問</p>
  <details open><summary>専門用語がわからなくても大丈夫ですか？</summary><p>大丈夫です。ご相談では、むずかしい言葉を使わずにお話しします。「何ができるのか」から一緒に考えましょう。ITの知識がなくても、ざっくりしたアイデアで頼めます。</p></details>
  <details><summary>「文字数」と言われても、見当がつきません。</summary><p>文字数は、機能をつくるためのプログラムの量で、作業量の目安です。数えるのはこちらなので、調べる必要はありません。見積もりで、機能ごとの金額をお見せします。</p></details>
  <details><summary>お客様の個人情報や決済情報は安全ですか？</summary><p>カード情報はStripeの画面で処理され、あなたのアプリには保存されません。ログインには実績のある仕組みを使い、データはお客様ごとに見られる範囲を分け、通信は暗号化します。[個人情報の取り扱い方針・公開前の確認内容を記入]</p></details>
  <details><summary>サーバー代など、ほかに費用はかかりますか？</summary><p>サーバーやデータベースの利用料は、アプリの規模によって変わります。必要な費用と支払い先は、お見積もりの段階でお伝えします。[月額費用の有無と目安を記入]</p></details>
- <details><summary>あとから追加で請求されることはありますか？</summary><p>開発費用は「基本料金＋追加機能の文字数×<span class="nb">0.4円</span>」で、見積もりの時点で先にお出しします。[お見積もり後に仕様を変更する場合の扱いを記入]</p></details>
+ <details><summary>あとから追加で請求されることはありますか？</summary><p>開発費用は「基本料金＋追加機能の文字数×<span class="nb">0.4円」</span>で、見積もりの時点で先にお出しします。[お見積もり後に仕様を変更する場合の扱いを記入]</p></details>
  <details><summary>公開後の修正やアップデートもお願いできますか？</summary><p>はい。月額3,500円の運用保守プランで、バグ修正やアップデート対応、微調整（月に5回まで、毎月リセット）を承ります。新しい機能の追加は、追加機能としてお見積もりします。</p></details>
  <details><summary>分割払いの手数料はいくらですか？</summary><p>3・6・12ヶ月から選べて、手数料は5〜15%です。回数が多いほど、毎月の負担は小さくなります。</p></details>
  <details><summary>ノーコードのツールと何が違いますか？</summary><p>ひな形ではなく、プログラムを書いてオーダーメイドで作ります。「この機能は作れない」が起きにくく、事業の成長に合わせて作り足せます。</p></details>
@@ -965,7 +988,7 @@ header#hd .btn{min-height:34px;padding:0 16px;font-size:13px;border-radius:999px
 <section id="contact" class="band" style="text-align:center"><div class="wrap">
  <div class="cta">
   <span class="limited">限定1〜2名様</span>
-  <h2 style="color:#fff">そのアイデア、<wbr>7,700円から<wbr>形にしませんか。</h2>
+  <h2 style="color:#fff"><span class="nw">そのアイデア、</span><wbr>7,700円から<wbr>形にしませんか。</h2>
   <p>「こんなの作れる？」の気軽な相談から、どうぞ。相談も、最初の見積もりも無料です。いまなら、アイデアの文字数見積もり＆構成案づくりも無料で行っています。</p>
   <div class="btns"><a class="btn" href="#"><svg class="ico sm" aria-hidden="true"><use href="#i-chat"/></svg>LINEで相談する</a><a class="btn sub" href="#">X（Twitter）のDMで相談する</a></div>
   <p class="note" style="margin:20px auto 0">相談は無料／見積もりを見てから決められる／月々738円〜の分割払い<br>LINE：[LINE IDまたはURLを記入]　X：[Xのアカウントを記入]</p>
