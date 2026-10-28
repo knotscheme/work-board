@@ -9,7 +9,7 @@
 <title>7,700円から作れるオーダーメイドアプリ開発</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&family=Noto+Serif+JP:wght@600;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700;800&family=Noto+Sans+JP:wght@400;500;700;900&family=Noto+Serif+JP:wght@600;900&display=swap" rel="stylesheet">
 <style>
 :root{--bg:#f3fafa;--card:#fff;--text:#0f2a2e;--muted:#4f6a6e;--line:#d3e8e8;--brand:#0e7c8c;--mint:#e0f3f3;--accent:#f0a010;--ink:#0b6477;--ink-t:#fff;--ink-m:#d4eef0;color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
 html{height:100%;scroll-padding-top:calc(72px + env(safe-area-inset-top,0px));scroll-behavior:smooth}
@@ -843,6 +843,102 @@ header#hd .btn{font-size:14px!important;padding:0 10px!important;white-space:now
 .cmp2 .mk{width:26px;height:26px;font-size:15px;margin-bottom:4px}
 }
 @media(max-width:350px){.cmp2 th,.cmp2 td{font-size:10.5px}.cmp2 tbody th{font-size:11px;padding-left:8px}}
+
+/* =====================================================================
+   MODERN THEME (minimal / whitespace) — overrides everything above
+   ===================================================================== */
+:root{--bg:#fafaf8;--card:#fff;--text:#141716;--muted:#6a706f;--line:#e8e8e3;--brand:#0e7c8c;--mint:#eef5f4;--accent:#ffc83d;--ink:#0f1413;--ink-t:#fff;--ink-m:#a9b3b2;--dark:#0f1413}
+body{font-family:"Inter","Noto Sans JP","Hiragino Sans","Yu Gothic",Meiryo,sans-serif;font-feature-settings:"palt";letter-spacing:.02em;background:var(--bg)}
+section{padding:112px 0}
+@media(max-width:860px){section{padding:84px 0}}
+h1,h2,h3{font-weight:700!important;letter-spacing:.01em}
+h2{font-size:clamp(26px,5vw,40px);line-height:1.35;margin-bottom:16px}
+.lead{font-size:15px;line-height:1.9;color:var(--muted)}
+.alt{background:#fff;border-block:1px solid var(--line)}
+/* labels: quiet outline chips */
+.tag,.xl,.hero2 .tag{background:transparent!important;border:1px solid var(--line);color:var(--muted)!important;font-weight:600;letter-spacing:.08em;font-size:11px;border-radius:999px;padding:3px 10px}
+.hero2 .tag{border-color:rgba(255,255,255,.18);color:#c9d2d1!important}
+/* buttons: flat */
+.btn,.cta .btn,.wrap .cta .btn,header#hd .btn{background:var(--accent)!important;border-color:var(--accent)!important;color:#141716!important;box-shadow:none!important;font-weight:700;letter-spacing:.04em}
+.btn:hover{filter:brightness(.97)}
+.btn.sub,.cta .btn.sub{background:transparent!important;color:#fff!important;border:1px solid rgba(255,255,255,.35)!important}
+.hero2 .btn.main{animation:none!important}
+@media(max-width:860px){header#hd .btn{box-shadow:0 10px 30px -10px rgba(0,0,0,.35)!important}}
+header#hd .hbar{background:rgba(15,20,19,.86)!important;-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);border-color:rgba(255,255,255,.08)!important;box-shadow:none!important}
+/* hero video: no dot pattern, neutral tint */
+.vhero .vdots{display:none}
+.vhero .vtint{background:#7d8584}
+/* ---------- dark sections ---------- */
+.hero2{background:var(--dark)!important;animation:none!important}
+.hero2::before{animation:none!important;width:620px;height:620px;right:-220px;top:-260px;background:radial-gradient(circle,rgba(14,124,140,.45),transparent 62%)!important}
+.hero2::after{animation:none!important;background:radial-gradient(circle,rgba(255,200,61,.10),transparent 65%)!important}
+.big b{background:none!important;-webkit-text-fill-color:#fff;color:#fff!important;font-family:"Inter",sans-serif;font-weight:800;letter-spacing:-.04em}
+.big small{color:#fff;font-weight:700}
+.l1{font-weight:600!important;color:#a9b3b2;letter-spacing:.18em!important;font-size:clamp(14px,3.4vw,18px)!important}
+.l3 span{background:none!important;color:#7fd3d6}
+.hero2 .sub{color:#b9c3c2}
+.anchor{color:#a9b3b2}.anchor b{background:#fff;color:var(--dark)}
+.stats b{font-family:"Inter","Noto Sans JP",sans-serif;font-weight:700;letter-spacing:-.01em}
+.band{background:var(--dark)!important}
+.band .lead{color:#a9b3b2}
+.band .card,.band .chk li{border-color:rgba(255,255,255,.1)!important}
+.band .ico{background:rgba(255,255,255,.06)!important;color:#7fd3d6!important}
+#contact::after{background:linear-gradient(90deg,rgba(15,20,19,.94) 0%,rgba(15,20,19,.84) 45%,rgba(15,20,19,.55) 100%)!important}
+@media(max-width:860px){#contact::after{background:linear-gradient(180deg,rgba(15,20,19,.8),rgba(15,20,19,.9))!important}}
+.cta .limited{background:transparent!important;color:var(--accent)!important;border:1px solid rgba(255,200,61,.5)}
+/* ---------- remove marker highlights / glows ---------- */
+.endline span{background:none!important}
+.endline{color:var(--text)!important;font-weight:700!important}
+.pfig::before{display:none!important}
+.pfig img{filter:none!important}
+/* ---------- surfaces: border, no heavy shadows ---------- */
+.card,.xcard,.bub.chat,#why .rows,.cmp2 table,.plist,.chat,.eband,.secviz figcaption span{box-shadow:none!important}
+.card,.xcard,#why .rows,.plist{border:1px solid var(--line)!important;border-radius:20px!important}
+.cmp2 table{box-shadow:inset 0 0 0 1px var(--line)!important;border-radius:20px}
+.scene img,.ucimg,.tl2 .stimg{box-shadow:none!important;border-radius:20px!important}
+.bub.chat{background:#f3f4f2!important;box-shadow:inset 0 0 0 1px var(--line)!important}
+.bub.chat .bb{box-shadow:none!important;border:1px solid var(--line)}
+.bub.chat .b.me .bb{background:var(--dark)!important;border-color:var(--dark)}
+.bub.chat .chd{background:#fff!important}
+/* emphasis blocks: flat dark instead of teal gradient */
+#usecase .sum,.xpt.on,.cmp2 thead .us{background:var(--dark)!important;box-shadow:none!important}
+#usecase .sum::before{display:none}
+#usecase .sum span b,.xpt.on .xpm b{color:var(--accent)!important}
+.cmp2 .us{background:#f6f7f5}
+.cmp2 td.us .mk.g2{background:var(--accent)!important;box-shadow:none!important;color:#141716}
+.mk.g2{background:var(--text)!important}
+.cmp-hl{color:var(--text);text-decoration:underline;text-decoration-color:var(--accent);text-decoration-thickness:3px;text-underline-offset:5px}
+.xf strong{background:none!important;-webkit-text-fill-color:var(--text);color:var(--text);font-family:"Inter",sans-serif;font-weight:800}
+.xf strong small{-webkit-text-fill-color:var(--muted)}
+.xb i{background:var(--text)!important}
+.xpt.on::before{background:var(--accent)!important}
+.xlist li{background:#f6f7f5!important}
+#usecase .tg{box-shadow:none!important;border-color:var(--line)}
+#usecase .tg[aria-pressed="true"]{border-color:var(--text)!important;background:#fff!important}
+#usecase .tg[aria-pressed="true"]::before{background:var(--text)!important}
+#usecase .tg[aria-pressed="true"]::after{background-color:var(--text)!important;box-shadow:inset 0 0 0 2px var(--text)!important}
+#usecase .tg::before{background:#f1f2f0!important;color:var(--text)!important}
+.pr1.first{background:#f6f7f5!important;box-shadow:inset 3px 0 0 var(--text)!important}
+.tl2 .dot{background:var(--text)!important;color:#fff!important}.tl2 .dot.g{background:var(--accent)!important;color:#141716!important}
+/* numbers in Inter */
+.pp b,.xp,.xpm b,.xpn b,#usecase .sum>b,.sum b,.rows .n,.cu{font-family:"Inter","Noto Sans JP",sans-serif}
+.rows .n{-webkit-text-stroke:1.2px var(--text)!important;font-weight:700!important}
+/* reveal: shorter, calmer */
+html.js .rv{transform:translate3d(0,16px,0)}
+html.js .rv.rv-l,html.js .rv.rv-r{transform:translate3d(0,16px,0)}
+
+/* modern theme: remaining LP-level teal blocks (demo app screens keep their own colors) */
+.card.care,.estimate .monthly,.extra .card:first-child{background:var(--dark)!important;border:0!important}
+.card.care .tag{color:var(--accent)!important;border-color:rgba(255,200,61,.4)}
+.sim .chip[aria-pressed="true"],#price .chip[aria-pressed="true"]{background:var(--text)!important;border-color:var(--text)!important;color:#fff!important}
+.estimate{border-color:var(--line)!important;box-shadow:none!important;border-radius:20px!important}
+.tl2 .dot{background:var(--text)!important}
+#usecase .swp .dots i.on{background:var(--text)}
+.uct .tab[aria-selected="true"]{color:var(--text)!important}
+.uct .tab[aria-selected="true"]::after,.uct .tab[aria-selected="true"]{border-color:var(--text)!important}
+.faq details,details{box-shadow:none!important}
+.alt .sim .result,.result{border:1px solid var(--text)!important;box-shadow:none!important;border-radius:20px!important;background:#fff!important}
+.result .big,.result [data-m],.result .total b{color:var(--text)!important}
 </style>
 <style>
 /* ヘッダー：ヒーロー（動画ヒーロー＋#intro）を過ぎてから表示 */
