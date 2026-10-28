@@ -994,6 +994,16 @@ header#hd .hbar{background:rgba(14,124,140,.92)!important}
 /* sticker look for cutout models */
 .pfig img{filter:drop-shadow(0 6px 10px rgba(14,60,70,.18)) drop-shadow(0 1px 2px rgba(14,60,70,.12))!important;transform:rotate(-2.5deg);transform-origin:50% 100%}
 .pfig.tint-y img{transform:rotate(2.5deg)}
+
+/* sticker icons above heads */
+.pfig{position:relative}
+.pst{position:absolute;z-index:3;width:46%;height:auto;overflow:visible;filter:drop-shadow(0 3px 5px rgba(14,60,70,.22)) drop-shadow(0 0 1px rgba(14,60,70,.25));pointer-events:none}
+.pst .o *{fill:#fff;stroke:#fff;stroke-width:16;stroke-linejoin:round;stroke-linecap:round}
+.pst-cloud{right:-10%;top:-12%;transform:rotate(6deg);animation:pstbob 4s ease-in-out infinite}
+.pst-bulb{right:-8%;top:-16%;transform:rotate(10deg);animation:pstbob 3.4s ease-in-out infinite}
+.pst-bulb .f>path:first-child{animation:pstglow 1.8s ease-in-out infinite}
+@keyframes pstbob{0%,100%{translate:0 0}50%{translate:0 -5px}}
+@keyframes pstglow{0%,100%{opacity:.55}50%{opacity:1}}
 </style>
 <style>
 /* ヘッダー：ヒーロー（動画ヒーロー＋#intro）を過ぎてから表示 */
@@ -1097,7 +1107,7 @@ header#hd .btn{min-height:34px;padding:0 16px;font-size:13px;border-radius:999px
 <section class="alt"><div class="wrap">
  <div class="phead">
  <h2>アプリを<br class="spbr"><span class="nw">つくりたい。</span><br class="spbr"><span class="nw">でも、</span><wbr>現実は。</h2>
- <figure class="pfig tint-m"><img src="worry.webp" alt="予算の壁に悩み、腕を組んで考え込む女性" width="464" height="574" loading="lazy" decoding="async"></figure>
+ <figure class="pfig tint-m"><svg class="pst pst-cloud" viewBox="0 0 120 100" aria-hidden="true"><g class="o"><path d="M30 68a16 16 0 0 1-3-31.6A21 21 0 0 1 66 26a17 17 0 0 1 30 9.5A15 15 0 0 1 93 68Z"/><circle cx="26" cy="84" r="7"/><circle cx="13" cy="95" r="4"/></g><g class="f"><path d="M30 68a16 16 0 0 1-3-31.6A21 21 0 0 1 66 26a17 17 0 0 1 30 9.5A15 15 0 0 1 93 68Z" fill="#dfe8ea" stroke="#33494d" stroke-width="3" stroke-linejoin="round"/><circle cx="26" cy="84" r="7" fill="#dfe8ea" stroke="#33494d" stroke-width="3"/><circle cx="13" cy="95" r="4" fill="#dfe8ea" stroke="#33494d" stroke-width="2.6"/><path d="M42 50c4-7 8 7 12 0s8 7 12 0 8 7 12 0" fill="none" stroke="#33494d" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/></g></svg><img src="worry.webp" alt="予算の壁に悩み、腕を組んで考え込む女性" width="464" height="574" loading="lazy" decoding="async"></figure>
  <p class="lead">こんな理由で、あきらめていませんか？</p>
 </div>
  <div class="bub chat" role="list" aria-label="よくある悩み"><div class="chd" aria-hidden="true"><img src="avatar.webp" alt="" width="120" height="120"><span>心の声</span><i></i></div><div class="b" role="listitem"><img class="av" src="avatar.webp" alt="" width="120" height="120" aria-hidden="true"><div class="bb"><b>「見積もりが<wbr>100万円超え…」</b><span>開発会社に相談したら、個人の副業やお店の予算では最初の一歩すら踏み出せない。</span></div><time aria-hidden="true">23:41</time></div><div class="b" role="listitem"><span class="av" aria-hidden="true"></span><div class="bb"><b>「制限が多くて<wbr>断念…」</b><span>ノーコードで自作したら、やりたいことの半分しか実現できず、時間だけが過ぎていく。</span></div><time aria-hidden="true">23:42</time></div><div class="b" role="listitem"><span class="av" aria-hidden="true"></span><div class="bb"><b>「後からいくら<wbr>請求されるか不安…」</b><span>安い見積もりを見つけても、総額が見えないままでは頼む決心がつかない。</span></div><time aria-hidden="true">23:44</time></div><div class="b" role="listitem"><span class="av" aria-hidden="true"></span><div class="bb"><b>「安いアプリは<wbr>セキュリティが心配…」</b><span>お客様のデータを預かるなら、個人情報や決済が絡むからこそ妥協したくない。</span></div><time aria-hidden="true">23:47</time></div><div class="b me" aria-label="サクアプが入力中"><div class="bb"><span class="dots"><i></i><i></i><i></i></span></div></div></div>
@@ -1108,7 +1118,7 @@ header#hd .btn{min-height:34px;padding:0 16px;font-size:13px;border-radius:999px
 <section id="why"><div class="wrap">
  <div class="phead">
  <h2><span class="nw">安さにも速さにも、</span><br class="spbr">理由があります。</h2>
- <figure class="pfig tint-y"><img src="smile.webp" alt="スマートフォンを手に、笑顔を見せる女性" width="464" height="522" loading="lazy" decoding="async"></figure>
+ <figure class="pfig tint-y"><svg class="pst pst-bulb" viewBox="0 0 120 120" aria-hidden="true"><g class="o"><path d="M60 22a26 26 0 0 0-15 47c3 2.5 4 5 4 8v6h22v-6c0-3 1-5.5 4-8A26 26 0 0 0 60 22Z"/><rect x="48" y="83" width="24" height="16" rx="5"/><path d="M60 4v8M24 18l6 6M96 18l-6 6M12 50h8M100 50h8"/></g><g class="f"><path d="M60 4v8M24 18l6 6M96 18l-6 6M12 50h8M100 50h8" stroke="#f0a010" stroke-width="5" stroke-linecap="round"/><path d="M60 22a26 26 0 0 0-15 47c3 2.5 4 5 4 8v6h22v-6c0-3 1-5.5 4-8A26 26 0 0 0 60 22Z" fill="#ffd54d" stroke="#5b3d00" stroke-width="3.2" stroke-linejoin="round"/><path d="M50 38a14 14 0 0 1 10-5" fill="none" stroke="#fff6cf" stroke-width="4" stroke-linecap="round"/><rect x="48" y="83" width="24" height="16" rx="5" fill="#cfd8da" stroke="#5b3d00" stroke-width="3.2"/><path d="M49 90h22" stroke="#5b3d00" stroke-width="2.4"/></g></svg><img src="smile.webp" alt="スマートフォンを手に、笑顔を見せる女性" width="464" height="522" loading="lazy" decoding="async"></figure>
  <p class="lead">AIと一緒に作ることで、開発の手間を大きく減らし、その分を価格に反映しています。</p>
 </div>
  <div class="rows"><div class="r"><span class="n">01</span><div><span class="tag">スピード</span><h3>AIと作るから<wbr>最短1ヶ月</h3></div><p>プログラムを書く作業をAIと進めて、開発時間を大きく圧縮。かかる手間が減ったぶん、価格にも反映しています。</p></div><div class="r"><span class="n">02</span><div><span class="tag">本物のコード</span><h3>既製品ではなく<wbr>オーダーメイド</h3></div><p>ノーコードのような「できないこと」が出にくく、事業と一緒に育てられます。</p></div><div class="r"><span class="n">03</span><div><span class="tag">明朗会計</span><h3>ごまかし一切なしの<wbr>「1文字<span class="nb">0.4円」</span></h3></div><p>何にいくらかかるのかを、見積もりの時点で全部お見せします。</p></div></div>
