@@ -813,6 +813,7 @@ header#hd .wrap{padding:0!important}
 header#hd .btn{font-size:14px!important;padding:0 10px!important;white-space:nowrap}
 }
 @media(max-width:350px){header#hd{left:11vw!important;right:11vw!important}header#hd .btn{font-size:12.5px!important;padding:0 6px!important}}
+#usecase .uci{touch-action:pan-y}#usecase .ucimg{-webkit-user-drag:none;user-select:none}
 </style>
 <style>
 /* ヘッダー：ヒーロー（動画ヒーロー＋#intro）を過ぎてから表示 */
@@ -1326,6 +1327,10 @@ pans.forEach(function(p){
   bd.addEventListener("pointerdown",function(e){if(e.target.closest(".nv"))return;x0=e.clientX;y0=e.clientY;id=e.pointerId});
   bd.addEventListener("pointerup",function(e){if(id!==e.pointerId)return;id=null;var dx=e.clientX-x0,dy=e.clientY-y0;if(Math.abs(dx)>50&&Math.abs(dx)>Math.abs(dy)*1.5)go(dx<0?1:-1)});
   bd.addEventListener("pointercancel",function(){id=null});
+  var ui=p.querySelector(".uci");if(ui){var ux=0,uy=0,uid=null;
+  ui.addEventListener("pointerdown",function(e){ux=e.clientX;uy=e.clientY;uid=e.pointerId});
+  ui.addEventListener("pointerup",function(e){if(uid!==e.pointerId)return;uid=null;var dx=e.clientX-ux,dy=e.clientY-uy;if(Math.abs(dx)>50&&Math.abs(dx)>Math.abs(dy)*1.5){e.preventDefault();go(dx<0?1:-1)}});
+  ui.addEventListener("pointercancel",function(){uid=null});}
   var h=p.querySelector(".hint");if(h)h.remove();
   var pi=pans.indexOf(p),dots="";for(var k=0;k<pans.length;k++)dots+='<i'+(k===pi?' class="on"':'')+'></i>';
   bd.insertAdjacentHTML("afterend",'<div class="swp"><span class="dots" aria-hidden="true">'+dots+'</span><span class="sw-sp">画面をタップで操作 ・ 左右スワイプで業種切替</span><span class="sw-pc">画面をクリックで操作 ・ 左右の矢印で業種切替</span></div>');
