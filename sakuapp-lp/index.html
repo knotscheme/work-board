@@ -575,17 +575,26 @@ header .btn{min-height:38px;padding:0 18px;font-size:14px;border-radius:8px;anim
 .secimg{margin:28px 0 0;width:min(100%,320px);background:#fff;border-radius:24px;padding:14px;box-shadow:0 24px 48px -24px rgba(3,40,50,.55)}.secimg img{display:block;width:100%;height:auto}
 @media(max-width:860px){.secimg{margin:24px auto 8px;width:min(64vw,260px);padding:10px;border-radius:20px}}
 
-/* ===== small figure beside heading ===== */
-.phead{display:grid;grid-template-columns:minmax(0,auto) auto;grid-template-areas:"h f" "l l";justify-content:start;align-items:end;column-gap:40px;margin-bottom:32px}
+/* ===== figure peeking over the card below ===== */
+.phead{display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"h f" "l f";align-items:end;column-gap:32px;margin-bottom:0;position:relative;z-index:1}
 .phead h2{grid-area:h;margin-bottom:0}
-.phead .lead{grid-area:l;margin-top:14px;margin-bottom:0}
-.pfig{grid-area:f;position:relative;margin:0;width:clamp(104px,28vw,180px);isolation:isolate}
-.pfig::before{content:"";position:absolute;left:4%;right:4%;bottom:0;aspect-ratio:1;border-radius:50%;z-index:-1}
-.pfig.tint-m::before{background:radial-gradient(circle at 30% 25%,#e7f6f4,#bfe6e2 60%,#9fd6d1)}
-.pfig.tint-y::before{background:radial-gradient(circle at 30% 25%,#fff7e0,#ffe3a0 60%,#ffd27a)}
-.pfig img{display:block;width:100%;height:auto;-webkit-mask-image:radial-gradient(closest-side circle at 50% 62.4%,#000 99%,transparent 100%),linear-gradient(#000 0 62%,transparent 62%);mask-image:radial-gradient(closest-side circle at 50% 62.4%,#000 99%,transparent 100%),linear-gradient(#000 0 62%,transparent 62%)}
-@media(max-width:600px){.phead{grid-template-columns:minmax(0,1fr) auto;justify-content:stretch;column-gap:10px;margin-bottom:24px}.phead h2{font-size:clamp(17px,5.6vw,26px);line-break:strict}.pfig{width:clamp(80px,26vw,130px)}}
-
+.phead .lead{grid-area:l;margin:14px 0 28px}
+.pfig{grid-area:f;align-self:end;position:relative;margin:0 8px -96px 0;width:clamp(150px,22vw,250px);isolation:isolate;pointer-events:none}
+.pfig::before{content:"";position:absolute;left:50%;top:34%;width:120%;aspect-ratio:1;transform:translate(-50%,-50%);border-radius:50%;z-index:-1;filter:blur(2px)}
+.pfig.tint-m::before{background:radial-gradient(circle,rgba(159,214,209,.55),rgba(159,214,209,0) 68%)}
+.pfig.tint-y::before{background:radial-gradient(circle,rgba(255,210,122,.55),rgba(255,210,122,0) 68%)}
+.pfig img{display:block;width:100%;height:auto;-webkit-mask-image:none;mask-image:none;filter:drop-shadow(0 18px 24px rgba(14,60,70,.18))}
+.bub.chat,#why .rows{position:relative;z-index:2}
+.wrap > .bub.chat{max-width:none;margin:0}
+#why .rows{background:#fff;border-radius:24px;padding:4px 32px;box-shadow:0 30px 60px -40px rgba(14,80,95,.45),inset 0 0 0 1px rgba(14,124,140,.08)}
+#why .rows .r:first-child{border-top:0}#why .rows .r:last-child{border-bottom:0}
+@media(max-width:600px){
+.phead{column-gap:4px;grid-template-areas:"h h" "l f"}
+.phead h2{font-size:clamp(20px,6vw,26px)}
+.phead .lead{margin:12px 0 22px;font-size:15px}
+.pfig{width:clamp(128px,38vw,160px);margin:0 -4px -64px 0}
+#why .rows{padding:0 20px;border-radius:20px}
+}
 /* ===== final CTA photo background ===== */
 #contact{position:relative;isolation:isolate;overflow:hidden;background:#0b6477}
 #contact::before{content:"";position:absolute;inset:0;z-index:-2;background:url(idea.webp) 72% 30%/cover no-repeat}
