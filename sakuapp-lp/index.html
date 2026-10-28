@@ -798,6 +798,13 @@ header#hd.on.quiet{transform:translateY(calc(100% + 32px));opacity:0;visibility:
 #usecase .hint{margin-top:14px;align-items:flex-start;gap:8px;padding:10px 12px;border-radius:12px;background:rgba(14,124,140,.06);font-size:12px;line-height:1.7;color:var(--muted)}
 #usecase .hint::before{content:"👆";font-size:14px;line-height:1.5}
 @media(max-width:350px){#usecase .tg{grid-template-columns:24px 1fr auto 34px;gap:8px;padding:10px}#usecase .tg::before{width:24px;height:24px}#usecase .tg span{font-size:14px}#usecase .tg::after{width:34px;height:20px;background-image:radial-gradient(circle at 10px 10px,#fff 7px,transparent 7.5px)}#usecase .tg[aria-pressed="true"]::after{background-position:14px 0}}
+
+/* ===== swipe caption under demo phone ===== */
+#usecase .swp{display:flex;flex-direction:column;align-items:center;gap:8px;margin-top:14px;font-size:12px;color:var(--muted);letter-spacing:.04em}
+#usecase .swp .sw-pc{display:none}@media(min-width:861px){#usecase .swp .sw-pc{display:inline}#usecase .swp .sw-sp{display:none}}
+#usecase .swp .dots{display:flex;gap:6px}
+#usecase .swp .dots i{width:6px;height:6px;border-radius:3px;background:#c9dadd;transition:width .3s}
+#usecase .swp .dots i.on{width:18px;background:var(--brand)}
 </style>
 <style>
 /* ヘッダー：ヒーロー（動画ヒーロー＋#intro）を過ぎてから表示 */
@@ -1311,7 +1318,9 @@ pans.forEach(function(p){
   bd.addEventListener("pointerdown",function(e){if(e.target.closest(".nv"))return;x0=e.clientX;y0=e.clientY;id=e.pointerId});
   bd.addEventListener("pointerup",function(e){if(id!==e.pointerId)return;id=null;var dx=e.clientX-x0,dy=e.clientY-y0;if(Math.abs(dx)>50&&Math.abs(dx)>Math.abs(dy)*1.5)go(dx<0?1:-1)});
   bd.addEventListener("pointercancel",function(){id=null});
-  var h=p.querySelector(".hint");if(h)h.textContent="スマホ画面の下のメニューで、ほかの画面も見られます。左右にスワイプ（または矢印）で、ほかの業種にも切り替えられます。";
+  var h=p.querySelector(".hint");if(h)h.remove();
+  var pi=pans.indexOf(p),dots="";for(var k=0;k<pans.length;k++)dots+='<i'+(k===pi?' class="on"':'')+'></i>';
+  bd.insertAdjacentHTML("afterend",'<div class="swp"><span class="dots" aria-hidden="true">'+dots+'</span><span class="sw-sp">画面をタップで操作 ・ 左右スワイプで業種切替</span><span class="sw-pc">画面をクリックで操作 ・ 左右の矢印で業種切替</span></div>');
 });
 })();
 </script>
