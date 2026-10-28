@@ -805,6 +805,14 @@ header#hd.on.quiet{transform:translateY(calc(100% + 32px));opacity:0;visibility:
 #usecase .swp .dots{display:flex;gap:6px}
 #usecase .swp .dots i{width:6px;height:6px;border-radius:3px;background:#c9dadd;transition:width .3s}
 #usecase .swp .dots i.on{width:18px;background:var(--brand)}
+
+/* iOS Safari: a full-width fixed bar at the bottom makes Safari tint its toolbar; keep the bar narrower than 80% */
+@media(max-width:860px){
+header#hd{left:12vw!important;right:12vw!important;width:auto!important}
+header#hd .wrap{padding:0!important}
+header#hd .btn{font-size:14px!important;padding:0 10px!important;white-space:nowrap}
+}
+@media(max-width:350px){header#hd{left:11vw!important;right:11vw!important}header#hd .btn{font-size:12.5px!important;padding:0 6px!important}}
 </style>
 <style>
 /* ヘッダー：ヒーロー（動画ヒーロー＋#intro）を過ぎてから表示 */
