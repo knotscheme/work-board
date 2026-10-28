@@ -815,30 +815,34 @@ header#hd .btn{font-size:14px!important;padding:0 10px!important;white-space:now
 @media(max-width:350px){header#hd{left:11vw!important;right:11vw!important}header#hd .btn{font-size:12.5px!important;padding:0 6px!important}}
 #usecase .uci{touch-action:pan-y}#usecase .ucimg{-webkit-user-drag:none;user-select:none}
 
-/* ===== comparison ===== */
-.cmp{position:relative;display:grid;margin-top:8px}
-.cmp .cr{display:grid;grid-template-columns:150px 1.15fr 1fr 1fr;align-items:stretch}
-.cmp .cr>span{display:flex;align-items:center;gap:8px;padding:18px 18px;font-size:14px;color:var(--muted);border-bottom:1px solid var(--line)}
-.cmp .cr .ck{font-weight:700;color:var(--text)}
-.cmp .cmh>span{font-size:13px;font-weight:700;color:var(--muted);border-bottom:0;padding-top:24px}
-.cmp .us{position:relative;background:#fff;color:var(--text)!important;font-weight:700;border-left:2px solid var(--brand);border-right:2px solid var(--brand);border-bottom-color:#e3eff0!important}
-.cmp .cmh .us{flex-direction:column;align-items:flex-start;gap:0;border-top:2px solid var(--brand);border-radius:16px 16px 0 0;background:linear-gradient(135deg,#16919f,#0b6477);color:#fff!important;border-color:var(--brand)}
-.cmp .cmh .us b{font-size:18px;color:#fff}.cmp .cmh .us small{font-size:11px;color:#d9f1f3;font-weight:700}
-.cmp .cr:last-child .us{border-bottom:2px solid var(--brand)!important;border-radius:0 0 16px 16px;box-shadow:0 20px 30px -24px rgba(11,100,119,.6)}
-.cmp .us svg{flex:none;width:20px;height:20px;padding:3px;border-radius:50%;background:var(--mint);color:var(--brand)}
-.cmp .us em{font-style:normal}
-@media(max-width:760px){
-.cmp{gap:12px}
-.cmp .cmh{display:none}
-.cmp .cr{grid-template-columns:1fr 1fr;grid-template-areas:"k k" "u u" "d n";background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 14px 30px -24px rgba(14,80,95,.5),inset 0 0 0 1px #dcebec}
-.cmp .cr>span{border:0!important;padding:0 16px}
-.cmp .cr .ck{grid-area:k;padding:14px 16px 8px;font-size:13px;letter-spacing:.06em;color:var(--brand)}
-.cmp .cr .us{grid-area:u;margin:0 12px;padding:12px 14px;border-radius:12px!important;background:linear-gradient(135deg,#16919f,#0b6477);color:#fff!important;font-size:16px;box-shadow:none!important}
-.cmp .cr .us svg{background:#fff;color:#0b6477}
-.cmp .cr span[data-l]:not(.us){flex-direction:column;align-items:flex-start;gap:2px;padding:12px 16px 14px;font-size:13px;line-height:1.5}
-.cmp .cr span[data-l]:not(.us)::before{content:attr(data-l);font-size:11px;font-weight:700;color:#8aa0a4;letter-spacing:.04em}
-.cmp .cr span[data-l]:not(.us)+span{border-left:1px solid #e3eff0!important}
+/* ===== comparison (symbol table) ===== */
+.hl{color:var(--brand)}
+.cmp2 table{width:100%;min-width:0;border-collapse:separate;border-spacing:0;table-layout:fixed;background:#fff;border-radius:18px;box-shadow:0 20px 40px -30px rgba(14,80,95,.5),inset 0 0 0 1px #dcebec}
+.cmp2 th,.cmp2 td{padding:14px 10px;text-align:center;vertical-align:middle;border-bottom:1px solid #e6f0f1;font-size:13px;line-height:1.45}
+.cmp2 tbody tr:last-child th,.cmp2 tbody tr:last-child td{border-bottom:0}
+.cmp2 thead th{padding:18px 8px 14px;font-size:13px;font-weight:700;color:var(--muted)}
+.cmp2 tbody th{text-align:left;padding-left:18px;font-size:13px;font-weight:700;color:var(--text);width:24%}
+.cmp2 .us{position:relative;background:#eef8f8}
+.cmp2 thead .us{background:linear-gradient(160deg,#16919f,#0b6477);color:#fff;font-size:16px;font-weight:900;border-radius:14px 14px 0 0}
+.cmp2 tbody tr:last-child .us{border-radius:0 0 14px 14px}
+.cmp2 .crown{position:absolute;top:-11px;left:50%;transform:translateX(-50%);white-space:nowrap;font-size:10px;font-weight:900;color:#2b1d00;background:#ffc247;padding:3px 9px;border-radius:999px}
+.cmp2 td{color:var(--muted)}.cmp2 td.us{color:var(--text);font-weight:700}
+.cmp2 .mk{display:grid;place-items:center;width:30px;height:30px;margin:0 auto 6px;border-radius:50%;font-size:17px;font-weight:900;font-style:normal;line-height:1}
+.cmp2 .mt{display:block}
+.mk.g2{background:#0e7c8c;color:#fff}.mk.g1{background:#d6eeee;color:#0e7c8c}.mk.g0{background:#fff1d1;color:#c98300}.mk.gx{background:#f2e6e6;color:#b25454}
+.cmp2 td.us .mk.g2{background:linear-gradient(135deg,#ffc247,#f0a010);color:#2b1d00;box-shadow:0 4px 10px -4px rgba(240,160,16,.7)}
+.cmp2 .lgd{display:flex;flex-wrap:wrap;justify-content:center;gap:6px 14px;margin:14px 0 0;font-size:12px;color:var(--muted)}
+.cmp2 .lgd span{display:inline-flex;align-items:center;gap:5px}
+.cmp2 .lgd .mk{width:18px;height:18px;margin:0;font-size:11px}
+@media(max-width:600px){
+.cmp2{margin:0 -8px}
+.cmp2 th,.cmp2 td{padding:12px 4px;font-size:11.5px}
+.cmp2 thead th{font-size:11.5px;padding:16px 2px 12px;line-height:1.35}
+.cmp2 thead .us{font-size:14px}
+.cmp2 tbody th{padding-left:12px;font-size:12px;width:25%;line-break:strict}
+.cmp2 .mk{width:26px;height:26px;font-size:15px;margin-bottom:4px}
 }
+@media(max-width:350px){.cmp2 th,.cmp2 td{font-size:10.5px}.cmp2 tbody th{font-size:11px;padding-left:8px}}
 </style>
 <style>
 /* ヘッダー：ヒーロー（動画ヒーロー＋#intro）を過ぎてから表示 */
@@ -988,14 +992,13 @@ header#hd .btn{min-height:34px;padding:0 16px;font-size:13px;border-radius:999px
 <!-- COMPARE -->
 <section class="alt"><div class="wrap">
  <h2><span class="nw">ほかの方法と、</span><wbr>くらべてみてください。</h2>
- <p class="lead">開発会社に頼む・自分で作る、とくらべると、ちょうどいいところが見えてきます。</p>
- <div class="cmp" role="table" aria-label="ほかの方法との比較">
-  <div class="cr cmh" role="row"><span role="columnheader"></span><span class="us" role="columnheader"><b>サクアプ</b><small>このサービス</small></span><span role="columnheader">開発会社に依頼</span><span role="columnheader">ノーコードで自作</span></div>
-  <div class="cr" role="row"><span class="ck" role="rowheader">初期費用</span><span class="us" role="cell" data-l="サクアプ"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3.5 8.5l3 3 6-7" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg><em>7,700円から</em></span><span role="cell" data-l="開発会社">数十万〜100万円超</span><span role="cell" data-l="ノーコード">ツール費用＋自分の作業時間</span></div>
-  <div class="cr" role="row"><span class="ck" role="rowheader">費用の見え方</span><span class="us" role="cell" data-l="サクアプ"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3.5 8.5l3 3 6-7" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg><em>見積もりで総額がわかる</em></span><span role="cell" data-l="開発会社">あとから増えないか不安</span><span role="cell" data-l="ノーコード">月額プランに左右される</span></div>
-  <div class="cr" role="row"><span class="ck" role="rowheader">機能の自由度</span><span class="us" role="cell" data-l="サクアプ"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3.5 8.5l3 3 6-7" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg><em>高い（オーダーメイド）</em></span><span role="cell" data-l="開発会社">高い</span><span role="cell" data-l="ノーコード">制限が出やすい</span></div>
-  <div class="cr" role="row"><span class="ck" role="rowheader">開発期間</span><span class="us" role="cell" data-l="サクアプ"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3.5 8.5l3 3 6-7" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg><em>最短1ヶ月</em></span><span role="cell" data-l="開発会社">見積もりによる</span><span role="cell" data-l="ノーコード">自分の作業時間しだい</span></div>
-  <div class="cr" role="row"><span class="ck" role="rowheader">お金の負担</span><span class="us" role="cell" data-l="サクアプ"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3.5 8.5l3 3 6-7" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg><em>3・6・12ヶ月の分割払い</em></span><span role="cell" data-l="開発会社">まとまった資金が必要</span><span role="cell" data-l="ノーコード">毎月の利用料</span></div>
+ <p class="lead">開発会社の<b class="hl">「自由さ」</b>と、<span class="nw">自分で作る<b class="hl">「安さ」</b>。</span>そのいいとこ取りです。</p>
+ <div class="cmp2">
+ <table>
+  <thead><tr><th></th><th class="us" scope="col"><span class="crown">おすすめ</span>サクアプ</th><th scope="col">開発会社<br class="spbr">に依頼</th><th scope="col">ノーコード<br class="spbr">で自作</th></tr></thead>
+  <tbody><tr><th scope="row">初期費用</th><td class="us"><span class="mk g2">◎</span><span class="mt">7,700円〜</span></td><td><span class="mk gx">×</span><span class="mt">数十万〜100万円超</span></td><td><span class="mk g1">○</span><span class="mt">ツール代＋作業時間</span></td></tr><tr><th scope="row">総額の見えやすさ</th><td class="us"><span class="mk g2">◎</span><span class="mt">見積もりで確定</span></td><td><span class="mk g0">△</span><span class="mt">増えないか不安</span></td><td><span class="mk g0">△</span><span class="mt">月額プラン次第</span></td></tr><tr><th scope="row">機能の自由度</th><td class="us"><span class="mk g2">◎</span><span class="mt">オーダーメイド</span></td><td><span class="mk g2">◎</span><span class="mt">高い</span></td><td><span class="mk g0">△</span><span class="mt">制限が出やすい</span></td></tr><tr><th scope="row">開発期間</th><td class="us"><span class="mk g2">◎</span><span class="mt">最短1ヶ月</span></td><td><span class="mk g0">△</span><span class="mt">見積もり次第</span></td><td><span class="mk g0">△</span><span class="mt">自分の作業次第</span></td></tr><tr><th scope="row">作る手間</th><td class="us"><span class="mk g2">◎</span><span class="mt">おまかせ</span></td><td><span class="mk g2">◎</span><span class="mt">おまかせ</span></td><td><span class="mk gx">×</span><span class="mt">すべて自分で</span></td></tr><tr><th scope="row">お金の負担</th><td class="us"><span class="mk g2">◎</span><span class="mt">3・6・12回払い</span></td><td><span class="mk gx">×</span><span class="mt">まとまった資金</span></td><td><span class="mk g1">○</span><span class="mt">毎月の利用料</span></td></tr></tbody>
+ </table>
+ <p class="lgd"><span><i class="mk g2">◎</i>とても良い</span><span><i class="mk g1">○</i>良い</span><span><i class="mk g0">△</i>気になる</span><span><i class="mk gx">×</i>難しい</span></p>
  </div>
 </div></section>
 
@@ -1398,7 +1401,7 @@ var H=document.documentElement;
 /* image fade-in */
 [].forEach.call(document.querySelectorAll('img[loading="lazy"]'),function(im){im.classList.add("lz");function ok(){im.classList.add("ld")}if(im.complete&&im.naturalWidth)ok();else{im.addEventListener("load",ok);im.addEventListener("error",ok)}});
 if(!("IntersectionObserver" in window)){H.classList.remove("js");return}
-var GROUP=".bub,.rows,.chk,.tl2,.grid,.split,.two,.pp,.xtra,.cmp";
+var GROUP=".bub,.rows,.chk,.tl2,.grid,.split,.two,.pp,.xtra";
 var els=[];
 function mark(el,d,extra){el.classList.add("rv");if(extra)el.classList.add(extra);el.style.setProperty("--d",Math.min(d,.5).toFixed(2)+"s");els.push(el)}
 [].forEach.call(document.querySelectorAll("main section"),function(sec){
