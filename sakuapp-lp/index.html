@@ -814,6 +814,31 @@ header#hd .btn{font-size:14px!important;padding:0 10px!important;white-space:now
 }
 @media(max-width:350px){header#hd{left:11vw!important;right:11vw!important}header#hd .btn{font-size:12.5px!important;padding:0 6px!important}}
 #usecase .uci{touch-action:pan-y}#usecase .ucimg{-webkit-user-drag:none;user-select:none}
+
+/* ===== comparison ===== */
+.cmp{position:relative;display:grid;margin-top:8px}
+.cmp .cr{display:grid;grid-template-columns:150px 1.15fr 1fr 1fr;align-items:stretch}
+.cmp .cr>span{display:flex;align-items:center;gap:8px;padding:18px 18px;font-size:14px;color:var(--muted);border-bottom:1px solid var(--line)}
+.cmp .cr .ck{font-weight:700;color:var(--text)}
+.cmp .cmh>span{font-size:13px;font-weight:700;color:var(--muted);border-bottom:0;padding-top:24px}
+.cmp .us{position:relative;background:#fff;color:var(--text)!important;font-weight:700;border-left:2px solid var(--brand);border-right:2px solid var(--brand);border-bottom-color:#e3eff0!important}
+.cmp .cmh .us{flex-direction:column;align-items:flex-start;gap:0;border-top:2px solid var(--brand);border-radius:16px 16px 0 0;background:linear-gradient(135deg,#16919f,#0b6477);color:#fff!important;border-color:var(--brand)}
+.cmp .cmh .us b{font-size:18px;color:#fff}.cmp .cmh .us small{font-size:11px;color:#d9f1f3;font-weight:700}
+.cmp .cr:last-child .us{border-bottom:2px solid var(--brand)!important;border-radius:0 0 16px 16px;box-shadow:0 20px 30px -24px rgba(11,100,119,.6)}
+.cmp .us svg{flex:none;width:20px;height:20px;padding:3px;border-radius:50%;background:var(--mint);color:var(--brand)}
+.cmp .us em{font-style:normal}
+@media(max-width:760px){
+.cmp{gap:12px}
+.cmp .cmh{display:none}
+.cmp .cr{grid-template-columns:1fr 1fr;grid-template-areas:"k k" "u u" "d n";background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 14px 30px -24px rgba(14,80,95,.5),inset 0 0 0 1px #dcebec}
+.cmp .cr>span{border:0!important;padding:0 16px}
+.cmp .cr .ck{grid-area:k;padding:14px 16px 8px;font-size:13px;letter-spacing:.06em;color:var(--brand)}
+.cmp .cr .us{grid-area:u;margin:0 12px;padding:12px 14px;border-radius:12px!important;background:linear-gradient(135deg,#16919f,#0b6477);color:#fff!important;font-size:16px;box-shadow:none!important}
+.cmp .cr .us svg{background:#fff;color:#0b6477}
+.cmp .cr span[data-l]:not(.us){flex-direction:column;align-items:flex-start;gap:2px;padding:12px 16px 14px;font-size:13px;line-height:1.5}
+.cmp .cr span[data-l]:not(.us)::before{content:attr(data-l);font-size:11px;font-weight:700;color:#8aa0a4;letter-spacing:.04em}
+.cmp .cr span[data-l]:not(.us)+span{border-left:1px solid #e3eff0!important}
+}
 </style>
 <style>
 /* ヘッダー：ヒーロー（動画ヒーロー＋#intro）を過ぎてから表示 */
@@ -963,17 +988,15 @@ header#hd .btn{min-height:34px;padding:0 16px;font-size:13px;border-radius:999px
 <!-- COMPARE -->
 <section class="alt"><div class="wrap">
  <h2><span class="nw">ほかの方法と、</span><wbr>くらべてみてください。</h2>
- <p class="lead">横にスクロールして比較できます。</p>
- <div class="scroll" tabindex="0"><table>
-  <thead><tr><th></th><th>開発会社に依頼</th><th>ノーコードで自作</th><th class="us">このサービス</th></tr></thead>
-  <tbody>
-   <tr><th>初期費用</th><td>数十万〜100万円超</td><td>ツール費用＋自分の作業時間</td><td class="us">7,700円から</td></tr>
-   <tr><th>費用の見え方</th><td>あとから増えないか不安</td><td>月額プランに左右される</td><td class="us">見積もりで総額がわかる</td></tr>
-   <tr><th>機能の自由度</th><td>高い</td><td>制限が出やすい</td><td class="us">高い（オーダーメイド）</td></tr>
-   <tr><th>開発期間</th><td>見積もりによる</td><td>自分の作業時間しだい</td><td class="us">最短1ヶ月</td></tr>
-   <tr><th>お金の負担</th><td>まとまった資金が必要</td><td>毎月の利用料</td><td class="us">3・6・12ヶ月の分割払い</td></tr>
-  </tbody>
- </table></div>
+ <p class="lead">開発会社に頼む・自分で作る、とくらべると、ちょうどいいところが見えてきます。</p>
+ <div class="cmp" role="table" aria-label="ほかの方法との比較">
+  <div class="cr cmh" role="row"><span role="columnheader"></span><span class="us" role="columnheader"><b>サクアプ</b><small>このサービス</small></span><span role="columnheader">開発会社に依頼</span><span role="columnheader">ノーコードで自作</span></div>
+  <div class="cr" role="row"><span class="ck" role="rowheader">初期費用</span><span class="us" role="cell" data-l="サクアプ"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3.5 8.5l3 3 6-7" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg><em>7,700円から</em></span><span role="cell" data-l="開発会社">数十万〜100万円超</span><span role="cell" data-l="ノーコード">ツール費用＋自分の作業時間</span></div>
+  <div class="cr" role="row"><span class="ck" role="rowheader">費用の見え方</span><span class="us" role="cell" data-l="サクアプ"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3.5 8.5l3 3 6-7" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg><em>見積もりで総額がわかる</em></span><span role="cell" data-l="開発会社">あとから増えないか不安</span><span role="cell" data-l="ノーコード">月額プランに左右される</span></div>
+  <div class="cr" role="row"><span class="ck" role="rowheader">機能の自由度</span><span class="us" role="cell" data-l="サクアプ"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3.5 8.5l3 3 6-7" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg><em>高い（オーダーメイド）</em></span><span role="cell" data-l="開発会社">高い</span><span role="cell" data-l="ノーコード">制限が出やすい</span></div>
+  <div class="cr" role="row"><span class="ck" role="rowheader">開発期間</span><span class="us" role="cell" data-l="サクアプ"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3.5 8.5l3 3 6-7" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg><em>最短1ヶ月</em></span><span role="cell" data-l="開発会社">見積もりによる</span><span role="cell" data-l="ノーコード">自分の作業時間しだい</span></div>
+  <div class="cr" role="row"><span class="ck" role="rowheader">お金の負担</span><span class="us" role="cell" data-l="サクアプ"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3.5 8.5l3 3 6-7" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg><em>3・6・12ヶ月の分割払い</em></span><span role="cell" data-l="開発会社">まとまった資金が必要</span><span role="cell" data-l="ノーコード">毎月の利用料</span></div>
+ </div>
 </div></section>
 
 <!-- SECURITY -->
@@ -1375,7 +1398,7 @@ var H=document.documentElement;
 /* image fade-in */
 [].forEach.call(document.querySelectorAll('img[loading="lazy"]'),function(im){im.classList.add("lz");function ok(){im.classList.add("ld")}if(im.complete&&im.naturalWidth)ok();else{im.addEventListener("load",ok);im.addEventListener("error",ok)}});
 if(!("IntersectionObserver" in window)){H.classList.remove("js");return}
-var GROUP=".bub,.rows,.chk,.tl2,.grid,.split,.two,.pp,.xtra";
+var GROUP=".bub,.rows,.chk,.tl2,.grid,.split,.two,.pp,.xtra,.cmp";
 var els=[];
 function mark(el,d,extra){el.classList.add("rv");if(extra)el.classList.add(extra);el.style.setProperty("--d",Math.min(d,.5).toFixed(2)+"s");els.push(el)}
 [].forEach.call(document.querySelectorAll("main section"),function(sec){
