@@ -162,7 +162,7 @@ h1,h2,h3,p{margin:0}
 .vsw button{border:0;background:none;border-radius:99px;padding:7px 14px;font-weight:700;font-size:13px;color:var(--muted);cursor:pointer}
 .vsw button.on{background:var(--brand);color:#fff}
 .appview[hidden]{display:none}.appview{display:flex;flex-direction:column;align-items:center;gap:10px}
-.admview{width:100%;display:flex;flex-direction:column;align-items:center;gap:10px}.admview[hidden]{display:none}
+.admwrap{display:flex;justify-content:center;width:100%}.admview{width:100%;display:flex;flex-direction:column;align-items:center;gap:10px}.admview[hidden]{display:none}
 .adm{width:100%;max-width:560px;background:#fff;border:1px solid var(--line);border-radius:12px;overflow:hidden;box-shadow:0 30px 60px -30px rgba(11,60,70,.45);font-size:12px;line-height:1.5}
 .adm-bar{display:flex;gap:6px;align-items:center;padding:8px 12px;background:#eef3f3;border-bottom:1px solid var(--line)}.adm-bar i{width:9px;height:9px;border-radius:50%;background:#d0dcdc}.adm-bar u{flex:1;text-decoration:none;margin-left:8px;background:#fff;border-radius:6px;padding:1px 10px;color:var(--muted);font-size:11px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
 .adm-in{display:grid;grid-template-columns:120px minmax(0,1fr);min-height:420px}
@@ -214,7 +214,7 @@ footer{text-align:center;font-size:12px;color:var(--muted);padding:24px 16px 40p
   <button type="button" class="pvbtn" id="pvopen">▶ 全画面で確認する</button>
   <p class="cap">パーツをタップすると編集、長押ししてドラッグすると並べかえができます。下のメニューを押すと、その画面に切りかわります。</p>
   </div>
-  <div id="admview" class="admview" hidden><div class="adm" id="adm"></div><p class="cap">お店の人がスマホで使う管理画面のイメージです。業種と、お客様の画面に置いたパーツに合わせて、自動で中身が変わります。管理画面は基本料金に含まれます（パソコンからも使えます）。</p></div>
+  <div id="admview" class="admview" hidden><div class="admwrap" id="adm"></div><p class="cap">お店の人がスマホで使う管理画面のイメージです。業種と、お客様の画面に置いたパーツに合わせて、自動で中身が変わります。管理画面は基本料金に含まれます（パソコンからも使えます）。</p></div>
  </div>
  <div>
   <div class="panel">
