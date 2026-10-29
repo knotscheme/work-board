@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<title>アプリ構成案シート｜サクアプ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@700;800&family=Noto+Sans+JP:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#eef5f5;--card:#fff;--text:#0f2a2e;--muted:#4f6a6e;--line:#d3e8e8;--brand:#0e7c8c;--dark:#0b6477;--mint:#e0f3f3;--yel:#ffc247;--yel2:#f0a010;--yl:#fff4d1;color-scheme:light}
+*{box-sizing:border-box}html{background:var(--bg)}
+body{margin:0;background:var(--bg);color:var(--text);font:400 14px/1.7 "Noto Sans JP","Hiragino Sans",sans-serif;-webkit-text-size-adjust:100%}
+h1,h2,h3,p{margin:0}
+.tools{max-width:820px;margin:0 auto;padding:14px 16px 0;display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.tools a,.tools button{border:1.5px solid var(--brand);background:#fff;color:var(--brand);border-radius:99px;padding:7px 14px;font:700 13px "Noto Sans JP",sans-serif;text-decoration:none;cursor:pointer}
+.tools .pri{background:linear-gradient(135deg,var(--yel),var(--yel2));border-color:transparent;color:#2b1d00}
+.tools p{flex-basis:100%;font-size:12px;color:var(--muted)}
+.sheet{max-width:820px;margin:14px auto 40px;background:#fff;border-radius:16px;box-shadow:0 20px 50px -30px rgba(11,60,70,.4);padding:32px 30px;overflow:hidden}
+.hd{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;border-bottom:3px solid var(--brand);padding-bottom:14px;margin-bottom:22px;flex-wrap:wrap}
+.hd small{font:800 11px Inter,sans-serif;letter-spacing:.14em;color:var(--brand)}
+.hd h1{font-size:26px;font-weight:900;line-height:1.3}
+.meta{font-size:12px;color:var(--muted);text-align:right;line-height:1.8}
+[contenteditable]{outline:none;border-radius:4px;transition:background .15s}
+[contenteditable]:hover{background:var(--yl)}[contenteditable]:focus{background:var(--yl);box-shadow:0 0 0 2px var(--yel)}
+.ed-hint{display:inline-block;font-size:10px;font-weight:700;color:#a86a00;background:var(--yl);border-radius:99px;padding:0 8px;margin-left:6px;vertical-align:2px}
+section{margin-bottom:24px;break-inside:avoid}
+h2{display:flex;align-items:center;gap:10px;font-size:16px;font-weight:900;margin-bottom:10px}
+h2 b{width:26px;height:26px;border-radius:8px;background:var(--brand);color:#fff;display:grid;place-items:center;font:800 13px Inter,sans-serif;flex:none}
+.goal{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.goal div{background:var(--mint);border-radius:12px;padding:10px 12px}.goal small{display:block;font-size:11px;font-weight:900;color:var(--brand)}.goal p{font-weight:700;min-height:1.7em}
+.flow{display:flex;flex-wrap:wrap;align-items:stretch;gap:0}
+.scb{flex:1 1 140px;max-width:190px;border:2px solid var(--brand);border-radius:14px;overflow:hidden;background:#fff;display:flex;flex-direction:column}
+.scb h3{background:var(--brand);color:#fff;font-size:13px;font-weight:900;padding:6px 10px;display:flex;gap:6px;align-items:center}.scb h3 i{font:800 11px Inter,sans-serif;font-style:normal;background:rgba(255,255,255,.22);border-radius:6px;padding:0 6px}
+.scb ul{margin:0;padding:8px 10px 10px 24px;font-size:11.5px;line-height:1.6;color:var(--muted)}
+.arw{display:flex;align-items:center;padding:0 4px;color:var(--brand);font-weight:900;font-size:18px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{border-bottom:1px solid var(--line);padding:9px 10px;text-align:left;vertical-align:top}
+th{background:var(--mint);color:var(--brand);font-size:12px;width:22%}
+td ul{margin:0;padding-left:1.2em}
+.feat{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.col{border-radius:14px;padding:12px 14px;min-height:90px}.col.now{background:var(--mint);border:2px solid var(--brand)}.col.later{background:#f7f7f7;border:2px dashed #c9d3d3}
+.col h3{font-size:13px;font-weight:900;margin-bottom:6px}.col.now h3{color:var(--brand)}.col.later h3{color:var(--muted)}
+.chip{display:flex;justify-content:space-between;gap:8px;align-items:center;background:#fff;border:1px solid var(--line);border-radius:10px;padding:6px 10px;margin-bottom:6px;font-size:12.5px;font-weight:700;cursor:pointer;width:100%;text-align:left;font-family:inherit;color:inherit}
+.chip span:first-child{flex:1}.chip span:last-child{white-space:nowrap;color:var(--muted);font-weight:500}.chip.base{cursor:default;background:var(--yl);border-color:transparent}
+.chip:not(.base):after{content:"⇄";color:var(--brand);margin-left:4px}
+.tip{font-size:11px;color:var(--muted);margin-top:4px}
+.est{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;background:linear-gradient(135deg,#16919f,#0b6477);color:#fff;border-radius:14px;padding:16px 18px}
+.est small{font-size:12px;color:#d9f1f3}.est b{font:800 30px Inter,"Noto Sans JP",sans-serif;color:#ffe27a}
+.est .mo{font-size:12px;color:#d9f1f3;text-align:right}
+.rows{margin-top:8px;font-size:12px;color:var(--muted)}.rows div{display:flex;justify-content:space-between;padding:2px 0}
+.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;counter-reset:s}
+.steps div{background:var(--bg);border-radius:12px;padding:10px;counter-increment:s;font-size:12px}.steps div:before{content:counter(s);display:grid;place-items:center;width:22px;height:22px;border-radius:50%;background:var(--brand);color:#fff;font:800 12px Inter,sans-serif;margin-bottom:4px}
+.steps b{display:block;font-size:13px}
+.memo{border:1.5px dashed var(--line);border-radius:12px;padding:10px 12px;min-height:70px;color:var(--muted)}
+.foot{font-size:11px;color:var(--muted);border-top:1px solid var(--line);padding-top:10px;display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.empty{text-align:center;padding:40px 10px}.empty a{display:inline-block;margin-top:12px;background:var(--brand);color:#fff;border-radius:99px;padding:10px 20px;font-weight:700;text-decoration:none}
+@media(max-width:640px){.sheet{padding:22px 16px;border-radius:0;margin-top:10px}.goal,.feat{grid-template-columns:1fr}.steps{grid-template-columns:1fr 1fr}.flow{flex-direction:column}.scb{max-width:none}.arw{justify-content:center;transform:rotate(90deg);height:22px}.meta{text-align:left}}
+@media print{@page{size:A4;margin:12mm}html,body{background:#fff}.tools,.ed-hint{display:none!important}.sheet{box-shadow:none;margin:0;padding:0;max-width:none;border-radius:0}[contenteditable]:hover{background:none}.chip:not(.base):after{content:""}body{-webkit-print-color-adjust:exact;print-color-adjust:exact}}
+</style>
+</head>
+<body>
+<div class="tools"><a href="index.html">← 画面メーカーに戻る</a><button type="button" class="pri" id="print">PDFで保存・印刷</button><button type="button" id="reset">書きかえを元に戻す</button><p>黄色くなる文字はタップして書きかえられます。機能をタップすると「最初に作る」と「あとで足す」を入れかえられ、概算も変わります。</p></div>
+<article class="sheet" id="sheet"></article>
+<script>
+(function(){
+var E=function(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})};
+var lines=function(s){return String(s||'').split('\n').map(function(x){return x.trim()}).filter(Boolean)};
+/* what each part does, and paid features */
+var D={head:['お店の名前とロゴを表示'],ttl:[],hero:['写真とキャッチコピーで案内'],notice:['お知らせを表示'],menu:['メニュー・商品を写真つきで一覧表示'],cal:['日付を選べる'],slots:['空いている時間を選べる'],btn:['ボタンで次の画面へ進む'],pay:['その場でカード払いができる','カード決済',6000],form:['名前や連絡先を入力できる'],line:['LINEで自動のお知らせが届く','LINE通知',6000],mail:['申し込み後に確認メールが自動で届く','メール自動送信',4000],hist:['これまでの履歴を見られる'],prof:['お客様のプロフィールを表示'],list:['設定やメニューの項目を一覧表示'],coupon:['クーポンを表示'],shop:['お店の住所・営業時間・写真を表示'],ticket:['回数券の残り回数を確認できる'],member:['月額の有料メンバーに登録できる','月額課金',6000],gal:['写真を投稿・一覧表示できる','画像アップロード',3200],cart:['選んだ商品をまとめて注文できる']};
+var BASE=7700,KEY='sakuapp-builder-v2',KEY2='sakuapp-sheet-v1';
+var st=null;try{st=JSON.parse(localStorage.getItem(KEY)||'null')}catch(e){}
+var ex={};try{ex=JSON.parse(localStorage.getItem(KEY2)||'{}')||{}}catch(e){ex={}}
+function saveEx(){try{localStorage.setItem(KEY2,JSON.stringify(ex))}catch(e){}}
+var sh=document.getElementById('sheet');
+if(!st||!st.screens||!st.screens.length){sh.innerHTML='<div class="empty"><h1 style="font-size:20px">まだ画面がありません</h1><p style="color:#4f6a6e;margin-top:6px">アプリ画面メーカーで画面をつくると、ここに構成案が自動でまとまります。</p><a href="index.html">画面メーカーでつくる</a></div>';return}
+var appName=(function(){for(var i=0;i<st.screens.length;i++){var h=st.screens[i].blocks.filter(function(b){return b.t==='head'})[0];if(h&&h.title)return h.title}return 'わたしのアプリ'})();
+/* features */
+var feats={};st.screens.forEach(function(s){s.blocks.forEach(function(b){var d=D[b.t];if(d&&d[1])feats[d[1]]=d[2]})});
+var later=ex.later||{};
+function ed(key,def){var v=ex[key]!=null?ex[key]:def;return '<span contenteditable="true" data-ed="'+key+'">'+E(v)+'</span>'}
+function screenDoes(s){var out=[];s.blocks.forEach(function(b){var d=D[b.t];if(!d||!d[0])return;var t=d[0];if(b.t==='menu'||b.t==='hist'||b.t==='list'){var n=lines(b.items).length;if(n)t+='（'+n+'件）'}if(out.indexOf(t)<0)out.push(t)});return out}
+var today=new Date(),ds=today.getFullYear()+'年'+(today.getMonth()+1)+'月'+today.getDate()+'日';
+function render(){
+ var now=[],lat=[];Object.keys(feats).forEach(function(k){(later[k]?lat:now).push(k)});
+ var total=BASE+now.reduce(function(a,k){return a+feats[k]},0);
+ sh.innerHTML='<header class="hd"><div><small>SAKUAPP ・ APP PLAN</small><h1>'+ed('title',appName)+' 構成案</h1></div><div class="meta">お客様：'+ed('client','〇〇 様')+'<br>作成日：'+ed('date',ds)+'<br>サクアプ</div></header>'+
+ '<section><h2><b>1</b>このアプリでやること<span class="ed-hint">書きかえ可</span></h2><div class="goal"><div><small>誰のための</small><p>'+ed('who','（例）ひとりで営むサロンのお客様')+'</p></div><div><small>どんな困りごとを</small><p>'+ed('pain','（例）電話がつながらず予約しにくい')+'</p></div><div><small>どう解決する</small><p>'+ed('fix','（例）スマホで24時間予約できる')+'</p></div></div></section>'+
+ '<section><h2><b>2</b>画面の一覧と流れ</h2><div class="flow">'+st.screens.map(function(s,i){var d=screenDoes(s).slice(0,4);return (i?'<span class="arw">→</span>':'')+'<div class="scb"><h3><i>'+(i+1)+'</i>'+E(s.name)+'</h3><ul>'+(d.length?d.map(function(x){return '<li>'+E(x)+'</li>'}).join(''):'<li>（これから決める）</li>')+'</ul></div>'}).join('')+'</div><p class="tip">※下のメニューで、それぞれの画面に切りかえられる構成です。</p></section>'+
+ '<section><h2><b>3</b>画面ごとにできること</h2><table>'+st.screens.map(function(s){var d=screenDoes(s);return '<tr><th>'+E(s.name)+'</th><td>'+(d.length?'<ul>'+d.map(function(x){return '<li>'+E(x)+'</li>'}).join('')+'</ul>':'（これから決める）')+'</td></tr>'}).join('')+'</table></section>'+
+ '<section><h2><b>4</b>最初に作るもの・あとで足すもの</h2><div class="feat"><div class="col now"><h3>最初に作るもの</h3><div class="chip base"><span>基本の画面と管理画面（'+st.screens.length+'画面）</span><span>'+BASE.toLocaleString('ja-JP')+'円</span></div>'+now.map(function(k){return '<button type="button" class="chip" data-f="'+E(k)+'"><span>'+E(k)+'</span><span>+'+feats[k].toLocaleString('ja-JP')+'円</span></button>'}).join('')+'</div><div class="col later"><h3>あとで足すもの</h3>'+(lat.length?lat.map(function(k){return '<button type="button" class="chip" data-f="'+E(k)+'"><span>'+E(k)+'</span><span>+'+feats[k].toLocaleString('ja-JP')+'円</span></button>'}).join(''):'<p class="tip">機能をタップすると、ここに移せます。使われてから足すほうが、安く正確に作れます。</p>')+'</div></div></section>'+
+ '<section><h2><b>5</b>概算（最初に作るもの）</h2><div class="est"><div><small>合計の目安</small><br><b>'+total.toLocaleString('ja-JP')+'円〜</b></div><div class="mo">12回払いなら 月々 約'+Math.ceil(total/12).toLocaleString('ja-JP')+'円〜<br>（カード会社の分割手数料が別にかかります）</div></div><div class="rows"><div><span>基本料金（かんたんWebサービス）</span><span>'+BASE.toLocaleString('ja-JP')+'円</span></div>'+now.map(function(k){return '<div><span>＋ '+E(k)+'</span><span>'+feats[k].toLocaleString('ja-JP')+'円</span></div>'}).join('')+'</div><p class="tip">※概算です。正式な金額は、ヒアリングのあとのお見積もりで確定します。ドメイン・サーバー等の実費や、Stripeの決済手数料は別途です。</p></section>'+
+ '<section><h2><b>6</b>メモ<span class="ed-hint">書きかえ可</span></h2><div class="memo">'+ed('memo','ご要望・気になる点・参考にしたいアプリなど')+'</div></section>'+
+ '<section><h2><b>7</b>このあとの流れ</h2><div class="steps"><div><b>ヒアリング</b>LINEで30分ほど</div><div><b>お見積もり</b>金額を見てから決められます</div><div><b>開発</b>1週間〜1か月が目安</div><div><b>公開</b>動きを確かめて使いはじめ</div></div></section>'+
+ '<footer class="foot"><span>※画面は見た目のイメージです。実際の機能・デザインは、ご相談のうえ決定します。</span><span>サクアプ ｜ 個人事業主・副業のためのアプリ開発</span></footer>';
+ sh.querySelectorAll('[data-ed]').forEach(function(el){el.addEventListener('input',function(){ex[el.dataset.ed]=el.textContent;saveEx()})});
+}
+sh.addEventListener('click',function(e){var c=e.target.closest('[data-f]');if(!c)return;var k=c.dataset.f;later[k]=!later[k];ex.later=later;saveEx();render()});
+document.getElementById('print').addEventListener('click',function(){window.print()});
+document.getElementById('reset').addEventListener('click',function(){ex={};later={};saveEx();render()});
+render();
+})();
+</script>
+</body>
+</html>
