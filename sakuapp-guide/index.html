@@ -210,6 +210,12 @@ td:first-child{color:var(--ink);font-weight:700}
  .bar button:active{background:rgba(255,255,255,.14)}
  .bar svg{width:20px;height:20px}
  .bar .pg{font:600 12px/1 Inter,"Noto Sans JP",sans-serif;color:rgba(255,255,255,.85);min-width:58px;text-align:center;letter-spacing:.04em}
+ .bar .play{width:40px;height:40px;background:#FFC83D!important;color:#14211F;opacity:1;margin:0 2px}
+ .bar .play .i-pause{display:none}.bar.playing .play .i-play{display:none}.bar.playing .play .i-pause{display:block}
+ .bar.playing{opacity:1!important}
+ .bar.playing .prog{background:#fff}
+ .say{position:fixed;left:50%;bottom:calc(70px + env(safe-area-inset-bottom));transform:translateX(-50%);max-width:min(92vw,420px);background:rgba(20,33,31,.78);color:#fff;font:500 13px/1.6 "Noto Sans JP",sans-serif;padding:8px 14px;border-radius:14px;z-index:9;opacity:0;transition:opacity .25s;pointer-events:none;text-align:center}
+ .say.on{opacity:1}
  .bar .bm.on{color:#FFC83D}.bar .bm.on svg{fill:#FFC83D}
  .bar .prog{position:absolute;left:0;bottom:0;height:2px;width:var(--p,0%);background:#FFC83D;transition:width .3s}
  .bar.dim{opacity:.35}
@@ -252,7 +258,7 @@ var marks=load(KEY,[]),cur=0,lock=false;
 var svgB='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M6 3h12v18l-6-4-6 4Z"/></svg>';
 var svgL='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h16M4 12h16M4 18h10"/></svg>';
 var bar=document.createElement('div');bar.className='bar';
-bar.innerHTML='<button class="nav" type="button" aria-label="前のページ"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m15 6-6 6 6 6"/></svg></button><button class="toc" type="button" aria-label="目次">'+svgL+'</button><span class="pg">1 / '+n+'</span><button class="bm" type="button" aria-label="しおり">'+svgB+'</button><button class="nav" type="button" aria-label="次のページ"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg></button><i class="prog"></i>';
+bar.innerHTML='<button class="nav" type="button" aria-label="前のページ"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m15 6-6 6 6 6"/></svg></button><button class="toc" type="button" aria-label="目次">'+svgL+'</button><button class="play" type="button" aria-label="読み上げを再生"><svg class="i-play" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5.5v13l11-6.5Z"/></svg><svg class="i-pause" viewBox="0 0 24 24" fill="currentColor"><rect x="6.5" y="5" width="4" height="14" rx="1"/><rect x="13.5" y="5" width="4" height="14" rx="1"/></svg></button><span class="pg">1 / '+n+'</span><button class="bm" type="button" aria-label="しおり">'+svgB+'</button><button class="nav" type="button" aria-label="次のページ"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg></button><i class="prog"></i>';
 document.body.appendChild(bar);
 var bg=document.createElement('div');bg.className='sheet-bg';document.body.appendChild(bg);
 var sh=document.createElement('div');sh.className='sheet';sh.setAttribute('role','dialog');sh.setAttribute('aria-label','目次としおり');
@@ -264,6 +270,26 @@ function go(i,instant){i=Math.max(0,Math.min(n-1,i));deck.scrollTo({left:i*deck.
 function upd(){cur=idx();pg.textContent=(cur+1)+' / '+n;bar.style.setProperty('--p',((cur+1)/n*100)+'%');var on=marks.indexOf(frames[cur].id)>=0;bmBtn.classList.toggle('on',on);save(LAST,cur);}
 function paintMarks(){frames.forEach(function(f){f.classList.toggle('marked',marks.indexOf(f.id)>=0)});upd();}
 deck.addEventListener('scroll',upd,{passive:true});
+/* ---- read aloud ---- */
+var playBtn=bar.querySelector('.play'),playing=false,synth=window.speechSynthesis,voice=null,timer=null,settleT=null,token=0;
+var say=document.createElement('div');say.className='say';document.body.appendChild(say);
+function pickVoice(){if(!synth)return;var vs=synth.getVoices().filter(function(v){return /^ja/i.test(v.lang)});var male=/Otoya|Hattori|Ichiro|Keita|Daichi|Naoki|male/i;var pref=['Kyoko','O-Ren','Nanami','Mayu','Haruka','Ayumi','Sayaka','Google'];vs=vs.filter(function(v){return !male.test(v.name)}).concat(vs.filter(function(v){return male.test(v.name)}));voice=null;for(var k=0;k<pref.length&&!voice;k++){voice=vs.find(function(v){return v.name.indexOf(pref[k])>=0&&!/Compact/i.test(v.name)})||vs.find(function(v){return v.name.indexOf(pref[k])>=0})||null;}voice=voice||vs[0]||null;}
+if(synth){pickVoice();synth.onvoiceschanged=pickVoice;}
+function textOf(i){var pg=frames[i].querySelector('.page');var sel='h1,h2,.bubble,.learn-t,.learn li,.lead,.bi-t,.bi-d,.big-point p,.sm p,.chips span,.flow p,.formula span,.formula p,.vs p,.toc p,.term p,th,td,.gate div,.weeks>div,.chk>div,.cta-box h3,.cv-s,.funnel>div,.cycle h3,.cycle p';
+ var out=[],seen=new Set();pg.querySelectorAll(sel).forEach(function(el){if(seen.has(el))return;for(var a=el.parentElement;a&&a!==pg;a=a.parentElement){if(seen.has(a))return;}seen.add(el);var t=el.innerText.replace(/\s+/g,' ').trim();if(t)out.push(t);});
+ return out.join('。').replace(/[→＋]/g,'、').replace(/[「」『』]/g,'').replace(/。+/g,'。').replace(/×/g,'かける').replace(/÷/g,'わる').replace(/＝/g,'は').replace(/CVR/g,'シーブイアール').replace(/UI/g,'ユーアイ').replace(/LINE/g,'ライン').replace(/SNS/g,'エスエヌエス').replace(/PR/g,'ピーアール').replace(/note/g,'ノート').replace(/p\.(\d+)/g,'$1ページ');}
+function stopAll(){token++;clearTimeout(timer);clearTimeout(settleT);if(synth)synth.cancel();say.classList.remove('on');}
+function readCur(){var my=++token;var i=idx(),txt=textOf(i);say.textContent=txt.length>70?txt.slice(0,70)+'…':txt;say.classList.add('on');
+ var next=function(){if(my!==token||!playing)return;if(i>=n-1){setPlaying(false);return;}go(i+1);settleT=setTimeout(function(){if(my===token&&playing)readCur();},700);};
+ if(!txt){timer=setTimeout(next,1500);return;}
+ if(synth&&voice!==undefined){var u=new SpeechSynthesisUtterance(txt);u.lang='ja-JP';if(voice)u.voice=voice;u.rate=0.98;u.pitch=1.08;u.onend=function(){timer=setTimeout(next,500)};u.onerror=function(){timer=setTimeout(next,800)};synth.cancel();synth.speak(u);}
+ else{timer=setTimeout(next,Math.max(2500,txt.length*140));}}
+function setPlaying(v){playing=v;bar.classList.toggle('playing',v);playBtn.setAttribute('aria-label',v?'読み上げを停止':'読み上げを再生');if(v){readCur();}else stopAll();}
+playBtn.onclick=function(){setPlaying(!playing)};
+var manual=false;['touchstart','wheel','keydown'].forEach(function(ev){window.addEventListener(ev,function(e){if(playing&&!e.target.closest('.bar'))manual=true;},{passive:true});});
+deck.addEventListener('scroll',function(){if(!playing||!manual)return;clearTimeout(settleT);stopAll();settleT=setTimeout(function(){manual=false;if(playing)readCur();},650);},{passive:true});
+navs[0].addEventListener('click',function(){if(playing){stopAll();settleT=setTimeout(readCur,700);}});navs[1].addEventListener('click',function(){if(playing){stopAll();settleT=setTimeout(readCur,700);}});
+document.addEventListener('visibilitychange',function(){if(document.hidden&&playing)setPlaying(false)});
 navs[0].onclick=function(){go(idx()-1)};navs[1].onclick=function(){go(idx()+1)};
 bmBtn.onclick=function(){var id=frames[cur].id,i=marks.indexOf(id);if(i>=0)marks.splice(i,1);else marks.push(id);save(KEY,marks);paintMarks();};
 function label(f){var t=f.dataset.label||'',tp=f.dataset.topic||'';return (tp&&t!==tp?tp+' ・ ':'')+t}
