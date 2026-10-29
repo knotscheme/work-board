@@ -67,7 +67,7 @@ td ul{margin:0;padding-left:1.2em}
 var E=function(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})};
 var lines=function(s){return String(s||'').split('\n').map(function(x){return x.trim()}).filter(Boolean)};
 /* what each part does, and paid features */
-var D={head:['お店の名前とロゴを表示'],ttl:[],hero:['写真とキャッチコピーで案内'],notice:['お知らせを表示'],menu:['メニュー・商品を写真つきで一覧表示'],cal:['日付を選べる'],slots:['空いている時間を選べる'],btn:['ボタンで次の画面へ進む'],pay:['その場でカード払いができる','カード決済',6000],form:['名前や連絡先を入力できる'],line:['LINEで自動のお知らせが届く','LINE通知',6000],mail:['申し込み後に確認メールが自動で届く','メール自動送信',4000],hist:['これまでの履歴を見られる'],prof:['お客様のプロフィールを表示'],list:['設定やメニューの項目を一覧表示'],coupon:['クーポンを表示'],shop:['お店の住所・営業時間・写真を表示'],ticket:['回数券の残り回数を確認できる'],member:['月額の有料メンバーに登録できる','月額課金',6000],gal:['写真を投稿・一覧表示できる','画像アップロード',3200],cart:['選んだ商品をまとめて注文できる']};
+var D={head:['お店の名前とロゴを表示'],ttl:[],hero:['写真とキャッチコピーで案内'],notice:['お知らせを表示'],menu:['メニュー・商品を写真つきで一覧表示'],cal:['日付を選べる'],slots:['空いている時間を選べる'],btn:['ボタンで次の画面へ進む'],pay:['その場でカード払いができる','カード決済',6000],form:['名前や連絡先を入力できる'],line:['LINEで自動のお知らせが届く','LINE通知',6000],mail:['申し込み後に確認メールが自動で届く','メール自動送信',4000],hist:['これまでの履歴を見られる'],prof:['お客様のプロフィールを表示'],list:['設定やメニューの項目を一覧表示'],coupon:['クーポンを表示'],shop:['お店の住所・営業時間・写真を表示'],ticket:['回数券の残り回数を確認できる'],member:['月額の有料メンバーに登録できる','月額課金',6000],gal:['写真を投稿・一覧表示できる','画像アップロード',3200],cart:['選んだ商品をまとめて注文できる'],paysel:['支払い方法（カード・現金など）を選べる']};
 var BASE=7700,KEY='sakuapp-builder-v2',KEY2='sakuapp-sheet-v1';
 var st=null;try{st=JSON.parse(localStorage.getItem(KEY)||'null')}catch(e){}
 var ex={};try{ex=JSON.parse(localStorage.getItem(KEY2)||'{}')||{}}catch(e){ex={}}

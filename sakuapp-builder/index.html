@@ -75,6 +75,7 @@ h1,h2,h3,p{margin:0}
 .p-mem b{display:block;font-size:13px}.p-mem em{display:block;font-style:normal;font-size:22px;font-weight:900;color:#ffd26b;margin:4px 0}.p-mem span{display:block;border-radius:10px;padding:8px;background:linear-gradient(135deg,var(--pc),var(--pc2));font-size:12px;font-weight:900}
 .p-gal{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px}.p-gal i{aspect-ratio:1;border-radius:9px;background:linear-gradient(135deg,rgba(255,255,255,.7),rgba(255,255,255,.2)),var(--pc);overflow:hidden}
 .p-gal i img{width:100%;height:100%;object-fit:cover;display:block}
+.p-ps{background:#fff;border:1px solid #e3ecec;border-radius:12px;overflow:hidden}.p-ps div{display:flex;align-items:center;gap:10px;padding:10px 12px;border-top:1px solid #eef3f3;font-size:12.5px;font-weight:700}.p-ps div:first-child{border-top:0}.p-ps i{width:16px;height:16px;border-radius:50%;border:2px solid #c9d3d3;flex:none}.p-ps .on{background:#f2f8f8}.p-ps .on i{border:5px solid var(--pc)}
 .p-cart{margin:6px 12px;border-radius:12px;padding:11px 14px;color:#fff;background:#14212a;display:flex;justify-content:space-between;font-weight:900;font-size:13px}
 .p-hist{background:#fff;border:1px solid #e3ecec;border-radius:12px;overflow:hidden}
 .p-hist div{display:flex;align-items:center;gap:10px;padding:10px 12px;border-top:1px solid #eef3f3;font-size:12px}.p-hist div:first-child{border-top:0}
@@ -226,9 +227,10 @@ var P={
  ticket:{n:'回数券',d:'残り回数をお客様が確認',def:{title:'整体 回数券（10回）',left:'4',total:'10'},f:[['title','名前'],['left','残り回数'],['total','全部の回数']],r:function(b){var t=Math.min(+b.total||10,10),l=Math.min(+b.left||0,t),s='';for(var i=0;i<t;i++)s+='<i class="'+(i<t-l?'':'e')+'"></i>';return '<div class="p-sec"><div class="p-tk"><small>'+E(b.title)+'</small><b>'+E(b.left)+'<span>回 残り</span></b><div class="p-st">'+s+'</div></div></div>'}},
  member:{n:'月額メンバー',d:'会員だけの有料プラン',ft:['月額課金',6000],def:{title:'メンバー限定の投稿が読めます',price:'980円 / 月',label:'メンバーになる'},f:[['title','説明'],['price','月額'],['label','ボタンの文字']],r:function(b){return '<div class="p-sec"><div class="p-mem"><b>'+E(b.title)+'</b><em>'+E(b.price)+'</em><span>'+E(b.label)+'</span></div></div>'}},
  gal:{n:'写真ギャラリー',d:'作品や店内の写真を並べる',ft:['画像アップロード',3200],def:{title:'ギャラリー',imgs:['img/c1.jpg','img/c2.jpg','img/c3.jpg','img/c4.jpg','img/c5.jpg','img/c6.jpg']},f:[['imgs','写真（6枚まで）','m',500],['title','見出し']],r:function(b){var im=(b.imgs||[]).slice(0,6),s='';for(var i=0;i<6;i++)s+='<i>'+img(im[i])+'</i>';return '<div class="p-sec"><p class="p-t">'+E(b.title)+'</p><div class="p-gal">'+s+'</div></div>'}},
+ paysel:{n:'支払い方法えらび',d:'カード・現金などを選ぶ',def:{title:'お支払い方法',items:'カードで支払う\nレジで現金で支払う\nPayPayで支払う'},f:[['title','見出し'],['items','支払い方法（1行に1つ）','t']],r:function(b){return '<div class="p-sec"><p class="p-t">'+E(b.title)+'</p><div class="p-ps">'+lines(b.items).map(function(x,i){return '<div class="'+(i===1?'on':'')+'"><i></i>'+E(x)+'</div>'}).join('')+'</div></div>'}},
  cart:{n:'注文ボタン（カート）',d:'選んだ商品をまとめて注文',def:{label:'カート 3点',total:'注文する 2,700円'},f:[['label','左の文字'],['total','右の文字']],r:function(b){return '<div class="p-cart"><span>'+E(b.label)+'</span><span>'+E(b.total)+'</span></div>'}}
 };
-var ORDER=['head','ttl','hero','notice','menu','cal','slots','btn','pay','form','line','mail','hist','prof','list','coupon','shop','ticket','member','gal','cart'];
+var ORDER=['head','ttl','hero','notice','menu','cal','slots','btn','pay','paysel','form','line','mail','hist','prof','list','coupon','shop','ticket','member','gal','cart'];
 function S(n,b){return {name:n,blocks:b}}
 var T={
  salon:{n:'サロンの予約',d:'美容室・ネイル・エステ',c:0,im:'img/salon.jpg',s:[
@@ -239,7 +241,7 @@ var T={
  food:{n:'飲食店のQR注文',d:'カフェ・レストラン',c:3,im:'img/food.jpg',s:[
   S('メニュー',[['head',{title:'Trattoria Sole',sub:'テーブル 5'}],['hero',{title:'本日のおすすめ',sub:'深煎りコーヒーとグラスワイン',img:'img/food.jpg'}],['menu',{title:'おすすめ',items:'ハウスコーヒー,深煎り,450円\nカフェラテ,自家製ミルク,550円\nグラスワイン,赤・白,700円',imgs:['img/f1.jpg','img/c3.jpg','img/f3.jpg']}],['cart']]),
   S('注文履歴',[['ttl',{title:'ご注文の状況'}],['hist',{title:'テーブル 5',items:'12:05,グラスワイン,準備中\n12:05,ハウスコーヒー,お届け済み'}]]),
-  S('お会計',[['ttl',{title:'お会計'}],['hist',{title:'ご注文の合計',items:'×1,グラスワイン,700円\n×2,ハウスコーヒー,900円'}],['pay',{label:'カードで支払う 1,600円'}]]),
+  S('お会計',[['ttl',{title:'お会計'}],['hist',{title:'ご注文の合計',items:'×1,グラスワイン,700円\n×2,ハウスコーヒー,900円'}],['paysel'],['btn',{label:'お会計に進む 1,600円'}]]),
   S('呼び出し',[['ttl',{title:'店員を呼ぶ'}],['notice',{title:'ご用件',text:'お水・取り皿などお気軽にどうぞ'}],['btn',{label:'店員を呼ぶ'}]])]},
  school:{n:'教室・整体の回数券',d:'スクール・整骨院・ジム',c:1,im:'img/seitai.jpg',s:[
   S('回数券',[['head',{title:'ひだまり整骨院',sub:'会員ページ'}],['ticket'],['notice']]),
