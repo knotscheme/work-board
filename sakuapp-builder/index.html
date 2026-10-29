@@ -1,0 +1,239 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#0e7c8c">
+<title>アプリ画面メーカー｜サクアプ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@700;800&family=Noto+Sans+JP:wght@400;500;700;900&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" defer></script>
+<style>
+:root{--bg:#f3fafa;--card:#fff;--text:#0f2a2e;--muted:#4f6a6e;--line:#d3e8e8;--brand:#0e7c8c;--dark:#0b6477;--mint:#e0f3f3;--yel:#ffc247;--yel2:#f0a010;--pc:#0e7c8c;--pc2:#0b6477;color-scheme:light}
+*{box-sizing:border-box}html{background:var(--bg)}
+body{margin:0;background:var(--bg);color:var(--text);font:400 15px/1.7 "Noto Sans JP","Hiragino Sans",sans-serif;-webkit-text-size-adjust:100%}
+button,input,textarea,select{font:inherit;color:inherit}
+h1,h2,h3,p{margin:0}
+.top{background:linear-gradient(160deg,#12a3a8,#0b7a88);color:#fff;padding:22px 16px 20px}
+.top .w{max-width:1040px;margin:0 auto}
+.top small{font:800 12px Inter,sans-serif;letter-spacing:.14em;opacity:.9}
+.top h1{font-size:clamp(22px,6vw,30px);font-weight:900;line-height:1.35;margin:4px 0 6px}
+.top p{color:#e3f4f5;font-size:14px}
+.app{max-width:1040px;margin:0 auto;padding:16px;display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:24px;align-items:start}
+.stage{position:sticky;top:12px;display:flex;flex-direction:column;align-items:center;gap:10px}
+.phone{width:300px;height:600px;border:10px solid #14212a;border-radius:44px;background:#fff;position:relative;overflow:hidden;box-shadow:0 30px 60px -30px rgba(11,60,70,.55)}
+.phone:before{content:"";position:absolute;top:8px;left:50%;width:84px;height:22px;margin-left:-42px;border-radius:99px;background:#14212a;z-index:3}
+.scr{height:100%;overflow-y:auto;overflow-x:hidden;padding:40px 0 0;display:flex;flex-direction:column;scrollbar-width:none;background:#f7f9f9}
+.scr::-webkit-scrollbar{display:none}
+.blk{position:relative;cursor:pointer;outline:2px solid transparent;outline-offset:-2px;transition:outline-color .15s}
+.blk:hover{outline-color:rgba(14,124,140,.35)}
+.blk.sel{outline:2px dashed var(--yel2)}
+.blk.sel:after{content:"編集中";position:absolute;right:6px;top:4px;font-size:9px;font-weight:900;background:var(--yel);color:#2b1d00;border-radius:99px;padding:0 7px;z-index:2}
+.empty{margin:auto;padding:30px;text-align:center;color:#9aa;font-size:13px}
+.cap{font-size:12px;color:var(--muted);text-align:center;max-width:300px}
+/* phone parts */
+.p-head{display:flex;align-items:center;gap:8px;padding:8px 14px}
+.p-logo{width:30px;height:30px;border-radius:9px;background:linear-gradient(135deg,var(--pc),var(--pc2));color:#fff;display:grid;place-items:center;font-weight:900;font-size:13px;flex:none}
+.p-head b{display:block;font-size:14px;line-height:1.3}.p-head small{font-size:10px;color:#6b7b7d}
+.p-hero{margin:4px 12px 6px;border-radius:14px;padding:16px 14px;color:#fff;background:linear-gradient(135deg,var(--pc),var(--pc2));position:relative;overflow:hidden}
+.p-hero:after{content:"";position:absolute;right:-24px;top:-24px;width:90px;height:90px;border-radius:50%;background:rgba(255,255,255,.18)}
+.p-hero b{display:block;font-size:16px;line-height:1.35;position:relative}.p-hero small{opacity:.9;font-size:11px;position:relative}
+.p-sec{padding:6px 12px}
+.p-t{font-size:12px;font-weight:900;margin:2px 2px 6px}
+.p-note{background:#fff;border:1px solid #e3ecec;border-radius:12px;padding:10px 12px;font-size:12px;display:flex;justify-content:space-between;gap:8px}
+.p-note i{font-style:normal;font-size:9px;font-weight:900;color:#fff;background:#e2574c;border-radius:99px;padding:0 6px;height:16px;line-height:16px;flex:none}
+.p-item{display:flex;align-items:center;gap:10px;background:#fff;border:1px solid #e3ecec;border-radius:12px;padding:8px 10px;margin-bottom:6px}
+.p-th{width:40px;height:40px;border-radius:9px;flex:none;background:linear-gradient(135deg,rgba(255,255,255,.6),rgba(255,255,255,0)),var(--pc)}
+.p-item div{flex:1;min-width:0;line-height:1.35}.p-item b{font-size:12.5px;display:block}.p-item small{font-size:10px;color:#6b7b7d}
+.p-item em{font-style:normal;font-weight:900;font-size:12.5px;white-space:nowrap}
+.p-days{display:grid;grid-template-columns:repeat(5,1fr);gap:5px;text-align:center}
+.p-days span{background:#fff;border:1px solid #e3ecec;border-radius:10px;padding:5px 0;font-size:10px;line-height:1.3}.p-days span b{display:block;font-size:13px}
+.p-days .on,.p-slots .on{background:var(--pc);border-color:var(--pc);color:#fff}
+.p-slots{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;text-align:center}
+.p-slots span{background:#fff;border:1px solid #e3ecec;border-radius:10px;padding:6px 0;font-size:11px;font-weight:700}
+.p-btn{margin:6px 12px;border-radius:12px;padding:11px;text-align:center;font-weight:900;font-size:13px;color:#fff;background:linear-gradient(135deg,var(--pc),var(--pc2))}
+.p-pay{margin:6px 12px;border-radius:12px;padding:11px;text-align:center;font-weight:900;font-size:13px;color:#2b1d00;background:linear-gradient(135deg,#ffc247,#f0a010);display:flex;align-items:center;justify-content:center;gap:6px}
+.p-pay svg{width:16px;height:16px}
+.p-form label{display:block;font-size:10.5px;color:#6b7b7d;margin:4px 2px 2px}.p-form div{height:30px;background:#fff;border:1px solid #e3ecec;border-radius:9px}
+.p-line{display:flex;gap:10px;align-items:center;background:#fff;border:1px solid #e3ecec;border-radius:12px;padding:9px 11px}
+.p-line i{width:28px;height:28px;border-radius:8px;background:#06c755;color:#fff;font-style:normal;font-weight:900;font-size:9px;display:grid;place-items:center;flex:none}
+.p-line b{font-size:12px;display:block;line-height:1.3}.p-line small{font-size:10px;color:#6b7b7d}
+.p-tk{border-radius:14px;padding:14px;color:#fff;background:linear-gradient(135deg,var(--pc),var(--pc2))}
+.p-tk small{font-size:10.5px;opacity:.9}.p-tk b{display:block;font-size:34px;font-weight:900;line-height:1.1}.p-tk b span{font-size:12px;margin-left:4px}
+.p-st{display:grid;grid-template-columns:repeat(5,1fr);gap:5px;margin-top:8px}.p-st i{aspect-ratio:1;border-radius:50%;background:#ffc247}.p-st i.e{background:none;border:1.5px dashed rgba(255,255,255,.6)}
+.p-mem{border-radius:14px;padding:14px;background:#14212a;color:#fff;text-align:center}
+.p-mem b{display:block;font-size:13px}.p-mem em{display:block;font-style:normal;font-size:22px;font-weight:900;color:#ffd26b;margin:4px 0}.p-mem span{display:block;border-radius:10px;padding:8px;background:linear-gradient(135deg,var(--pc),var(--pc2));font-size:12px;font-weight:900}
+.p-gal{display:grid;grid-template-columns:repeat(3,1fr);gap:5px}.p-gal i{aspect-ratio:1;border-radius:9px;background:linear-gradient(135deg,rgba(255,255,255,.7),rgba(255,255,255,.2)),var(--pc)}
+.p-gal i:nth-child(2n){background:linear-gradient(135deg,#ffe9b8,#f6c76b)}
+.p-cart{margin:6px 12px;border-radius:12px;padding:11px 14px;color:#fff;background:#14212a;display:flex;justify-content:space-between;font-weight:900;font-size:13px}
+.p-tab{margin-top:auto;display:flex;justify-content:space-around;padding:8px 4px 14px;border-top:1px solid #e3ecec;background:#fff;font-size:9.5px;color:#8a9a9c;position:sticky;bottom:0}
+.p-tab span{display:grid;justify-items:center;gap:2px}.p-tab span:before{content:"";width:18px;height:18px;border-radius:6px;background:#e3ecec}
+.p-tab .on{color:var(--pc);font-weight:700}.p-tab .on:before{background:var(--pc)}
+/* panel */
+.panel{background:var(--card);border:1px solid var(--line);border-radius:18px;overflow:hidden}
+.tabs{display:grid;grid-template-columns:repeat(3,1fr);border-bottom:1px solid var(--line)}
+.tabs button{border:0;background:none;padding:13px 4px;font-weight:700;font-size:14px;color:var(--muted);cursor:pointer}
+.tabs button.on{color:var(--brand);box-shadow:inset 0 -3px 0 var(--brand)}
+.pane{padding:16px;display:none}.pane.on{display:block}
+.lbl{font-size:12px;font-weight:900;color:var(--muted);margin:14px 0 8px}.lbl:first-child{margin-top:0}
+.tpls{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.tpl{border:1.5px solid var(--line);background:#fff;border-radius:12px;padding:10px;text-align:left;cursor:pointer;line-height:1.4}
+.tpl b{display:block;font-size:14px}.tpl small{font-size:11px;color:var(--muted)}.tpl:hover,.tpl.on{border-color:var(--brand);background:var(--mint)}
+.parts{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.part{border:1.5px dashed var(--brand);background:#fff;border-radius:12px;padding:9px 10px;text-align:left;cursor:pointer;line-height:1.35;font-weight:700;font-size:13px}
+.part:before{content:"＋ ";color:var(--brand)}.part small{display:block;font-weight:500;font-size:11px;color:var(--muted)}.part em{font-style:normal;color:#a86a00}
+.part:active{background:var(--mint)}
+.field{margin-bottom:12px}.field label{display:block;font-size:12px;font-weight:700;color:var(--muted);margin-bottom:4px}
+.field input,.field textarea{width:100%;border:1.5px solid var(--line);border-radius:10px;padding:9px 11px;background:#fff;font-size:16px}
+.field textarea{min-height:92px;resize:vertical;line-height:1.6}.field small{display:block;font-size:11px;color:var(--muted);margin-top:3px}
+.acts{display:flex;gap:8px;flex-wrap:wrap}.acts button{border:1.5px solid var(--line);background:#fff;border-radius:99px;padding:7px 14px;font-weight:700;font-size:13px;cursor:pointer}.acts .del{color:#c0392b;border-color:#f0c9c4}
+.hint{font-size:13px;color:var(--muted);background:var(--bg);border-radius:12px;padding:12px}
+.sw{display:flex;gap:10px;flex-wrap:wrap}.sw button{width:38px;height:38px;border-radius:50%;border:3px solid #fff;box-shadow:0 0 0 1.5px var(--line);cursor:pointer}.sw button.on{box-shadow:0 0 0 3px var(--text)}
+.est{margin-top:16px;background:var(--card);border:2px solid var(--brand);border-radius:18px;padding:16px}
+.est h3{font-size:13px;color:var(--muted);font-weight:900;margin-bottom:6px}
+.row{display:flex;justify-content:space-between;gap:10px;font-size:14px;padding:4px 0}.row span:last-child{white-space:nowrap;font-weight:700}
+.tot{border-top:1px dashed var(--line);margin-top:6px;padding-top:10px;display:flex;justify-content:space-between;align-items:baseline;font-weight:900}
+.tot b{font:800 28px Inter,"Noto Sans JP",sans-serif;color:var(--brand)}
+.mo{font-size:13px;color:var(--muted);text-align:right}
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;min-height:50px;width:100%;border:0;border-radius:99px;background:linear-gradient(135deg,var(--yel),var(--yel2));color:#2b1d00;font-weight:900;font-size:15px;text-decoration:none;cursor:pointer;margin-top:12px}
+.btn.sub{background:#fff;border:2px solid var(--brand);color:var(--brand)}
+.note{font-size:12px;color:var(--muted);margin-top:8px}
+.toast{position:fixed;left:50%;bottom:24px;transform:translate(-50%,20px);opacity:0;background:var(--text);color:#fff;padding:10px 18px;border-radius:99px;font-weight:700;font-size:14px;transition:.25s;z-index:20;pointer-events:none;max-width:90vw;text-align:center}.toast.on{opacity:1;transform:translate(-50%,0)}
+footer{text-align:center;font-size:12px;color:var(--muted);padding:24px 16px 40px}footer a{color:var(--muted)}
+@media(max-width:820px){
+ .app{grid-template-columns:1fr;gap:14px}
+ .stage{position:static}
+ .phone{width:270px;height:540px}
+}
+</style>
+</head>
+<body>
+<header class="top"><div class="w"><small>SAKUAPP APP MAKER</small><h1>あなたのアプリの画面を、<br>つくって遊んでみよう</h1><p>ひな形を選んで、パーツを足して、文字や色を変えるだけ。作った画面の概算金額も、その場でわかります。</p></div></header>
+<main class="app">
+ <div class="stage">
+  <div class="phone" id="phone"><div class="scr" id="scr"></div></div>
+  <p class="cap">画面のパーツをタップすると、文字を書きかえられます</p>
+ </div>
+ <div>
+  <div class="panel">
+   <div class="tabs" role="tablist"><button type="button" data-p="tpl" class="on">ひな形</button><button type="button" data-p="add">パーツ追加</button><button type="button" data-p="edit">編集・デザイン</button></div>
+   <div class="pane on" id="p-tpl"><p class="lbl">どんなアプリに近いですか？</p><div class="tpls" id="tpls"></div><p class="note">ひな形を選ぶと、今の画面は置きかわります。</p></div>
+   <div class="pane" id="p-add"><p class="lbl">タップで画面の下に追加されます</p><div class="parts" id="parts"></div></div>
+   <div class="pane" id="p-edit"><div id="editor"></div>
+    <p class="lbl">アプリの色</p><div class="sw" id="sw"></div>
+   </div>
+  </div>
+  <div class="est" aria-live="polite">
+   <h3>この画面の概算</h3><div id="rows"></div>
+   <div class="tot"><span>合計の目安</span><b id="total"></b></div>
+   <p class="mo" id="mo"></p>
+   <button type="button" class="btn" id="save">画面を画像で保存する</button>
+   <a class="btn sub" id="consult" href="[LINE公式アカウントのURL]">この画面でLINE相談する（無料）</a>
+   <p class="note">※画面は見た目のイメージです。実際の機能・デザイン・金額は、ご相談のあとのお見積もりで決まります。月々の目安は12回払いの場合で、カード会社の分割手数料が別にかかります。</p>
+  </div>
+ </div>
+</main>
+<footer><a href="../sakuapp-starter/index.html">スターターパックに戻る</a>　<a href="../sakuapp-lp/index.html">サクアプについて</a>　<a href="../sakuapp-lp/privacy.html">プライバシーポリシー</a></footer>
+<div class="toast" id="toast"></div>
+<script>
+(function(){
+var E=function(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})};
+var lines=function(s){return String(s||'').split('\n').map(function(x){return x.trim()}).filter(Boolean)};
+var CARD='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>';
+/* parts: name, desc, feature [label, price], defaults, fields, render */
+var P={
+ head:{n:'お店の名前',d:'いちばん上の名前とひとこと',def:{title:'Salon Mio',sub:'表参道 ・ 10:00–20:00'},f:[['title','名前'],['sub','ひとこと']],r:function(b){return '<div class="p-head"><span class="p-logo">'+E((b.title||'A').slice(0,1))+'</span><div><b>'+E(b.title)+'</b><small>'+E(b.sub)+'</small></div></div>'}},
+ hero:{n:'大きなバナー',d:'キャッチコピーを目立たせる',def:{title:'11月のご予約、受付中',sub:'はじめての方もお気軽に'},f:[['title','見出し'],['sub','小さな文字']],r:function(b){return '<div class="p-hero"><b>'+E(b.title)+'</b><small>'+E(b.sub)+'</small></div>'}},
+ notice:{n:'お知らせ',d:'新着情報を1行で',def:{title:'お知らせ',text:'年末年始の営業時間について'},f:[['title','見出し'],['text','内容']],r:function(b){return '<div class="p-sec"><p class="p-t">'+E(b.title)+'</p><div class="p-note"><span>'+E(b.text)+'</span><i>NEW</i></div></div>'}},
+ menu:{n:'メニュー一覧',d:'商品やコースと値段',def:{title:'メニュー',items:'カット,60分,5,500円\nカラー,90分,8,800円\nトリートメント,30分,3,300円'},f:[['title','見出し'],['items','中身（1行に「名前,説明,値段」）','t']],r:function(b){return '<div class="p-sec"><p class="p-t">'+E(b.title)+'</p>'+lines(b.items).map(function(l){var a=l.split(/[,，、]/);var price=a.length>2?a.slice(2).join(','):'';return '<div class="p-item"><i class="p-th"></i><div><b>'+E(a[0])+'</b><small>'+E(a[1]||'')+'</small></div><em>'+E(price)+'</em></div>'}).join('')+'</div>'}},
+ cal:{n:'日付えらび',d:'カレンダーから日付を選ぶ',def:{title:'日付を選ぶ'},f:[['title','見出し']],r:function(b){var d=['月','火','水','木','金'];return '<div class="p-sec"><p class="p-t">'+E(b.title)+'</p><div class="p-days">'+d.map(function(x,i){return '<span class="'+(i===2?'on':'')+'">'+x+'<b>'+(12+i)+'</b></span>'}).join('')+'</div></div>'}},
+ slots:{n:'時間えらび',d:'空いている時間を選ぶ',def:{title:'時間を選ぶ',items:'10:00\n11:30\n13:00\n14:30\n16:00\n17:30'},f:[['title','見出し'],['items','時間（1行に1つ）','t']],r:function(b){return '<div class="p-sec"><p class="p-t">'+E(b.title)+'</p><div class="p-slots">'+lines(b.items).map(function(x,i){return '<span class="'+(i===1?'on':'')+'">'+E(x)+'</span>'}).join('')+'</div></div>'}},
+ btn:{n:'ボタン',d:'予約・申し込みなど',def:{label:'予約する'},f:[['label','ボタンの文字']],r:function(b){return '<div class="p-btn">'+E(b.label)+'</div>'}},
+ pay:{n:'カード決済ボタン',d:'その場でカード払い',ft:['カード決済',6000],def:{label:'カード決済で予約する'},f:[['label','ボタンの文字']],r:function(b){return '<div class="p-pay">'+CARD+E(b.label)+'</div>'}},
+ form:{n:'入力フォーム',d:'名前や連絡先を入力',def:{title:'お客様情報',items:'お名前\nメールアドレス\n電話番号'},f:[['title','見出し'],['items','入力する項目（1行に1つ）','t']],r:function(b){return '<div class="p-sec p-form"><p class="p-t">'+E(b.title)+'</p>'+lines(b.items).map(function(x){return '<label>'+E(x)+'</label><div></div>'}).join('')+'</div>'}},
+ line:{n:'LINEでお知らせ',d:'予約の前日などに自動通知',ft:['LINE通知',6000],def:{title:'明日11:30のご予約です',text:'前日にLINEでお知らせが届きます'},f:[['title','通知の見出し'],['text','説明']],r:function(b){return '<div class="p-sec"><div class="p-line"><i>LINE</i><div><b>'+E(b.title)+'</b><small>'+E(b.text)+'</small></div></div></div>'}},
+ ticket:{n:'回数券',d:'残り回数をお客様が確認',def:{title:'整体 回数券（10回）',left:'4',total:'10'},f:[['title','名前'],['left','残り回数'],['total','全部の回数']],r:function(b){var t=Math.min(+b.total||10,10),l=Math.min(+b.left||0,t),s='';for(var i=0;i<t;i++)s+='<i class="'+(i<t-l?'':'e')+'"></i>';return '<div class="p-sec"><div class="p-tk"><small>'+E(b.title)+'</small><b>'+E(b.left)+'<span>回 残り</span></b><div class="p-st">'+s+'</div></div></div>'}},
+ member:{n:'月額メンバー',d:'会員だけの有料プラン',ft:['月額課金',6000],def:{title:'メンバー限定の投稿が読めます',price:'980円 / 月',label:'メンバーになる'},f:[['title','説明'],['price','月額'],['label','ボタンの文字']],r:function(b){return '<div class="p-sec"><div class="p-mem"><b>'+E(b.title)+'</b><em>'+E(b.price)+'</em><span>'+E(b.label)+'</span></div></div>'}},
+ gal:{n:'写真ギャラリー',d:'作品や店内の写真を並べる',ft:['画像アップロード',3200],def:{title:'ギャラリー'},f:[['title','見出し']],r:function(b){return '<div class="p-sec"><p class="p-t">'+E(b.title)+'</p><div class="p-gal"><i></i><i></i><i></i><i></i><i></i><i></i></div></div>'}},
+ cart:{n:'注文ボタン（カート）',d:'選んだ商品をまとめて注文',def:{label:'カート 3点',total:'注文する 2,700円'},f:[['label','左の文字'],['total','右の文字']],r:function(b){return '<div class="p-cart"><span>'+E(b.label)+'</span><span>'+E(b.total)+'</span></div>'}},
+ mail:{n:'自動メール',d:'申し込み後に確認メール',ft:['メール自動送信',4000],def:{title:'ご予約ありがとうございます',text:'確認メールを自動でお送りします'},f:[['title','メールの件名'],['text','説明']],r:function(b){return '<div class="p-sec"><div class="p-line"><i style="background:var(--pc)">MAIL</i><div><b>'+E(b.title)+'</b><small>'+E(b.text)+'</small></div></div></div>'}},
+ tab:{n:'下のメニュー',d:'画面の切りかえボタン',def:{items:'ホーム\n予約\n履歴\nマイページ'},f:[['items','メニュー（1行に1つ・4つまで）','t']],r:function(b){return '<div class="p-tab">'+lines(b.items).slice(0,5).map(function(x,i){return '<span class="'+(i===0?'on':'')+'">'+E(x)+'</span>'}).join('')+'</div>'}}
+};
+var ORDER=['head','hero','notice','menu','cal','slots','btn','pay','form','line','mail','ticket','member','gal','cart','tab'];
+var T={
+ salon:{n:'サロンの予約',d:'美容室・ネイル・エステ',c:0,b:[['head'],['hero'],['menu'],['cal'],['slots'],['pay'],['line'],['tab']]},
+ food:{n:'飲食店のQR注文',d:'カフェ・レストラン',c:3,b:[['head',{title:'Trattoria Sole',sub:'テーブル 5'}],['hero',{title:'本日のおすすめ',sub:'手打ちパスタ'}],['menu',{title:'パスタ',items:'本日のパスタ,トマトとバジル,1,200円\nシーザーサラダ,自家製ドレッシング,800円\nティラミス,マスカルポーネ,600円'}],['cart'],['tab',{items:'メニュー\n注文履歴\nお会計\n呼び出し'}]]},
+ school:{n:'教室・整体の回数券',d:'スクール・整骨院・ジム',c:1,b:[['head',{title:'ひだまり整骨院',sub:'会員ページ'}],['ticket'],['notice'],['cal',{title:'次回のご予約'}],['slots',{items:'10:00\n11:30\n13:00'}],['btn'],['tab',{items:'回数券\n予約\n履歴\n設定'}]]},
+ member:{n:'有料メンバーシップ',d:'クリエイター・講師',c:2,b:[['head',{title:'Creator Lab',sub:'メンバー 128人'}],['hero',{title:'制作の裏側 vol.12',sub:'メンバーに先行公開'}],['member'],['gal',{title:'最近の作品'}],['notice',{title:'新着',text:'制作日記 #12 を公開しました'}],['tab',{items:'ホーム\n投稿\nメンバー\n設定'}]]},
+ blank:{n:'白紙から作る',d:'名前とメニューだけ',c:0,b:[['head',{title:'あなたのアプリ',sub:'ひとこと説明'}],['tab']]}
+};
+var COLORS=[['#0e7c8c','#0b6477'],['#e0607e','#b93d5c'],['#7a5cff','#5537d1'],['#e07a2f','#b85a17'],['#2f9e5b','#1f7743'],['#2b2a3a','#14131f']];
+var BASE=7700,KEY='sakuapp-builder-v1';
+var st={tpl:'salon',c:0,blocks:[],sel:-1};
+function mk(t,o){var b={t:t};var d=P[t].def;for(var k in d)b[k]=d[k];if(o)for(var k2 in o)b[k2]=o[k2];return b}
+function useTpl(k){var t=T[k];st.tpl=k;st.c=t.c;st.blocks=t.b.map(function(x){return mk(x[0],x[1])});st.sel=-1;render()}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(st))}catch(e){}}
+function load(){try{var s=JSON.parse(localStorage.getItem(KEY)||'null');if(s&&s.blocks){st=s;st.sel=-1;return true}}catch(e){}return false}
+var scr=document.getElementById('scr'),phone=document.getElementById('phone');
+function render(){
+ var c=COLORS[st.c]||COLORS[0];phone.style.setProperty('--pc',c[0]);phone.style.setProperty('--pc2',c[1]);
+ /* keep tab bar last */
+ var tabs=st.blocks.filter(function(b){return b.t==='tab'}),rest=st.blocks.filter(function(b){return b.t!=='tab'});
+ if(tabs.length){var selB=st.blocks[st.sel];st.blocks=rest.concat(tabs.slice(0,1));st.sel=selB?st.blocks.indexOf(selB):-1}
+ scr.innerHTML=st.blocks.length?st.blocks.map(function(b,i){return '<div class="blk'+(i===st.sel?' sel':'')+'" data-i="'+i+'"'+(b.t==='tab'?' style="margin-top:auto;position:sticky;bottom:0"':'')+'>'+P[b.t].r(b)+'</div>'}).join(''):'<p class="empty">「パーツ追加」から、画面に部品を足してみましょう</p>';
+ if(!st.blocks.some(function(b){return b.t==='tab'}))scr.insertAdjacentHTML('beforeend','<div style="height:16px;flex:none"></div>');
+ document.querySelectorAll('.tpl').forEach(function(x){x.classList.toggle('on',x.dataset.k===st.tpl)});
+ document.querySelectorAll('#sw button').forEach(function(x,i){x.classList.toggle('on',i===st.c)});
+ editor();est();save();
+}
+function editor(){var ed=document.getElementById('editor'),b=st.blocks[st.sel];
+ if(!b){ed.innerHTML='<p class="hint">画面の中のパーツをタップすると、ここで文字を書きかえたり、並べかえたりできます。</p>';return}
+ var p=P[b.t];
+ ed.innerHTML='<p class="lbl">「'+E(p.n)+'」を編集</p>'+p.f.map(function(f){var v=E(b[f[0]]);return '<div class="field"><label for="f-'+f[0]+'">'+E(f[1])+'</label>'+(f[2]==='t'?'<textarea id="f-'+f[0]+'" data-k="'+f[0]+'">'+v+'</textarea>':'<input id="f-'+f[0]+'" data-k="'+f[0]+'" value="'+v+'">')+'</div>'}).join('')+
+ '<div class="acts">'+(b.t!=='tab'?'<button type="button" data-a="up">↑ 上へ</button><button type="button" data-a="down">↓ 下へ</button>':'')+'<button type="button" data-a="dup">複製</button><button type="button" class="del" data-a="del">削除</button></div>'+(p.ft?'<p class="note">このパーツには「'+p.ft[0]+'」の機能（+'+p.ft[1].toLocaleString('ja-JP')+'円の目安）が入ります。</p>':'');
+ ed.querySelectorAll('[data-k]').forEach(function(inp){inp.addEventListener('input',function(){b[inp.dataset.k]=inp.value;var el=scr.querySelector('.blk[data-i="'+st.sel+'"]');if(el)el.innerHTML=P[b.t].r(b);save()})});
+}
+function est(){var fs={};st.blocks.forEach(function(b){var f=P[b.t].ft;if(f)fs[f[0]]=f[1]});
+ var rows=[['基本料金（かんたんWebサービス）',BASE]];for(var k in fs)rows.push(['＋ '+k,fs[k]]);
+ var t=rows.reduce(function(a,r){return a+r[1]},0);
+ document.getElementById('rows').innerHTML=rows.map(function(r){return '<div class="row"><span>'+E(r[0])+'</span><span>'+r[1].toLocaleString('ja-JP')+'円</span></div>'}).join('');
+ document.getElementById('total').textContent=t.toLocaleString('ja-JP')+'円〜';
+ document.getElementById('mo').textContent='12回払いなら 月々 約'+Math.ceil(t/12).toLocaleString('ja-JP')+'円〜';
+}
+function tab(p){document.querySelectorAll('.tabs button').forEach(function(x){x.classList.toggle('on',x.dataset.p===p)});document.querySelectorAll('.pane').forEach(function(x){x.classList.toggle('on',x.id==='p-'+p)})}
+document.querySelectorAll('.tabs button').forEach(function(x){x.onclick=function(){tab(x.dataset.p)}});
+document.getElementById('tpls').innerHTML=Object.keys(T).map(function(k){return '<button type="button" class="tpl" data-k="'+k+'"><b>'+E(T[k].n)+'</b><small>'+E(T[k].d)+'</small></button>'}).join('');
+document.getElementById('tpls').addEventListener('click',function(e){var b=e.target.closest('.tpl');if(b){useTpl(b.dataset.k);toast('「'+T[b.dataset.k].n+'」のひな形にしました');tab('add')}});
+document.getElementById('parts').innerHTML=ORDER.map(function(k){var p=P[k];return '<button type="button" class="part" data-k="'+k+'">'+E(p.n)+'<small>'+E(p.d)+(p.ft?' <em>+'+p.ft[1].toLocaleString('ja-JP')+'円</em>':'')+'</small></button>'}).join('');
+document.getElementById('parts').addEventListener('click',function(e){var b=e.target.closest('.part');if(!b)return;var k=b.dataset.k;
+ if(k==='tab'&&st.blocks.some(function(x){return x.t==='tab'})){toast('下のメニューは1つまでです');return}
+ var nb=mk(k);var ti=st.blocks.findIndex(function(x){return x.t==='tab'});if(ti>=0&&k!=='tab')st.blocks.splice(ti,0,nb);else st.blocks.push(nb);
+ st.sel=st.blocks.indexOf(nb);render();var el=scr.querySelector('.blk.sel');if(el)el.scrollIntoView({block:'nearest',behavior:'smooth'});toast('「'+P[k].n+'」を追加しました')});
+scr.addEventListener('click',function(e){var b=e.target.closest('.blk');if(!b)return;st.sel=+b.dataset.i;render();tab('edit')});
+document.getElementById('editor').addEventListener('click',function(e){var a=e.target.closest('[data-a]');if(!a)return;var i=st.sel,bl=st.blocks;
+ if(a.dataset.a==='up'&&i>0){bl.splice(i-1,0,bl.splice(i,1)[0]);st.sel=i-1}
+ else if(a.dataset.a==='down'&&i<bl.length-1&&bl[i+1].t!=='tab'){bl.splice(i+1,0,bl.splice(i,1)[0]);st.sel=i+1}
+ else if(a.dataset.a==='dup'){if(bl[i].t==='tab'){toast('下のメニューは1つまでです');return}var c=JSON.parse(JSON.stringify(bl[i]));bl.splice(i+1,0,c);st.sel=i+1}
+ else if(a.dataset.a==='del'){bl.splice(i,1);st.sel=-1}
+ render()});
+document.getElementById('sw').innerHTML=COLORS.map(function(c,i){return '<button type="button" aria-label="色'+(i+1)+'" style="background:linear-gradient(135deg,'+c[0]+','+c[1]+')"></button>'}).join('');
+document.getElementById('sw').addEventListener('click',function(e){var b=e.target.closest('button');if(!b)return;st.c=[].indexOf.call(b.parentNode.children,b);render()});
+var tt,toastEl=document.getElementById('toast');function toast(m){toastEl.textContent=m;toastEl.classList.add('on');clearTimeout(tt);tt=setTimeout(function(){toastEl.classList.remove('on')},1800)}
+document.getElementById('save').addEventListener('click',function(){
+ if(!window.html2canvas){toast('準備中です。少し待ってからもう一度お試しください');return}
+ var keep=st.sel;st.sel=-1;render();
+ var s=scr.style,h=phone.style.height;phone.style.height='auto';s.height='auto';s.overflow='visible';
+ html2canvas(phone,{backgroundColor:null,scale:2,useCORS:true}).then(function(cv){
+  phone.style.height=h;s.height='';s.overflow='';st.sel=keep;render();
+  cv.toBlob(function(blob){var f;try{f=new File([blob],'my-app.png',{type:'image/png'})}catch(e){}
+   if(f&&navigator.canShare&&navigator.canShare({files:[f]})){navigator.share({files:[f],title:'わたしのアプリ'}).catch(function(){})}
+   else{var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='my-app.png';document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(a.href);a.remove()},1000)}
+   toast('画像を保存しました。LINEで送ると、そのまま相談できます')},'image/png')
+ }).catch(function(){phone.style.height=h;s.height='';s.overflow='';st.sel=keep;render();toast('保存できませんでした。スクリーンショットでも大丈夫です')})});
+document.getElementById('consult').addEventListener('click',function(e){if(this.getAttribute('href').charAt(0)==='['){e.preventDefault();toast('LINEのURLは準備中です')}});
+if(!load())useTpl('salon');else render();
+})();
+</script>
+</body>
+</html>
