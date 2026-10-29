@@ -1,237 +1,269 @@
-<!doctype html><html lang="ja"><head>
-<meta name="robots" content="noindex,nofollow"><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>アプリで副業 永久保存版</title>
-<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@700;800&family=Noto+Sans+JP:wght@400;500;700;900&display=swap" rel="stylesheet">
-<style>
-:root{--bg:#F7FBFA;--bg2:#EAF4F2;--ink:#14211F;--sub:#4A5B59;--mut:#6A7A78;--line:#DCE9E7;--teal:#0E7C8C;--teal-d:#0A5F6B;--yel:#FFC83D;--yel-l:#FFF4D1}
+<!doctype html><html lang="ja"><head><meta name="robots" content="noindex,nofollow"><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>アプリで副業 永久保存版</title><link href="https://fonts.googleapis.com/css2?family=Inter:wght@700;800&family=Noto+Sans+JP:wght@400;500;700;900&display=swap" rel="stylesheet"><style>
+:root{--bg:#F7FBFA;--soft:#EAF4F2;--ink:#14211F;--sub:#4A5B59;--mut:#6A7A78;--line:#DCE9E7;--teal:#0E7C8C;--teal2:#2A8E9C;--yel:#FFC83D;--yel-l:#FFF4D1}
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{background:#C9D6D4}
-body{font-family:"Noto Sans JP","Noto Sans CJK JP","Hiragino Sans","Yu Gothic",sans-serif;color:var(--ink);-webkit-text-size-adjust:100%;font-feature-settings:"palt"}
-.deck{display:flex;flex-direction:column;align-items:center;gap:24px;padding:24px 0 48px}
+body{font-family:"Noto Sans JP","Noto Sans CJK JP","Hiragino Sans",sans-serif;color:var(--ink);-webkit-text-size-adjust:100%;font-feature-settings:"palt"}
+.deck{display:flex;flex-direction:column;align-items:center;gap:24px;padding:24px 0}
 .frame{width:min(100vw - 24px,540px);aspect-ratio:9/16;position:relative;overflow:hidden;border-radius:18px;box-shadow:0 10px 40px -20px rgba(0,0,0,.35)}
-.page{position:absolute;left:0;top:0;width:1080px;height:1920px;transform-origin:0 0;background:var(--bg);padding:104px 72px 150px;display:flex;flex-direction:column;gap:36px;overflow:hidden}
-.page.alt{background:#fff}
-.page.dark{background:var(--teal);color:#fff}
-.page.cover{background:var(--bg)}
-.foot{position:absolute;left:72px;right:72px;bottom:64px;display:flex;justify-content:space-between;font-size:36px;color:var(--mut)}
-.dark .foot{color:#BFE3E2}
-.eb{font-size:41px;font-weight:700;color:var(--teal);letter-spacing:.14em}
-h2{font-size:92px;font-weight:900;line-height:1.28;letter-spacing:.01em}
-.lead{font-size:44px;line-height:1.7;color:var(--sub);margin-top:-12px}
-h3{font-size:50px;font-weight:700;line-height:1.45}
-p{font-size:43px;line-height:1.7}
-b{font-weight:700}
-.note{font-size:36px;color:var(--mut);margin-top:-28px}
-.cards{display:flex;flex-direction:column;gap:18px}
-.card{position:relative;background:#fff;border:2px solid var(--line);border-radius:28px;padding:30px 38px;display:flex;flex-direction:column;gap:6px}
-.alt .card{background:var(--bg)}
-.card .n{font-family:Inter,sans-serif;font-weight:800;font-size:41px;color:var(--teal);letter-spacing:.06em}
-.card p{color:var(--sub);font-size:40px;line-height:1.65}
-.point{margin-top:auto;display:flex;gap:24px;align-items:flex-start;background:var(--yel-l);border-radius:26px;padding:28px 34px}
-.point span{flex:none;font-family:Inter,sans-serif;font-weight:800;font-size:33px;letter-spacing:.12em;background:var(--yel);color:var(--ink);padding:8px 16px;border-radius:999px;margin-top:6px}
-.point p{font-size:40px;line-height:1.65}
-.steps{display:flex;flex-direction:column;gap:0;position:relative}
-.st{display:flex;gap:28px;padding:22px 0;border-bottom:2px dashed var(--line)}
-.st:last-child{border-bottom:0}
-.st .dot{flex:none;width:68px;height:68px;border-radius:50%;background:var(--teal);color:#fff;display:grid;place-items:center;font-family:Inter,sans-serif;font-weight:800;font-size:50px}
-.st p{color:var(--sub);font-size:40px;line-height:1.65;margin-top:2px}
-table{width:100%;border-collapse:separate;border-spacing:0;background:#fff;border:2px solid var(--line);border-radius:28px;overflow:hidden;font-size:41px}
-th{background:var(--teal);color:#fff;font-weight:700;text-align:left;padding:26px 28px;font-size:41px}
-td{padding:22px 24px;border-top:2px solid var(--line);line-height:1.6;color:var(--sub);vertical-align:top}
+.page{position:absolute;left:0;top:0;width:1080px;height:1920px;transform-origin:0 0;background:var(--bg);padding:104px 72px 150px;display:flex;flex-direction:column;gap:40px;overflow:hidden}
+.page.alt{background:#fff}.page.soft{background:var(--soft)}.page.dark{background:var(--teal);color:#fff}.page.sumpg{background:var(--yel-l)}
+.foot{position:absolute;left:72px;right:72px;bottom:60px;display:flex;justify-content:space-between;font-size:30px;color:var(--mut)}
+.eb{font-size:36px;font-weight:700;color:var(--teal);letter-spacing:.12em}
+h2{font-size:92px;font-weight:900;line-height:1.25}
+.lead{font-size:40px;line-height:1.7;color:var(--sub);margin-top:-12px}
+h3{font-size:46px;font-weight:700;line-height:1.4}
+p{font-size:40px;line-height:1.65}
+.note{font-size:30px;color:var(--mut);margin-top:-20px}
+.ic{width:100%;height:100%}
+.ib{flex:none;width:104px;height:104px;border-radius:28px;background:#E1F1EF;color:var(--teal);display:grid;place-items:center;padding:24px}
+.icards{display:flex;flex-direction:column;gap:20px}
+.icard{display:flex;gap:32px;align-items:flex-start;background:#fff;border:2px solid var(--line);border-radius:32px;padding:34px 36px}
+.alt .icard{background:var(--bg)}
+.icard p{color:var(--sub);font-size:38px;line-height:1.6;margin-top:4px}
+.tiles{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.tile{background:#fff;border:2px solid var(--line);border-radius:32px;padding:34px 30px;display:flex;flex-direction:column;gap:12px}
+.alt .tile{background:var(--bg)}
+.tile h3{font-size:42px}.tile p{font-size:34px;line-height:1.55;color:var(--sub)}.tile small{font-size:30px;color:#9A5A00;line-height:1.5}
+.tile .ib{width:92px;height:92px;padding:20px;border-radius:24px}
+.point{display:flex;gap:24px;align-items:flex-start;background:var(--yel-l);border-radius:28px;padding:32px 36px}
+.sumpg .point{background:#fff}
+.point span{flex:none;font-family:Inter,sans-serif;font-weight:800;font-size:30px;letter-spacing:.1em;background:var(--yel);padding:8px 18px;border-radius:999px;margin-top:6px}
+.point p{font-size:38px;line-height:1.6}
+.term{display:flex;gap:20px;align-items:flex-start;border:2px dashed #BFD9D6;border-radius:24px;padding:22px 26px;background:rgba(255,255,255,.65)}
+.term>span{flex:none;font-size:28px;font-weight:700;color:var(--teal);background:#E3F2F0;padding:6px 16px;border-radius:999px;margin-top:4px}
+.term p{font-size:32px;line-height:1.55;color:var(--sub)}.term b{color:var(--ink)}
+.steps{display:flex;flex-direction:column}
+.st{display:flex;gap:28px;padding:22px 0;border-bottom:2px dashed var(--line)}.st:last-child{border-bottom:0}
+.st .dot{flex:none;width:72px;height:72px;border-radius:50%;background:var(--teal);color:#fff;display:grid;place-items:center;font-family:Inter,sans-serif;font-weight:800;font-size:38px}
+.st h3{font-size:44px}.st p{font-size:36px;color:var(--sub);line-height:1.5}
+table{width:100%;border-collapse:separate;border-spacing:0;background:#fff;border:2px solid var(--line);border-radius:28px;overflow:hidden}
+th{background:var(--teal);color:#fff;font-size:38px;text-align:left;padding:24px 28px}
+td{padding:24px 28px;border-top:2px solid var(--line);font-size:38px;line-height:1.5;color:var(--sub);vertical-align:top}
 td:first-child{color:var(--ink);font-weight:700}
-.term{display:flex;gap:18px;align-items:flex-start;border:2px dashed #BFD9D6;border-radius:20px;padding:18px 24px;background:rgba(255,255,255,.6)}
-.term>span{flex:none;font-size:30px;font-weight:700;color:var(--teal);background:#E3F2F0;padding:6px 14px;border-radius:999px;margin-top:3px}
-.term>div{display:flex;flex-direction:column;gap:6px}
-.term p{font-size:34px;line-height:1.6;color:var(--sub)}
-.term b{color:var(--ink)}
-.ba{display:flex;flex-direction:column;gap:16px}
-.ba>div{border-radius:26px;padding:26px 34px}
-.ba span{display:inline-block;font-size:36px;font-weight:700;padding:6px 18px;border-radius:999px;margin-bottom:10px}
-.ba .bad{background:#F3EEEE}.ba .bad span{background:#E9D9D9;color:#8C3A3A}.ba .bad p{color:#6B5555}
-.ba .good{background:#E3F2F0}.ba .good span{background:var(--teal);color:#fff}
-.formula{display:flex;flex-direction:column;gap:20px}
-.formula>div{background:#fff;border:2px solid var(--line);border-radius:28px;padding:32px 40px;display:flex;gap:28px;align-items:center}
-.formula span{flex:none;width:280px;font-size:41px;font-weight:700;color:var(--teal)}
-.formula p{font-size:50px;font-weight:700;line-height:1.5}
 .dv{margin:auto 0;display:flex;flex-direction:column;gap:24px}
-.dn{font-family:Inter,sans-serif;font-weight:800;font-size:260px;line-height:1;color:var(--yel)}
-.dv h1{font-size:130px;font-weight:900;line-height:1.2}
-.ds{font-size:61px;line-height:1.6;color:#D7EFEE}
-.cv{display:flex;flex-direction:column;gap:36px;height:100%;justify-content:center}
-.cv-k{font-size:44px;font-weight:700;color:var(--teal);letter-spacing:.16em}
-.cv-ill{width:440px;height:440px;align-self:flex-end;margin:-40px -20px -20px 0}
-.cv-ill svg{width:100%;height:100%}
-.cv h1{font-size:150px;font-weight:900;line-height:1.18}
-.cv-s{font-size:58px;line-height:1.7;color:var(--sub)}
-.cv-tags{display:flex;flex-wrap:wrap;gap:16px;margin-top:20px}
-.cv-tags span{font-size:41px;font-weight:700;padding:12px 26px;border-radius:999px;background:#fff;border:2px solid var(--line);color:var(--teal)}
-.cvr{display:flex;flex-direction:column;align-items:center;gap:16px;background:#fff;border:2px solid var(--line);border-radius:32px;padding:48px}
-.cvr>div:not(.cvr-arrow){display:flex;align-items:baseline;gap:20px}
-.cvr b{font-family:Inter,sans-serif;font-weight:800;font-size:130px;line-height:1;color:var(--ink)}
-.cvr span{font-size:50px;color:var(--sub)}
-.cvr-arrow{font-size:77px;color:var(--teal)}
-.cvr-r{margin-top:16px;font-size:61px;font-weight:700;background:var(--yel-l);padding:16px 40px;border-radius:999px}
-.cvr-r b{font-size:88px;color:var(--teal)}
-.loop{display:grid;grid-template-columns:1fr 1fr;gap:20px}
-.loop>div{background:#fff;border:2px solid var(--line);border-radius:28px;padding:36px;display:flex;flex-direction:column;gap:10px}
-.loop b{font-family:Inter,sans-serif;font-weight:800;font-size:61px;color:var(--teal)}
-.loop p{font-size:41px;color:var(--sub)}
-.funnel{display:flex;flex-direction:column;align-items:center;gap:14px}
-.funnel>div{background:var(--teal);color:#fff;border-radius:24px;padding:30px 36px;display:flex;flex-direction:column;align-items:center;gap:4px;text-align:center}
+.dn{font-family:Inter,sans-serif;font-weight:800;font-size:280px;line-height:1;color:var(--yel)}
+.dv h1{font-size:136px;font-weight:900;line-height:1.2}.ds{font-size:52px;line-height:1.6;color:#D7EFEE}
+.stk{filter:drop-shadow(0 8px 14px rgba(14,60,70,.2)) drop-shadow(0 1px 2px rgba(14,60,70,.15))}
+.chara{position:relative;display:flex;flex-direction:column;align-items:center;gap:0;margin-top:10px}
+.chara img{width:620px;height:auto;transform:rotate(-3deg)}
+.bubble{position:relative;align-self:stretch;background:#fff;border:3px solid var(--ink);border-radius:40px;padding:40px 44px;font-size:54px;font-weight:700;line-height:1.5;text-align:center;margin-bottom:30px}
+.bubble::after{content:"";position:absolute;left:50%;bottom:-30px;width:44px;height:44px;background:#fff;border-right:3px solid var(--ink);border-bottom:3px solid var(--ink);transform:translateX(-50%) rotate(45deg)}
+.learn{background:#fff;border-radius:32px;padding:36px 40px;margin-top:-90px;position:relative;z-index:2;border:2px solid var(--line)}
+.learn-t{font-size:32px;font-weight:700;color:var(--teal);letter-spacing:.08em;margin-bottom:10px}
+.learn ul{list-style:none;display:flex;flex-direction:column;gap:12px}
+.learn li{display:flex;gap:16px;align-items:flex-start;font-size:40px;line-height:1.5}
+.ck{flex:none;width:44px;height:44px;color:#fff;background:var(--teal);border-radius:50%;padding:8px;margin-top:6px}
+.sums{display:flex;flex-direction:column;gap:28px;margin-top:20px}
+.sm{display:flex;gap:30px;align-items:flex-start;background:#fff;border-radius:32px;padding:44px 40px}
+.sm b{flex:none;font-family:Inter,sans-serif;font-size:72px;line-height:1;color:var(--teal)}
+.sm p{font-size:48px;font-weight:700;line-height:1.5}
+.sum-f{margin-top:auto;text-align:center;font-size:34px;color:var(--mut)}
+.cv{display:flex;flex-direction:column;gap:30px;height:100%;justify-content:center}
+.cv-k{font-size:36px;font-weight:700;color:var(--teal);letter-spacing:.16em}
+.cv-art{position:relative;align-self:center;width:620px;margin:10px 0 -10px}
+.cv-img{width:100%;transform:rotate(3deg)}
+.cv-bulb{position:absolute;right:-30px;top:-20px;width:190px;height:190px;border-radius:50%;background:var(--yel);color:var(--ink);padding:40px;border:10px solid #fff;box-shadow:0 8px 20px rgba(0,0,0,.15)}
+.cv h1{font-size:150px;font-weight:900;line-height:1.15}
+.cv-s{font-size:46px;line-height:1.6;color:var(--sub)}
+.toc{display:flex;flex-direction:column;gap:20px}
+.toc>div{display:flex;align-items:center;gap:30px;background:#fff;border:2px solid var(--line);border-radius:32px;padding:32px 36px}
+.toc b{font-family:Inter,sans-serif;font-size:52px;color:var(--teal);width:80px}
+.toc span{flex:none;width:92px;height:92px;border-radius:24px;background:#E1F1EF;color:var(--teal);padding:20px}
+.toc p{font-size:50px;font-weight:700;line-height:1.3;display:flex;flex-direction:column}
+.toc small{font-size:34px;font-weight:500;color:var(--sub)}
+.flow{display:flex;flex-direction:column;gap:0}
+.flow>div{display:flex;gap:30px;align-items:center;padding:20px 0;position:relative}
+.flow>div:not(:last-child)::after{content:"";position:absolute;left:43px;top:110px;height:44px;border-left:4px dotted var(--teal)}
+.flow b{flex:none;width:90px;height:90px;border-radius:50%;background:var(--teal);color:#fff;display:grid;place-items:center;font-family:Inter,sans-serif;font-size:46px}
+.flow p{font-size:36px;color:var(--sub);line-height:1.45;display:flex;flex-direction:column}
+.flow strong{font-size:48px;color:var(--ink)}
+.formula{display:flex;flex-direction:column;gap:6px;align-items:stretch}
+.formula>div{background:#fff;border:2px solid var(--line);border-radius:28px;padding:30px 36px}
+.formula span{display:block;font-size:32px;font-weight:700;color:var(--teal);margin-bottom:6px}
+.formula p{font-size:46px;font-weight:700;line-height:1.4}
+.formula i{font-style:normal;text-align:center;font-size:44px;color:var(--teal);font-weight:900;line-height:1}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.vs>div{border-radius:32px;padding:34px 30px;display:flex;flex-direction:column;gap:12px}
+.vs span{align-self:flex-start;font-size:28px;font-weight:700;padding:6px 18px;border-radius:999px}
+.vs p{font-size:44px;font-weight:700;line-height:1.4}.vs small{font-size:32px;line-height:1.5}
+.vs-bad{background:#F3EEEE}.vs-bad span{background:#E9D9D9;color:#8C3A3A}.vs-bad small{color:#7A5A5A}
+.vs-good{background:#DDF0ED}.vs-good span{background:var(--teal);color:#fff}.vs-good small{color:var(--teal)}
+.weight{display:flex;flex-direction:column;gap:18px;background:#fff;border:2px solid var(--line);border-radius:32px;padding:36px}
+.weight>div{display:grid;grid-template-columns:230px 1fr 110px;align-items:center;gap:20px}
+.weight span{font-size:36px;font-weight:700}.weight small{font-size:30px;color:var(--mut);text-align:right}
+.weight i{display:block;height:34px;width:var(--w);border-radius:17px;background:linear-gradient(90deg,#9FD6D1,var(--teal))}
+.weight>div:last-child i{background:linear-gradient(90deg,#FFD978,#F0A010)}
+.t4 .tile{padding:32px 28px}
+.cvr{background:#fff;border:2px solid var(--line);border-radius:32px;padding:40px;display:flex;flex-direction:column;gap:30px;align-items:center}
+.people{display:grid;grid-template-columns:repeat(20,1fr);gap:10px;width:100%}
+.people i{aspect-ratio:1;border-radius:50%;background:#D5E5E3}.people i.on{background:var(--yel);box-shadow:0 0 0 4px #F0A010}
+.cvr-r{font-size:44px;font-weight:700;text-align:center}.cvr-r b{color:var(--teal);font-size:60px;font-family:Inter,"Noto Sans JP",sans-serif}
+.mock-row{display:flex;gap:30px;align-items:center;justify-content:center}
+.ph{position:relative;width:380px;height:720px;border-radius:56px;background:#1D2B2A;padding:16px;flex:none}
+.ph .notch{position:absolute;left:50%;top:26px;width:110px;height:26px;margin-left:-55px;border-radius:13px;background:#1D2B2A;z-index:2}
+.ph .scr{height:100%;border-radius:42px;background:#fff;padding:72px 28px 28px;display:flex;flex-direction:column;gap:18px;overflow:hidden}
+.mock-row.two .ph{width:400px;height:640px}
+.ph.psm .scr{gap:10px;padding-top:66px}
+.m-tag{align-self:flex-start;font-size:24px;font-weight:700;color:var(--teal);background:#E1F1EF;padding:4px 14px;border-radius:999px}
+.m-h{font-size:40px;font-weight:900;line-height:1.3}.m-h.s{font-size:32px}
+.m-img{flex:1;border-radius:20px;background:linear-gradient(135deg,#DDEFEC,#9FD6D1)}
+.m-btn{background:var(--yel);border-radius:999px;text-align:center;font-size:28px;font-weight:900;padding:20px 10px;margin-top:auto}
+.bad .m-btn{margin-top:0;font-size:28px;color:#fff}.bad .m-btn.g{background:#8A9694}.bad .m-btn.b{background:#4A7FC1}.bad .m-btn.r{background:#C65A5A}
+.bad .scr{justify-content:center}
+.m-link{text-align:center;font-size:24px;color:var(--teal);text-decoration:underline}
+.m-lab{font-size:22px;font-weight:700;color:var(--sub);line-height:1.2}.m-in{height:40px;border-radius:10px;border:2px solid #D5E2E0;background:#F7FAFA;flex:none}
+.good.psm .m-btn{margin-top:14px}
+.m-line{background:#06C755;color:#fff;border-radius:999px;text-align:center;font-size:26px;font-weight:700;padding:18px}
+.labels{display:flex;flex-direction:column;gap:70px}
+.labels p{font-size:40px;font-weight:700;display:flex;gap:18px;align-items:center;line-height:1.3}
+.labels b{flex:none;width:64px;height:64px;border-radius:50%;background:var(--yel);display:grid;place-items:center;font-family:Inter,sans-serif;font-size:36px}
+.mock-cap{display:grid;grid-template-columns:1fr 1fr;gap:30px;text-align:center;margin-top:-18px}
+.mock-cap span{font-size:34px;font-weight:700;padding:10px;border-radius:999px}
+.mock-cap .x{color:#8C3A3A;background:#F3EEEE}.mock-cap .o{color:#fff;background:var(--teal)}
+.cycle{position:relative;display:grid;grid-template-columns:1fr 1fr;gap:24px}
+.cycle>div{background:#fff;border:2px solid var(--line);border-radius:32px;padding:36px 32px;display:flex;flex-direction:column;gap:8px}
+.cycle b{font-family:Inter,sans-serif;font-size:56px;color:var(--teal);line-height:1}
+.cycle p{font-size:34px;color:var(--sub);line-height:1.5}
+.c-mid{position:absolute;left:50%;top:50%;width:120px;height:120px;margin:-60px 0 0 -60px;border-radius:50%;background:var(--yel);padding:28px;color:var(--ink);border:8px solid var(--bg)}
+.alt .c-mid{border-color:#fff}
+.dash{background:#fff;border:2px solid var(--line);border-radius:32px;padding:40px;display:flex;flex-direction:column;gap:24px}
+.d-top{display:flex;align-items:baseline;gap:20px}.d-top span{font-size:34px;color:var(--sub)}.d-top b{font-family:Inter,sans-serif;font-size:72px}.d-top em{font-style:normal;font-size:34px;color:var(--teal);font-weight:700}
+.d-chart{width:100%;height:auto}
+.d-bars{display:flex;flex-direction:column;gap:16px}
+.d-bars p{display:grid;grid-template-columns:230px 1fr;align-items:center;gap:20px;font-size:34px}
+.d-bars i{display:block;height:28px;width:var(--w);border-radius:14px;background:var(--teal)}
+.post{background:#fff;border:2px solid var(--line);border-radius:32px;padding:36px 40px;display:flex;flex-direction:column;gap:20px}
+.p-head{display:flex;gap:20px;align-items:center}.p-head i{width:80px;height:80px;border-radius:50%;background:var(--teal)}
+.p-head p{font-size:34px;line-height:1.3;display:flex;flex-direction:column}.p-head span{color:var(--mut);font-size:28px}
+.post>p{position:relative;font-size:38px;line-height:1.55;padding-right:70px}
+.p-1{font-weight:700}
+.post em{position:absolute;right:0;top:0;width:56px;height:56px;border-radius:50%;background:var(--yel);font-style:normal;font-family:Inter,sans-serif;font-weight:800;font-size:32px;display:grid;place-items:center}
+.p-img{position:relative;height:250px;border-radius:24px;background:linear-gradient(135deg,#DDEFEC,#9FD6D1);display:grid;place-items:center;margin-right:70px}
+.p-img span{font-size:32px;color:var(--teal);font-weight:700}.p-img em{right:-70px}
+.p-3{color:var(--teal)}
+.keys{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.keys p{display:flex;gap:14px;align-items:center;font-size:36px;font-weight:700;background:#fff;border-radius:24px;padding:20px 24px;border:2px solid var(--line);line-height:1.3}
+.keys b{flex:none;width:52px;height:52px;border-radius:50%;background:var(--yel);display:grid;place-items:center;font-family:Inter,sans-serif;font-size:30px}
+.funnel{display:flex;flex-direction:column;align-items:center;gap:16px}
+.funnel>div{background:var(--teal);color:#fff;border-radius:28px;padding:34px;display:flex;flex-direction:column;align-items:center;gap:4px;text-align:center}
 .funnel>div:nth-child(2){background:#2A8E9C}.funnel>div:nth-child(3){background:#4AA2AD}.funnel>div:nth-child(4){background:var(--yel);color:var(--ink)}
-.funnel b{font-size:55px}.funnel span{font-size:39px;opacity:.9}
-.gate{background:#fff;border:2px solid var(--line);border-radius:32px;padding:44px;display:flex;flex-direction:column;gap:24px}
-.gate-t{font-size:44px;font-weight:700;color:var(--teal)}
-.gate>div{display:flex;gap:20px;font-size:47px;line-height:1.6}
-.gate>div span{flex:none;width:52px;height:52px;border-radius:50%;background:var(--teal);color:#fff;display:grid;place-items:center;font-size:41px;margin-top:4px}
-.weeks{display:flex;flex-direction:column;gap:20px}
-.weeks>div{background:#fff;border:2px solid var(--line);border-radius:28px;padding:30px 34px;display:grid;grid-template-columns:170px 1fr;gap:4px 28px}
-.weeks b{grid-row:span 2;font-size:41px;color:#fff;background:var(--teal);border-radius:20px;display:grid;place-items:center;height:96px}
-.weeks p{font-size:41px;color:var(--sub)}
-.chk{display:flex;flex-direction:column;gap:14px}
-.chk>div{display:flex;gap:24px;align-items:flex-start;background:#fff;border:2px solid var(--line);border-radius:22px;padding:24px 30px;font-size:43px;line-height:1.55}
-.chk span{flex:none;width:44px;height:44px;border:4px solid var(--teal);border-radius:10px;margin-top:4px}
-.last{display:flex;flex-direction:column;gap:40px;height:100%;justify-content:center}
-.last h2{font-size:138px}
-.cta-box{background:var(--teal);color:#fff;border-radius:36px;padding:56px 48px;display:flex;flex-direction:column;gap:20px}
-.cta-k{font-size:41px;font-weight:700;color:var(--yel);letter-spacing:.14em}
-.cta-box h3{font-size:63px}
-.cta-box p{font-size:44px;color:#D7EFEE}
-.cta-btn{margin-top:12px;display:block;text-align:center;background:var(--yel);color:var(--ink);font-size:55px;font-weight:900;padding:34px;border-radius:999px;text-decoration:none}
-.eb .cont{color:var(--mut)}
-.intro-h{max-width:540px;margin:0 auto;padding:28px 16px 0;font-size:14px;color:#3d4b49;text-align:center;line-height:1.7}
-
+.funnel b{font-size:50px}.funnel span{font-size:34px}
+.week,.buf{display:grid;grid-template-columns:repeat(7,1fr);gap:10px}
+.week>div,.buf>div{background:#fff;border:2px solid var(--line);border-radius:20px;padding:20px 6px;min-height:300px;display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center}
+.week b,.buf b{font-size:36px}
+.week p{font-size:30px;font-weight:700;line-height:1.3;padding:10px 4px;border-radius:12px;width:100%}
+.week .a p{background:#DDF0ED}.week .b p{background:#FFF0C2}.week .c p{background:#E6E3F7}.week .d p{background:var(--ink);color:#fff}
+.buf>div{min-height:280px}
+.buf p{font-size:25px;font-weight:700;line-height:1.3;padding:8px 4px;border-radius:10px;width:100%}
+.buf .t1{background:#DDF0ED}.buf .t2{background:#FFF0C2}.buf .t3{background:#E6E3F7}.buf .t4{background:var(--ink);color:#fff}
+.gate{background:#fff;border:2px solid var(--line);border-radius:32px;padding:44px;display:flex;flex-direction:column;gap:30px}
+.gate-t{font-size:38px;font-weight:700;color:var(--teal)}
+.gate>div{display:flex;gap:24px;font-size:42px;line-height:1.5;font-weight:500}
+.gate>div span{flex:none;width:64px;height:64px;border-radius:50%;background:var(--teal);color:#fff;padding:14px;margin-top:2px}
+.calc{display:flex;flex-direction:column;align-items:stretch;gap:8px}
+.calc>div{background:#fff;border:2px solid var(--line);border-radius:28px;padding:26px 36px;display:flex;justify-content:space-between;align-items:baseline}
+.calc small{font-size:36px;color:var(--sub)}.calc b{font-family:Inter,"Noto Sans JP",sans-serif;font-size:60px}
+.calc i{font-style:normal;text-align:center;font-size:48px;font-weight:900;color:var(--teal);line-height:1}
+.calc .res{background:var(--yel-l);border-color:#F3DFA6}.calc .res b{color:var(--teal)}
+.weeks{display:flex;flex-direction:column;gap:22px}
+.weeks>div{background:#fff;border:2px solid var(--line);border-radius:32px;padding:34px 36px;display:grid;grid-template-columns:180px 1fr;gap:6px 30px}
+.weeks b{grid-row:span 2;font-size:36px;color:#fff;background:var(--teal);border-radius:24px;display:grid;place-items:center}
+.weeks h3{font-size:48px}.weeks p{font-size:36px;color:var(--sub);line-height:1.5}
+.chk{display:flex;flex-direction:column;gap:16px}
+.chk>div{display:flex;gap:24px;align-items:flex-start;background:#fff;border:2px solid var(--line);border-radius:24px;padding:24px 30px;font-size:38px;line-height:1.45}
+.chk span{flex:none;width:48px;height:48px;border:5px solid var(--teal);border-radius:12px;margin-top:2px}
+.last{display:flex;flex-direction:column;gap:36px;height:100%;justify-content:center}
+.chara.end img{width:440px;transform:rotate(3deg)}
+.last h2{font-size:84px;text-align:center}
+.cta-box{background:var(--teal);color:#fff;border-radius:40px;padding:48px;display:flex;flex-direction:column;gap:20px;text-align:center}
+.cta-k{font-size:32px;font-weight:700;color:var(--yel);letter-spacing:.14em}
+.cta-box h3{font-size:50px}
+.cta-btn{display:block;background:var(--yel);color:var(--ink);font-size:46px;font-weight:900;padding:34px;border-radius:999px;text-decoration:none}
 @media screen{
  html,body{height:100%;overflow:hidden;overscroll-behavior:none}
- .intro-h{display:none}
- .deck{position:fixed;inset:0;display:flex;flex-direction:row;align-items:center;gap:0;padding:0;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;scrollbar-width:none;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
+ .deck{position:fixed;inset:0;flex-direction:row;align-items:center;gap:0;padding:0;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;scrollbar-width:none;overscroll-behavior:contain}
  .deck::-webkit-scrollbar{display:none}
  .slot{flex:none;width:100vw;height:100%;display:flex;align-items:center;justify-content:center;scroll-snap-align:center;scroll-snap-stop:always;padding:12px 8px 56px}
  .frame{width:min(calc(100vw - 16px),calc((100dvh - 72px) * 9 / 16));aspect-ratio:9/16;flex:none}
  .hud{position:fixed;left:0;right:0;bottom:12px;display:flex;justify-content:center;align-items:center;gap:14px;pointer-events:none;z-index:5}
- .hud span{font:700 13px/1 Inter,"Noto Sans JP",sans-serif;color:#2f3d3b;background:rgba(255,255,255,.85);padding:8px 14px;border-radius:999px;letter-spacing:.04em}
+ .hud span{font:700 13px/1 Inter,"Noto Sans JP",sans-serif;color:#2f3d3b;background:rgba(255,255,255,.85);padding:8px 14px;border-radius:999px}
  .hud button{pointer-events:auto;width:36px;height:36px;border-radius:50%;border:0;background:rgba(255,255,255,.9);color:#0E7C8C;font-size:18px;font-weight:700;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.15)}
  .hud a{pointer-events:auto;font:700 12px/1 "Noto Sans JP",sans-serif;color:#0E7C8C;background:rgba(255,255,255,.85);padding:9px 12px;border-radius:999px;text-decoration:none}
 }
-@media print{.hud{display:none}.slot{display:contents}}
-
-@media print{
- @page{size:1080px 1920px;margin:0}
- html,body{background:none}
- .intro-h{display:none}
- .deck{display:block;padding:0}
- .frame{width:1080px;height:1920px;aspect-ratio:auto;border-radius:0;box-shadow:none;break-after:page;page-break-after:always}
- .page{transform:none!important}
-}
-</style></head><body>
-<p class="intro-h">サクアプ特典資料｜上から順にスクロールして読めます（全38ページ）</p>
-<div class="deck"><div class="frame"><div class="page cover"><div class="cv">
-<p class="cv-k">サクアプ 特典資料</p>
-<div class="cv-ill"><svg viewBox="0 0 200 200"><circle cx="100" cy="100" r="96" fill="#DDEFEC"/><circle cx="160" cy="160" r="40" fill="#FFE7A3"/><path d="M100 46a38 38 0 0 0-22 69c4 3 6 7 6 12v8h32v-8c0-5 2-9 6-12a38 38 0 0 0-22-69Z" fill="#FFC83D" stroke="#14211F" stroke-width="5" stroke-linejoin="round"/><rect x="84" y="138" width="32" height="20" rx="6" fill="#fff" stroke="#14211F" stroke-width="5"/><path d="M100 18v12M52 36l8 8M148 36l-8 8" stroke="#0E7C8C" stroke-width="7" stroke-linecap="round"/></svg></div>
-<h1>アプリで副業<br>永久保存版</h1>
-<p class="cv-s">アイデアを「売れるアプリ」にして、<br>お客さんに届けるまでの教科書</p>
-<div class="cv-tags"><span>売れるアプリ</span><span>UIとCVR</span><span>SNS集客</span><span>広告</span></div>
-</div></div></div><div class="frame"><div class="page  alt"><p class="eb">最初に</p><h2>この資料の<br>使い方</h2><p class="lead">全部を一度に覚えなくて大丈夫。<br>いまの自分に必要な章から読んでください。</p><div class="cards"><div class="card"><span class="n">01</span><h3>最初から順に読む</h3><p>アプリ副業がはじめての人は、1章から順番に。全体の流れがつかめます。</p></div><div class="card"><span class="n">02</span><h3>困ったところだけ読む</h3><p>「作ったけど使われない」なら2章、「知られていない」なら3章へ。</p></div><div class="card"><span class="n">03</span><h3>最後のチェックリストを使う</h3><p>公開前と、毎月の見直しに。手を動かしながら確認できます。</p></div></div><div class="point"><span>POINT</span><p>各ページの<b>「POINT」</b>だけ拾い読みしても、要点がわかるように作っています。</p></div><div class="foot"><span>アプリで副業 永久保存版 ・ 最初に</span><span>02 / 38</span></div></div></div><div class="frame"><div class="page "><p class="eb">最初に</p><h2>アプリ副業の<br>全体像</h2><p class="lead">やることは、この5つのステップだけです。</p><div class="steps"><div class="st"><span class="dot">1</span><div><h3>見つける</h3><p>誰の、どんな「困った」を解決するかを決める</p></div></div><div class="st"><span class="dot">2</span><div><h3>小さく作る</h3><p>いちばん大事な機能1つだけで、まず形にする</p></div></div><div class="st"><span class="dot">3</span><div><h3>整える</h3><p>使いやすく、申し込みやすい画面にする（UIとCVR）</p></div></div><div class="st"><span class="dot">4</span><div><h3>届ける</h3><p>SNSや発信で、必要な人に見つけてもらう</p></div></div><div class="st"><span class="dot">5</span><div><h3>育てる</h3><p>反応を見て直す。余裕が出たら広告で広げる</p></div></div></div><div class="point"><span>POINT</span><p>多くの人は2の「作る」だけに時間を使いすぎます。<b>1・4・5にも同じくらい時間を</b>。</p></div><div class="foot"><span>アプリで副業 永久保存版 ・ 最初に</span><span>03 / 38</span></div></div></div><div class="frame"><div class="page  alt"><p class="eb">最初に</p><h2>最初にやりがちな<br>3つの失敗</h2><div class="cards"><div class="card"><span class="n">01</span><h3>最初から全部入りで作る</h3><p>機能を盛るほど完成が遠のき、お金も時間も消えていきます。最初は1機能で十分。</p></div><div class="card"><span class="n">02</span><h3>「みんな向け」にする</h3><p>誰向けかがあいまいだと、誰にも刺さりません。相手を1人思い浮かべられるくらいに絞る。</p></div><div class="card"><span class="n">03</span><h3>完成してから集客を考える</h3><p>公開した日がスタートライン。作り始めた日から、発信も始めます。</p></div></div><div class="point"><span>POINT</span><p>3つとも<b>「小さく・絞って・早めに外に出す」</b>で防げます。</p></div><div class="foot"><span>アプリで副業 永久保存版 ・ 最初に</span><span>04 / 38</span></div></div></div><div class="frame"><div class="page dark"><div class="dv"><p class="dn">01</p><h1>売れるアプリ</h1><p class="ds">アイデア選びから<br>値段の決め方まで</p></div></div></div><div class="frame"><div class="page  alt"><p class="eb">売れるアプリ</p><h2>売れるアプリの<br>正体</h2><p class="lead">売れるアプリは、この3つが言葉にできています。</p><div class="formula">
-<div><span>誰の</span><p>ネイルサロンを<br>ひとりで営む人の</p></div>
-<div><span>どんな困りごとを</span><p>予約の電話対応で<br>施術が止まる問題を</p></div>
-<div><span>いくらで解決するか</span><p>月額1,980円で<br>なくす</p></div>
-</div><p class="note">※金額は説明のための例です</p><div class="point"><span>POINT</span><p>1文で言えないアイデアは、まだ形にする段階ではありません。<b>まず1文にする</b>ところから。</p></div><div class="foot"><span>アプリで副業 永久保存版 ・ 01 売れるアプリ</span><span>06 / 38</span></div></div></div><div class="frame"><div class="page "><p class="eb">売れるアプリ</p><h2>アイデアの<br>見つけ方</h2><p class="lead">「思いつく」より「見つける」。ネタはこの4か所に落ちています。</p><div class="cards"><div class="card"><span class="n">01</span><h3>自分の不便</h3><p>毎週くり返している手作業や、メモ帳・エクセルでなんとかしていること。</p></div><div class="card"><span class="n">02</span><h3>本業・バイト先の手作業</h3><p>紙の予約表、電話の確認、手書きの集計。お店の「面倒」は宝の山です。</p></div><div class="card"><span class="n">03</span><h3>SNSのグチ</h3><p>「〇〇 めんどくさい」「〇〇 アプリ ない」で検索。生の声がそのまま見つかります。</p></div><div class="card"><span class="n">04</span><h3>アプリの低評価レビュー</h3><p>既存アプリの★2〜3のレビューには「ここが惜しい」が書かれています。</p></div></div><div class="foot"><span>アプリで副業 永久保存版 ・ 01 売れるアプリ</span><span>07 / 38</span></div></div></div><div class="frame"><div class="page  alt"><p class="eb">売れるアプリ</p><h2>大きな市場より、<br>小さく深い市場</h2><p class="lead">個人が勝てるのは、大手がわざわざ来ない場所です。</p><div class="ba"><div class="bad"><span>✕ よくある</span><p>「誰でも使える予約アプリ」<br>→ 大手と正面から比べられる</p></div><div class="good"><span>◯ こうする</span><p>「ひとりネイルサロン専用の予約アプリ」<br>→ その人たちには一番になれる</p></div></div><div class="cards"><div class="card"><h3>言葉が刺さる</h3><p>「あなたのためのアプリ」と言い切れるので、紹介文が強くなります。</p></div><div class="card"><h3>集客がラク</h3><p>集まる場所（ハッシュタグ・コミュニティ）がはっきりしています。</p></div><div class="card"><h3>口コミが広がる</h3><p>同業者どうしはつながっているので、1人使えば紹介が起きやすい。</p></div></div><div class="foot"><span>アプリで副業 永久保存版 ・ 01 売れるアプリ</span><span>08 / 38</span></div></div></div><div class="frame"><div class="page "><p class="eb">売れるアプリ</p><h2>最初は<br>「1機能」で出す</h2><p class="lead">まず「これだけは絶対に必要」という1つに絞ります。</p><table><tr><th>作りたいもの</th><th>最初に作る1機能</th></tr><tr><td>サロンの予約アプリ</td><td>空き時間から予約できる</td></tr><tr><td>趣味の写真投稿サイト</td><td>写真を投稿して一覧で見られる</td></tr><tr><td>マッチング掲示板</td><td>募集を出して、連絡が届く</td></tr><tr><td>レッスン管理アプリ</td><td>回数券の残りがわかる</td></tr></table><div class="point"><span>POINT</span><p>決済・通知・ランキングなどは<b>「使われてから」足せばOK</b>。後から足すほうが、安く正確に作れます。</p></div><div class="foot"><span>アプリで副業 永久保存版 ・ 01 売れるアプリ</span><span>09 / 38</span></div></div></div><div class="frame"><div class="page  alt"><p class="eb">売れるアプリ</p><h2>作る前に<br>確かめる3つの方法</h2><p class="lead">お金をかける前に「欲しい人がいるか」を確かめます。</p><div class="steps"><div class="st"><span class="dot">1</span><div><h3>10人に聞く</h3><p>想定するお客さんに「こんなのあったら使う？いくらなら払う？」と聞く。社交辞令ではなく、払う気があるかを見る。</p></div></div><div class="st"><span class="dot">2</span><div><h3>紹介ページだけ先に出す</h3><p>完成前に説明ページと「事前登録」ボタンを置いて、登録数を見る。</p></div></div><div class="st"><span class="dot">3</span><div><h3>先に申し込みを取る</h3><p>「先着5名・特別価格」などで先に申し込みを集める。お金が動けば本物です。</p></div></div></div><div class="point"><span>POINT</span><p>「いいね」より<b>「登録」、登録より「支払い」</b>。行動の重さで本気度を測ります。</p></div><div class="foot"><span>アプリで副業 永久保存版 ・ 01 売れるアプリ</span><span>10 / 38</span></div></div></div><div class="frame"><div class="page "><p class="eb">売れるアプリ</p><h2>お金の<br>もらい方</h2><p class="lead">代表的な4つの型。アプリの性格に合うものを選びます。</p><div class="term"><span>用語チェック</span><div><p><b>月額課金</b>：毎月決まった金額をもらう形。「サブスク」とも呼びます。</p></div></div><table><tr><th>型</th><th>向いているアプリ</th><th>注意点</th></tr><tr><td>月額課金</td><td>毎週・毎日使う道具<br>（予約・管理など）</td><td>続けて使う理由が<br>ないと解約される</td></tr><tr><td>手数料</td><td>人と人をつなぐ<br>（マッチング・販売）</td><td>最初は利用者を<br>集めるのが大変</td></tr><tr><td>買い切り</td><td>一度で役目が終わる<br>（診断・作成ツール）</td><td>売れ続けないと<br>収入が止まる</td></tr><tr><td>広告</td><td>たくさんの人が<br>無料で見るもの</td><td>かなりの利用者数が<br>ないと収益は小さい</td></tr></table><div class="point"><span>POINT</span><p>個人の副業なら、<b>月額課金か手数料</b>から考えるのがおすすめです。</p></div><div class="foot"><span>アプリで副業 永久保存版 ・ 01 売れるアプリ</span><span>11 / 38</span></div></div></div><div class="frame"><div class="page  alt"><p class="eb">売れるアプリ</p><h2>値段の<br>決め方</h2><p class="lead">安くしすぎないのが、いちばん大事です。</p><div class="cards"><div class="card"><span class="n">01</span><h3>比べる相手を決める</h3><p>お客さんは「いまのやり方」と比べます。手作業にかかる時間や、他のサービスの値段を書き出します。</p></div><div class="card"><span class="n">02</span><h3>ちょっと高いと感じるくらいに</h3><p>安すぎると「大丈夫？」と不安にさせます。値下げは簡単、値上げは難しい。</p></div><div class="card"><span class="n">03</span><h3>無料の範囲を決めておく</h3><p>無料体験や無料プランは「どこまで無料か」を先に決めておくと、有料にしやすい。</p></div></div><div class="point"><span>POINT</span><p>値段は<b>後から何度でも試せる</b>。まず決めて、出して、反応を見ます。</p></div><div class="foot"><span>アプリで副業 永久保存版 ・ 01 売れるアプリ</span><span>12 / 38</span></div></div></div><div class="frame"><div class="page dark"><div class="dv"><p class="dn">02</p><h1>UIとCVR</h1><p class="ds">使われる・申し込まれる<br>画面のつくり方</p></div></div></div><div class="frame"><div class="page  alt"><p class="eb">UIとCVR</p><h2>CVRって<br>なに？</h2><p class="lead">CVR（コンバージョン率）は、来た人のうち<br>「やってほしいこと」をした人の割合です。</p><div class="term"><span>用語チェック</span><div><p><b>UI</b>：画面の見た目や、ボタン・文字の配置など「使うときに目にする部分」のこと。</p></div></div><div class="cvr">
-<div class="cvr-a"><b>100</b><span>人がページに来て</span></div>
-<div class="cvr-arrow">↓</div>
-<div class="cvr-b"><b>3</b><span>人が申し込んだら</span></div>
-<div class="cvr-r">CVR ＝ <b>3%</b></div>
-</div><p class="note">※数字は計算のしかたを説明するための例です</p><div class="point"><span>POINT</span><p>集客で人を2倍にするより、<b>CVRを2倍にする</b>ほうが安く早くできることがよくあります。</p></div><div class="foot"><span>アプリで副業 永久保存版 ・ 02 UIとCVR</span><span>14 / 38</span></div></div></div><div class="frame"><div class="page "><p class="eb">UIとCVR</p><h2>最初の1画面で<br>伝える3つ</h2><p class="lead">スクロールせずに見える範囲（ファーストビュー）で、<br>この3つが伝わるかをチェック。</p><div class="term"><span>用語チェック</span><div><p><b>ファーストビュー</b>：ページを開いて、スクロールせずに最初に見える範囲のこと。</p></div></div><div class="cards"><div class="card"><span class="n">01</span><h3>誰のためのものか</h3><p>「ひとりサロンの方へ」のように、対象を最初に言い切る。</p></div><div class="card"><span class="n">02</span><h3>何ができるのか</h3><p>機能の名前ではなく、使うと「どうなるか」で書く。<br>×「予約管理機能」→ ◯「電話なしで予約が埋まる」</p></div><div class="card"><span class="n">03</span><h3>次に何をすればいいか</h3><p>押すボタンを1つだけ、いちばん目立つ場所に置く。</p></div></div><div class="point"><span>POINT</span><p>家族や友だちに<b>5秒だけ見せて</b>「何のアプリ？」と聞く。答えられなければ直しどきです。</p></div><div class="foot"><span>アプリで副業 永久保存版 ・ 02 UIとCVR</span><span>15 / 38</span></div></div></div><div class="frame"><div class="page  alt"><p class="eb">UIとCVR</p><h2>押されるボタンの<br>3つのルール</h2><div class="ba"><div class="bad"><span>✕ よくある</span><p>「送信」「詳しくはこちら」<br>色違いのボタンが3つ並ぶ</p></div><div class="good"><span>◯ こうする</span><p>「無料で予約してみる」<br>目立つボタンは1画面に1つ</p></div></div><div class="cards"><div class="card"><h3>1画面に1つの目的</h3><p>押してほしいボタンは1つ。ほかのリンクは控えめな文字リンクに。</p></div><div class="card"><h3>押したあとが分かる言葉</h3><p>「送信」ではなく「無料で相談する」「空き時間を見る」。</p></div><div class="card"><h3>目立つ色は1色だけ</h3><p>ボタンの色はページ全体で1色に決め、ほかでは使わない。</p></div></div><div class="foot"><span>アプリで副業 永久保存版 ・ 02 UIとCVR</span><span>16 / 38</span></div></div></div><div class="frame"><div class="page "><p class="eb">UIとCVR</p><h2>入力は<br>少ないほど進む</h2><p class="lead">入力欄が1つ増えるたびに、途中でやめる人が増えます。</p><div class="steps"><div class="st"><span class="dot">1</span><div><h3>今いらない項目を消す</h3><p>住所や生年月日は、本当に今必要？あとで聞けるなら後回しに。</p></div></div><div class="st"><span class="dot">2</span><div><h3>ログインを簡単に</h3><p>メールとパスワードより、LINEやGoogleでのログインを用意する。</p></div></div><div class="st"><span class="dot">3</span><div><h3>進み具合を見せる</h3><p>入力が長いときは「1 / 3」のように、あとどれくらいかを表示する。</p></div></div></div><div class="point"><span>POINT</span><p>申し込みフォームは<b>最初は名前と連絡先だけ</b>。くわしいことは会話で聞けば十分です。</p></div><div class="foot"><span>アプリで副業 永久保存版 ・ 02 UIとCVR</span><span>17 / 38</span></div></div></div><div class="frame"><div class="page  alt"><p class="eb">UIとCVR</p><h2>信頼してもらう<br>4つの材料</h2><p class="lead">はじめて見るサービスに、お金や個人情報を<br>預けてもらうための材料です。</p><div class="cards"><div class="card"><span class="n">01</span><h3>実際の画面</h3><p>イメージ画像ではなく、本物の画面や操作の様子を見せる。</p></div><div class="card"><span class="n">02</span><h3>本物の声</h3><p>実際の利用者の感想だけを載せる。作った「声」は信用を失い、法律違反になることも。</p></div><div class="card"><span class="n">03</span><h3>運営者がわかる</h3><p>名前（屋号）、顔写真、連絡先。誰がやっているかは大きな安心になります。</p></div><div class="card"><span class="n">04</span><h3>お金のルール</h3><p>料金・解約・返金の条件を明記。有料なら特定商取引法の表記も必要です。</p></div></div><div class="foot"><span>アプリで副業 永久保存版 ・ 02 UIとCVR</span><span>18 / 38</span></div></div></div><div class="frame"><div class="page "><p class="eb">UIとCVR</p><h2>改善は<br>「1つずつ」</h2><p class="lead">感覚で全部変えると、何が効いたか分からなくなります。</p><div class="loop">
-<div><b>1</b><h3>はかる</h3><p>訪問数・ボタンが押された数・申し込み数</p></div>
-<div><b>2</b><h3>仮説を立てる</h3><p>「ボタンが下すぎて見られていない？」</p></div>
-<div><b>3</b><h3>1か所だけ変える</h3><p>ボタンを上に移す（ほかは触らない）</p></div>
-<div><b>4</b><h3>くらべる</h3><p>1〜2週間で数字が良くなったか見る</p></div>
-</div><div class="point"><span>POINT</span><p>Googleアナリティクスなどの<b>無料の計測ツール</b>を、公開した日から入れておきましょう。</p></div><div class="foot"><span>アプリで副業 永久保存版 ・ 02 UIとCVR</span><span>19 / 38</span></div></div></div><div class="frame"><div class="page  alt"><p class="eb">UIとCVR ・ 分析</p><h2>アプリに<br>アナリティクスを入れる</h2><p class="lead">入れておくと、アプリの「使われ方」が数字でわかります。</p><div class="term"><span>用語チェック</span><div><p><b>アナリティクス</b>：アプリやサイトの使われ方を記録して、数字やグラフで見せてくれるツール。無料のGoogleアナリティクスが有名です。</p></div></div><div class="cards"><div class="card"><h3>何人が使っているか</h3><p>毎日・毎週、どれくらいの人が開いているか。</p></div><div class="card"><h3>どの機能が使われているか</h3><p>よく押されるボタン、ほとんど使われていない画面。</p></div><div class="card"><h3>どこでやめているか</h3><p>登録や申し込みの途中で、多くの人が離れていく画面。</p></div><div class="card"><h3>続けて使われているか</h3><p>1週間後・1か月後にも戻ってきてくれる人の割合。</p></div></div><div class="point"><span>POINT</span><p><b>公開と同時に</b>入れるのがおすすめ。最初の数字が残っていれば、改善の効果をあとで比べられます。</p></div><p class="note" style="margin-top:0">※使われ方を記録することは、プライバシーポリシーに書いておきましょう。</p><div class="foot"><span>アプリで副業 永久保存版 ・ 02 UIとCVR</span><span>20 / 38</span></div></div></div><div class="frame"><div class="page "><p class="eb">UIとCVR ・ 分析</p><h2>数字を<br>アップデートに活かす</h2><p class="lead">「なんとなく」ではなく、数字を見て次の改善を決めます。</p><div class="term"><span>用語チェック</span><div><p><b>イベント</b>：「登録した」「予約ボタンを押した」など、記録しておきたい操作のこと。</p><p><b>継続率</b>：使い始めた人のうち、一定期間後も使い続けている人の割合。</p></div></div><table><tr><th>見えた数字</th><th>次のアップデート</th></tr><tr><td>登録画面で<br>多くの人がやめている</td><td>入力項目を減らす<br>LINEログインを足す</td></tr><tr><td>ある機能が<br>ほとんど使われない</td><td>目立つ場所に移す<br>または思い切って外す</td></tr><tr><td>1週間後に戻る人が<br>少ない（継続率が低い）</td><td>お知らせ通知や<br>リマインドを足す</td></tr><tr><td>よく使われる機能が<br>はっきりしている</td><td>そこを強化して<br>紹介ページでも推す</td></tr></table><div class="point"><span>POINT</span><p>使われない機能に開発費をかけずにすむので、<b>アップデートの費用もムダが減ります</b>。</p></div><div class="foot"><span>アプリで副業 永久保存版 ・ 02 UIとCVR</span><span>21 / 38</span></div></div></div><div class="frame"><div class="page dark"><div class="dv"><p class="dn">03</p><h1>SNS集客</h1><p class="ds">お金をかけずに<br>見つけてもらう</p></div></div></div><div class="frame"><div class="page "><p class="eb">SNS集客</p><h2>どのSNSを<br>使う？</h2><p class="lead">お客さんがいる場所を選びます。最初は1つに集中。</p><table><tr><th>SNS</th><th>向いていること</th><th>相性のいい相手</th></tr><tr><td>X</td><td>作っている過程や<br>考えを毎日発信</td><td>個人事業主・<br>副業の人</td></tr><tr><td>Instagram</td><td>画面や使い方を<br>見た目で見せる</td><td>お店・サロン・<br>クリエイター</td></tr><tr><td>TikTok</td><td>15〜30秒の<br>操作動画</td><td>若い世代・<br>一般の利用者</td></tr><tr><td>note</td><td>長い文章で<br>想いやノウハウ</td><td>じっくり<br>検討する人</td></tr></table><div class="point"><span>POINT</span><p>お客さんが<b>ふだん情報を探している場所</b>がどこか、まず聞いてみるのが一番の近道です。</p></div><div class="foot"><span>アプリで副業 永久保存版 ・ 03 SNS集客</span><span>23 / 38</span></div></div></div><div class="frame"><div class="page  alt"><p class="eb">SNS集客</p><h2>投稿ネタの<br>3つの型</h2><p class="lead">ネタに困ったら、この3つをくり返すだけで回ります。</p><div class="cards"><div class="card"><span class="n">01</span><h3>つくっている過程</h3><p>「予約画面ができた」「ここで迷った」。完成前から見せると、応援してくれる人が増えます。</p></div><div class="card"><span class="n">02</span><h3>役に立つ小ワザ</h3><p>「予約の電話を減らす3つの方法」など、アプリを使わない人にも役立つ情報。</p></div><div class="card"><span class="n">03</span><h3>使った人の変化</h3><p>「電話が週10件→2件に」など、実際の変化（許可をもらった本物の事例）。</p></div></div><div class="point"><span>POINT</span><p>宣伝は<b>3〜4投稿に1回</b>くらいで十分。役に立つ投稿が、宣伝の効き目を上げます。</p></div><div class="foot"><span>アプリで副業 永久保存版 ・ 03 SNS集客</span><span>24 / 38</span></div></div></div><div class="frame"><div class="page "><p class="eb">SNS集客</p><h2>読まれる投稿の<br>つくり方</h2><div class="steps"><div class="st"><span class="dot">1</span><div><h3>1行目で手を止めてもらう</h3><p>「予約の電話、1日何回出てますか？」など、相手が自分ごとにできる問いかけや数字から始める。</p></div></div><div class="st"><span class="dot">2</span><div><h3>1投稿に1つのメッセージ</h3><p>言いたいことを詰め込まない。1つの投稿で伝えるのは1つだけ。</p></div></div><div class="st"><span class="dot">3</span><div><h3>画面や動画を見せる</h3><p>文字だけより、実際の画面のスクショや操作動画のほうが伝わります。</p></div></div><div class="st"><span class="dot">4</span><div><h3>最後に次の行動</h3><p>「くわしくはプロフィールのリンクから」など、次にしてほしいことを1つ書く。</p></div></div></div><div class="foot"><span>アプリで副業 永久保存版 ・ 03 SNS集客</span><span>25 / 38</span></div></div></div><div class="frame"><div class="page  alt"><p class="eb">SNS集客</p><h2>フォロワー数より<br>「通り道」</h2><p class="lead">フォロワーが少なくても、通り道が整っていれば申し込みは来ます。</p><div class="funnel">
+@media print{@page{size:1080px 1920px;margin:0}html,body{background:none}.hud{display:none}.deck{display:block;padding:0}.slot{display:contents}.frame{width:1080px;height:1920px;aspect-ratio:auto;border-radius:0;box-shadow:none;break-after:page}.page{transform:none!important}}
+</style></head><body><div class="deck"><div class="frame"><div class="page cover"><div class="cv"><p class="cv-k">サクアプ 特典資料</p>
+<div class="cv-art"><img src="smile.webp" alt="" class="stk cv-img"><span class="cv-bulb"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.9.7 1.5 1.6 1.5 2.6V17h4v-.5c0-1 .6-1.9 1.5-2.6A6 6 0 0 0 12 3Z"/></svg></span></div>
+<h1>アプリで副業<br>永久保存版</h1><p class="cv-s">アイデアを「売れるアプリ」にして<br>届けるまでの教科書</p></div></div></div><div class="frame"><div class="page  alt"><p class="eb">最初に</p><h2>この資料の<br>使い方</h2><div class="toc">
+<div><b>01</b><span><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.9.7 1.5 1.6 1.5 2.6V17h4v-.5c0-1 .6-1.9 1.5-2.6A6 6 0 0 0 12 3Z"/></svg></span><p>売れるアプリ<small>何を作るか決める</small></p></div>
+<div><b>02</b><span><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="6" y="2" width="12" height="20" rx="3"/><path d="M11 18h2"/></svg></span><p>UIとCVR<small>使われる画面にする</small></p></div>
+<div><b>03</b><span><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h16v11H9l-5 4Z"/></svg></span><p>SNS集客<small>見つけてもらう</small></p></div>
+<div><b>04</b><span><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10v4h4l7 5V5L7 10Z"/><path d="M18 9a4 4 0 0 1 0 6"/></svg></span><p>広告<small>広げる・守る</small></p></div>
+</div><div class="point"><span>POINT</span><p>はじめてなら01から順番に。困っていることがあれば、その章だけ読んでもOK。各章の最後に<b>「3行まとめ」</b>があります。</p></div><div class="foot"><span>アプリで副業 永久保存版 ・ 最初に</span><span>02 / 46</span></div></div></div><div class="frame"><div class="page "><p class="eb">最初に</p><h2>アプリ副業は<br>5ステップ</h2><div class="flow">
+<div><b>1</b><p><strong>見つける</strong>誰の困りごとを解決するか決める</p></div>
+<div><b>2</b><p><strong>小さく作る</strong>大事な機能1つだけで形にする</p></div>
+<div><b>3</b><p><strong>整える</strong>使いやすく、申し込みやすくする</p></div>
+<div><b>4</b><p><strong>届ける</strong>SNSで必要な人に見つけてもらう</p></div>
+<div><b>5</b><p><strong>育てる</strong>数字を見て直す・広げる</p></div>
+</div><div class="point"><span>POINT</span><p>多くの人は2の「作る」だけに時間を使いすぎます。<b>1・4・5にも同じくらい時間を。</b></p></div><div class="foot"><span>アプリで副業 永久保存版 ・ 最初に</span><span>03 / 46</span></div></div></div><div class="frame"><div class="page  alt"><p class="eb">最初に</p><h2>やりがちな<br>3つの失敗</h2><div class="icards"><div class="icard"><span class="ib"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 3 9 5-9 5-9-5Z"/><path d="m3 13 9 5 9-5"/></svg></span><div><h3>最初から全部入り</h3><p>機能を盛るほど完成が遠のきます。最初は1機能で十分。</p></div></div><div class="icard"><span class="ib"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg></span><div><h3>「みんな向け」にする</h3><p>誰向けかあいまいだと、誰にも刺さりません。</p></div></div><div class="icard"><span class="ib"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span><div><h3>集客を後回しにする</h3><p>公開日がスタート。作り始めた日から発信も始めます。</p></div></div></div><div class="point"><span>POINT</span><p>3つとも<b>「小さく・絞って・早く外に出す」</b>で防げます。</p></div><div class="foot"><span>アプリで副業 永久保存版 ・ 最初に</span><span>04 / 46</span></div></div></div><div class="frame"><div class="page dark"><div class="dv"><p class="dn">01</p><h1>売れるアプリ</h1><p class="ds">アイデア選びから<br>値段の決め方まで</p></div></div></div><div class="frame"><div class="page soft"><p class="eb">01 売れるアプリ</p><div class="chara"><div class="bubble">アイデアはあるけど、<br>本当に売れるのかな…</div><img src="worry.webp" alt="" class="stk"></div>
+<div class="learn"><p class="learn-t">この章でわかること</p><ul><li><svg class="ck" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 5 5 9-10"/></svg>売れるアプリに共通すること</li><li><svg class="ck" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 5 5 9-10"/></svg>アイデアの見つけ方と確かめ方</li><li><svg class="ck" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 5 5 9-10"/></svg>お金のもらい方と値段の決め方</li></ul></div><div class="foot"><span>アプリで副業 永久保存版 ・ 01 売れるアプリ</span><span>06 / 46</span></div></div></div><div class="frame"><div class="page "><p class="eb">売れるアプリ</p><h2>売れるアプリは<br>1文で言える</h2><div class="formula">
+<div><span>誰の</span><p>ひとりでネイルサロンを営む人の</p></div><i>＋</i>
+<div><span>どんな困りごとを</span><p>予約の電話で施術が止まる問題を</p></div><i>＋</i>
+<div><span>いくらで解決</span><p>月額1,980円でなくす</p></div>
+</div><p class="note">※金額は説明のための例です</p><div class="point"><span>POINT</span><p>1文で言えないアイデアは、まだ形にする段階ではありません。<b>まず1文に。</b></p></div><div class="foot"><span>アプリで副業 永久保存版 ・ 01 売れるアプリ</span><span>07 / 46</span></div></div></div><div class="frame"><div class="page  alt"><p class="eb">売れるアプリ</p><h2>アイデアは<br>ここに落ちている</h2><div class="tiles"><div class="tile"><span class="ib"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16Z"/><path d="m14 6 4 4"/></svg></span><h3>自分の不便</h3><p>毎週くり返している手作業</p></div><div class="tile"><span class="ib"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9 5 4h14l1 5M4 9v11h16V9M4 9h16M9 20v-6h6v6"/></svg></span><h3>仕事の手作業</h3><p>紙の予約表、電話での確認</p></div><div class="tile"><span class="ib"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg></span><h3>SNSのグチ</h3><p>「〇〇 めんどくさい」で検索</p></div><div class="tile"><span class="ib"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 3 2.7 5.6 6.1.8-4.4 4.3 1 6.1L12 17l-5.4 2.8 1-6.1L3.2 9.4l6.1-.8Z"/></svg></span><h3>★2〜3のレビュー</h3><p>既存アプリの「ここが惜しい」</p></div></div><div class="point"><span>POINT</span><p>「思いつく」より<b>「見つける」</b>。困っている人の声がそのままアイデアになります。</p></div><div class="foot"><span>アプリで副業 永久保存版 ・ 01 売れるアプリ</span><span>08 / 46</span></div></div></div><div class="frame"><div class="page "><p class="eb">売れるアプリ</p><h2>大きな市場より<br>小さく深い市場</h2><div class="vs">
+<div class="vs-bad"><span>✕ よくある</span><p>誰でも使える<br>予約アプリ</p><small>大手と正面から比べられる</small></div>
+<div class="vs-good"><span>◯ こうする</span><p>ひとりネイルサロン<br>専用の予約アプリ</p><small>その人たちの一番になれる</small></div>
+</div><div class="icards"><div class="icard"><span class="ib"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.5"/></svg></span><div><h3>言葉が刺さる</h3><p>「あなたのため」と言い切れる</p></div></div><div class="icard"><span class="ib"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20s-7-4.5-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.5-7 10-7 10Z"/></svg></span><div><h3>口コミが広がる</h3><p>同業者どうしで紹介が起きやすい</p></div></div></div><div class="foot"><span>アプリで副業 永久保存版 ・ 01 売れるアプリ</span><span>09 / 46</span></div></div></div><div class="frame"><div class="page  alt"><p class="eb">売れるアプリ</p><h2>最初は<br>「1機能」で出す</h2><table><tr><th>作りたいもの</th><th>最初の1機能</th></tr><tr><td>サロンの予約アプリ</td><td>空き時間から予約できる</td></tr><tr><td>写真の投稿サイト</td><td>投稿して一覧で見られる</td></tr><tr><td>マッチング掲示板</td><td>募集を出して連絡が届く</td></tr><tr><td>レッスン管理</td><td>回数券の残りがわかる</td></tr></table><div class="point"><span>POINT</span><p>決済・通知などは<b>使われてから足せばOK</b>。後から足すほうが安く正確に作れます。</p></div><div class="foot"><span>アプリで副業 永久保存版 ・ 01 売れるアプリ</span><span>10 / 46</span></div></div></div><div class="frame"><div class="page "><p class="eb">売れるアプリ</p><h2>作る前に<br>本気度を確かめる</h2><p class="lead">行動が重いほど、本当に欲しい証拠です。</p><div class="weight">
+<div style="--w:34%"><span>いいね</span><i></i><small>軽い</small></div>
+<div style="--w:62%"><span>事前登録</span><i></i><small>ふつう</small></div>
+<div style="--w:100%"><span>先に支払い</span><i></i><small>本物</small></div>
+</div><div class="steps"><div class="st"><span class="dot">1</span><div><h3>10人に聞く</h3><p>「使う？いくらなら払う？」</p></div></div><div class="st"><span class="dot">2</span><div><h3>紹介ページだけ先に出す</h3><p>「事前登録」の数を見る</p></div></div><div class="st"><span class="dot">3</span><div><h3>先に申し込みを取る</h3><p>「先着5名・特別価格」など</p></div></div></div><div class="foot"><span>アプリで副業 永久保存版 ・ 01 売れるアプリ</span><span>11 / 46</span></div></div></div><div class="frame"><div class="page  alt"><p class="eb">売れるアプリ</p><h2>お金のもらい方<br>4つの型</h2><div class="term"><span>用語チェック</span><div><p><b>月額課金</b>：毎月決まった金額をもらう形。「サブスク」とも。</p></div></div><div class="tiles t4">
+<div class="tile"><h3>月額課金</h3><p>毎日・毎週使う道具に</p><small>続ける理由がないと解約</small></div>
+<div class="tile"><h3>手数料</h3><p>人と人をつなぐものに</p><small>最初の利用者集めが大変</small></div>
+<div class="tile"><h3>買い切り</h3><p>一度で役目が終わるものに</p><small>売れ続けないと止まる</small></div>
+<div class="tile"><h3>広告</h3><p>大勢が無料で見るものに</p><small>かなりの人数が必要</small></div>
+</div><div class="point"><span>POINT</span><p>個人の副業なら<b>月額課金か手数料</b>から考えるのがおすすめ。</p></div><div class="foot"><span>アプリで副業 永久保存版 ・ 01 売れるアプリ</span><span>12 / 46</span></div></div></div><div class="frame"><div class="page "><p class="eb">売れるアプリ</p><h2>値段の<br>決め方</h2><div class="icards"><div class="icard"><span class="ib"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg></span><div><h3>比べる相手を知る</h3><p>お客さんは「いまのやり方」と比べます。手間や他社の値段を書き出す。</p></div></div><div class="icard"><span class="ib"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12V4h8l10 10-8 8Z"/><circle cx="8" cy="9" r="1.5"/></svg></span><div><h3>少し高いくらいに</h3><p>安すぎると不安にさせます。値下げは簡単、値上げは難しい。</p></div></div><div class="icard"><span class="ib"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="9" width="18" height="12" rx="1"/><path d="M3 13h18M12 9v12M12 9c-2-4-6-4-6-1 0 1 1 1 6 1Zm0 0c2-4 6-4 6-1 0 1-1 1-6 1Z"/></svg></span><div><h3>無料の範囲を決める</h3><p>無料体験は「どこまで無料か」を先に決めておく。</p></div></div></div><div class="point"><span>POINT</span><p>値段は<b>何度でも試せる</b>。決めて、出して、反応を見る。</p></div><div class="foot"><span>アプリで副業 永久保存版 ・ 01 売れるアプリ</span><span>13 / 46</span></div></div></div><div class="frame"><div class="page sumpg"><p class="eb">01 売れるアプリ</p><h2>3行まとめ</h2><div class="sums"><div class="sm"><b>1</b><p>「誰の・どんな困りごとを・いくらで」を1文にする</p></div><div class="sm"><b>2</b><p>小さく深い市場で、まず1機能だけ出す</p></div><div class="sm"><b>3</b><p>作る前に「登録」や「支払い」で本気度を確かめる</p></div></div><p class="sum-f">スクショして、いつでも見返してください</p><div class="foot"><span>アプリで副業 永久保存版 ・ 01 売れるアプリ</span><span>14 / 46</span></div></div></div><div class="frame"><div class="page dark"><div class="dv"><p class="dn">02</p><h1>UIとCVR</h1><p class="ds">使われる・申し込まれる<br>画面のつくり方</p></div></div></div><div class="frame"><div class="page soft"><p class="eb">02 UIとCVR</p><div class="chara"><div class="bubble">見てくれる人はいるのに、<br>申し込みが来ない…</div><img src="worry.webp" alt="" class="stk"></div>
+<div class="learn"><p class="learn-t">この章でわかること</p><ul><li><svg class="ck" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 5 5 9-10"/></svg>CVRの意味と考え方</li><li><svg class="ck" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 5 5 9-10"/></svg>押される画面・入力しやすいフォーム</li><li><svg class="ck" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 5 5 9-10"/></svg>アナリティクスで改善する方法</li></ul></div><div class="foot"><span>アプリで副業 永久保存版 ・ 02 UIとCVR</span><span>16 / 46</span></div></div></div><div class="frame"><div class="page "><p class="eb">UIとCVR</p><h2>CVRって<br>なに？</h2><p class="lead">来た人のうち、やってほしいことをした人の割合です。</p><div class="cvr">
+<div class="people"><i class="on"></i><i class="on"></i><i class="on"></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i></div>
+<p class="cvr-r">100人中<b>3人</b>が申し込み → CVR <b>3%</b></p></div><div class="term"><span>用語チェック</span><div><p><b>UI</b>：画面の見た目や、ボタン・文字の配置など、使うときに目にする部分。</p></div></div><div class="foot"><span>アプリで副業 永久保存版 ・ 02 UIとCVR</span><span>17 / 46</span></div></div></div><div class="frame"><div class="page  alt"><p class="eb">UIとCVR</p><h2>最初の1画面で<br>3つ伝える</h2><div class="mock-row"><div class="ph "><i class="notch"></i><div class="scr"><p class="m-tag">ひとりサロンの方へ</p><p class="m-h">電話なしで<br>予約が埋まる</p><div class="m-img"></div><div class="m-btn">無料で試してみる</div></div></div><div class="labels"><p><b>1</b>誰のためか</p><p><b>2</b>使うとどうなるか</p><p><b>3</b>押すボタンは1つ</p></div></div><div class="term"><span>用語チェック</span><div><p><b>ファーストビュー</b>：ページを開いて、スクロールせずに見える範囲。</p></div></div><div class="point"><span>POINT</span><p>家族に<b>5秒だけ見せて</b>「何のアプリ？」と聞いてみる。</p></div><div class="foot"><span>アプリで副業 永久保存版 ・ 02 UIとCVR</span><span>18 / 46</span></div></div></div><div class="frame"><div class="page "><p class="eb">UIとCVR</p><h2>押される<br>ボタンの作り方</h2><div class="mock-row two"><div class="ph bad"><i class="notch"></i><div class="scr"><div class="m-btn g">送信</div><div class="m-btn b">詳しくはこちら</div><div class="m-btn r">お問い合わせ</div></div></div><div class="ph good"><i class="notch"></i><div class="scr"><p class="m-h s">空き時間を見て<br>予約できます</p><div class="m-btn">無料で予約してみる</div><p class="m-link">料金を見る</p></div></div></div><div class="mock-cap"><span class="x">✕ 何を押せばいいか迷う</span><span class="o">◯ 目立つボタンは1つ</span></div><div class="icards"><div class="icard"><span class="ib"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.5"/></svg></span><div><h3>1画面に1つの目的</h3><p>ほかは控えめな文字リンクに</p></div></div><div class="icard"><span class="ib"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h16v11H9l-5 4Z"/></svg></span><div><h3>押したあとがわかる言葉</h3><p>「送信」→「無料で予約してみる」</p></div></div></div><div class="foot"><span>アプリで副業 永久保存版 ・ 02 UIとCVR</span><span>19 / 46</span></div></div></div><div class="frame"><div class="page  alt"><p class="eb">UIとCVR</p><h2>入力は<br>少ないほど進む</h2><div class="mock-row two"><div class="ph bad psm"><i class="notch"></i><div class="scr"><p class="m-lab">お名前</p><div class="m-in"></div><p class="m-lab">ふりがな</p><div class="m-in"></div><p class="m-lab">メール</p><div class="m-in"></div><p class="m-lab">電話番号</p><div class="m-in"></div><p class="m-lab">住所</p><div class="m-in"></div><p class="m-lab">生年月日</p><div class="m-in"></div></div></div><div class="ph good psm"><i class="notch"></i><div class="scr"><p class="m-lab">お名前</p><div class="m-in"></div><p class="m-lab">メール</p><div class="m-in"></div><div class="m-btn">はじめる</div><div class="m-line">LINEではじめる</div></div></div></div><div class="mock-cap"><span class="x">✕ 6項目</span><span class="o">◯ 2項目＋LINE</span></div><div class="point"><span>POINT</span><p>最初は<b>名前と連絡先だけ</b>。くわしいことは、あとで会話で聞けば十分です。</p></div><div class="foot"><span>アプリで副業 永久保存版 ・ 02 UIとCVR</span><span>20 / 46</span></div></div></div><div class="frame"><div class="page "><p class="eb">UIとCVR</p><h2>信頼してもらう<br>4つの材料</h2><div class="tiles"><div class="tile"><span class="ib"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="6" y="2" width="12" height="20" rx="3"/><path d="M11 18h2"/></svg></span><h3>実際の画面</h3><p>本物の画面や操作の様子</p></div><div class="tile"><span class="ib"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h16v11H9l-5 4Z"/></svg></span><h3>本物の声</h3><p>実際の利用者の感想だけ</p></div><div class="tile"><span class="ib"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg></span><h3>運営者情報</h3><p>名前・顔・連絡先</p></div><div class="tile"><span class="ib"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h9l4 4v14H6Z"/><path d="M14 3v5h5M9 13h7M9 17h5"/></svg></span><h3>お金のルール</h3><p>料金・解約・返金・特商法</p></div></div><div class="point"><span>POINT</span><p>作った口コミは<b>信用も法律も失います</b>。載せるのは本物の声だけ。</p></div><div class="foot"><span>アプリで副業 永久保存版 ・ 02 UIとCVR</span><span>21 / 46</span></div></div></div><div class="frame"><div class="page  alt"><p class="eb">UIとCVR</p><h2>改善は<br>1つずつ</h2><div class="cycle">
+<div class="c1"><b>1</b><h3>はかる</h3><p>訪問数・申し込み数</p></div>
+<div class="c2"><b>2</b><h3>考える</h3><p>「ボタンが下すぎ？」</p></div>
+<div class="c4"><b>4</b><h3>くらべる</h3><p>1〜2週間後に見る</p></div>
+<div class="c3"><b>3</b><h3>1か所変える</h3><p>ほかは触らない</p></div>
+<span class="c-mid"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 10a8 8 0 0 1 14-4l2 2M20 14a8 8 0 0 1-14 4l-2-2"/><path d="M20 4v4h-4M4 20v-4h4"/></svg></span></div><div class="point"><span>POINT</span><p>一度に全部変えると、<b>何が効いたか分からなくなります</b>。</p></div><div class="foot"><span>アプリで副業 永久保存版 ・ 02 UIとCVR</span><span>22 / 46</span></div></div></div><div class="frame"><div class="page "><p class="eb">UIとCVR ・ 分析</p><h2>アプリに<br>アナリティクスを</h2><div class="dash"><div class="d-top"><span>今週の利用者</span><b>128人</b><em>▲ 12%</em></div>
+<svg viewBox="0 0 300 90" class="d-chart"><path d="M0 70C30 64 50 66 80 52S130 56 160 40 220 30 250 18 290 10 300 8" fill="none" stroke="#0E7C8C" stroke-width="4"/><path d="M0 70C30 64 50 66 80 52S130 56 160 40 220 30 250 18 290 10 300 8V90H0Z" fill="#0E7C8C" opacity=".12"/></svg>
+<div class="d-bars"><p>予約画面<i style="--w:86%"></i></p><p>マイページ<i style="--w:54%"></i></p><p>お知らせ<i style="--w:12%"></i></p></div></div><div class="term"><span>用語チェック</span><div><p><b>アナリティクス</b>：アプリの使われ方を記録して、数字やグラフで見せてくれるツール。無料のGoogleアナリティクスが有名。</p></div></div><div class="point"><span>POINT</span><p><b>公開と同時に</b>入れると、改善の前後を比べられます。</p></div><div class="foot"><span>アプリで副業 永久保存版 ・ 02 UIとCVR</span><span>23 / 46</span></div></div></div><div class="frame"><div class="page  alt"><p class="eb">UIとCVR ・ 分析</p><h2>数字を<br>次のアップデートへ</h2><table><tr><th>見えた数字</th><th>次のアップデート</th></tr><tr><td>登録の途中で<br>やめる人が多い</td><td>入力を減らす<br>LINEログインを足す</td></tr><tr><td>使われない<br>機能がある</td><td>目立つ場所に移す<br>または外す</td></tr><tr><td>1週間後に<br>戻る人が少ない</td><td>お知らせ通知・<br>リマインドを足す</td></tr></table><div class="term"><span>用語チェック</span><div><p><b>継続率</b>：使い始めた人のうち、一定期間後も使っている人の割合。</p></div></div><div class="point"><span>POINT</span><p>使われない機能にお金をかけずにすむので、<b>開発費のムダが減ります</b>。</p></div><div class="foot"><span>アプリで副業 永久保存版 ・ 02 UIとCVR</span><span>24 / 46</span></div></div></div><div class="frame"><div class="page sumpg"><p class="eb">02 UIとCVR</p><h2>3行まとめ</h2><div class="sums"><div class="sm"><b>1</b><p>最初の1画面で「誰向け・どうなる・押すボタン」</p></div><div class="sm"><b>2</b><p>ボタンは1画面に1つ、入力は最小限に</p></div><div class="sm"><b>3</b><p>アナリティクスを入れて、数字で1つずつ直す</p></div></div><p class="sum-f">スクショして、いつでも見返してください</p><div class="foot"><span>アプリで副業 永久保存版 ・ 02 UIとCVR</span><span>25 / 46</span></div></div></div><div class="frame"><div class="page dark"><div class="dv"><p class="dn">03</p><h1>SNS集客</h1><p class="ds">お金をかけずに<br>見つけてもらう</p></div></div></div><div class="frame"><div class="page soft"><p class="eb">03 SNS集客</p><div class="chara"><div class="bubble">SNS、何を投稿すれば<br>いいかわからない…</div><img src="worry.webp" alt="" class="stk"></div>
+<div class="learn"><p class="learn-t">この章でわかること</p><ul><li><svg class="ck" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 5 5 9-10"/></svg>自分に合うSNSの選び方</li><li><svg class="ck" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 5 5 9-10"/></svg>読まれる投稿と、申し込みまでの通り道</li><li><svg class="ck" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 5 5 9-10"/></svg>Bufferで投稿を自動化する方法</li></ul></div><div class="foot"><span>アプリで副業 永久保存版 ・ 03 SNS集客</span><span>27 / 46</span></div></div></div><div class="frame"><div class="page  alt"><p class="eb">SNS集客</p><h2>どのSNSを<br>使う？</h2><p class="lead">お客さんがいる場所を選び、最初は1つに集中。</p><table><tr><th>SNS</th><th>向いていること</th></tr><tr><td>X</td><td>作っている過程を毎日発信</td></tr><tr><td>Instagram</td><td>画面や使い方を見た目で</td></tr><tr><td>TikTok</td><td>15〜30秒の操作動画</td></tr><tr><td>note</td><td>長い文章で想いやノウハウ</td></tr></table><div class="point"><span>POINT</span><p>お客さんが<b>ふだん情報を探している場所</b>を、まず聞いてみましょう。</p></div><div class="foot"><span>アプリで副業 永久保存版 ・ 03 SNS集客</span><span>28 / 46</span></div></div></div><div class="frame"><div class="page "><p class="eb">SNS集客</p><h2>投稿ネタは<br>3つの型でOK</h2><div class="icards"><div class="icard"><span class="ib"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16Z"/><path d="m14 6 4 4"/></svg></span><div><h3>つくっている過程</h3><p>「予約画面ができた」完成前から見せると応援してもらえる</p></div></div><div class="icard"><span class="ib"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.9.7 1.5 1.6 1.5 2.6V17h4v-.5c0-1 .6-1.9 1.5-2.6A6 6 0 0 0 12 3Z"/></svg></span><div><h3>役に立つ小ワザ</h3><p>「電話を減らす3つの方法」アプリを使わない人にも役立つ</p></div></div><div class="icard"><span class="ib"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg></span><div><h3>使った人の変化</h3><p>「電話が週10件→2件に」許可をもらった本物の事例</p></div></div></div><div class="point"><span>POINT</span><p>宣伝は<b>3〜4投稿に1回</b>で十分です。</p></div><div class="foot"><span>アプリで副業 永久保存版 ・ 03 SNS集客</span><span>29 / 46</span></div></div></div><div class="frame"><div class="page  alt"><p class="eb">SNS集客</p><h2>読まれる投稿の<br>つくり方</h2><div class="post"><div class="p-head"><i></i><p><b>サクアプ</b><span>@sakuapp</span></p></div>
+<p class="p-1">予約の電話、1日に何回出てますか？<em>1</em></p>
+<p class="p-2">電話を減らすだけで、施術に集中できる時間が週3時間増えた例も。<em>2</em></p>
+<div class="p-img"><span>アプリの画面</span><em>3</em></div>
+<p class="p-3">くわしくはプロフィールのリンクから<em>4</em></p></div>
+<div class="keys"><p><b>1</b>1行目で手を止める</p><p><b>2</b>1投稿に1つのこと</p><p><b>3</b>画面を見せる</p><p><b>4</b>次の行動を1つ</p></div><p class="note">※投稿文は書き方の例です</p><div class="foot"><span>アプリで副業 永久保存版 ・ 03 SNS集客</span><span>30 / 46</span></div></div></div><div class="frame"><div class="page "><p class="eb">SNS集客</p><h2>フォロワー数より<br>「通り道」</h2><div class="funnel">
 <div style="width:100%"><b>投稿</b><span>見つけてもらう</span></div>
-<div style="width:86%"><b>プロフィール</b><span>何をしている人か伝わる</span></div>
-<div style="width:72%"><b>紹介ページ</b><span>くわしく知って納得する</span></div>
-<div style="width:58%"><b>LINE登録</b><span>気軽に相談できる</span></div>
-</div><div class="point"><span>POINT</span><p>プロフィールに<b>「誰の何を解決するか」と紹介ページのリンク</b>があるか、今すぐ確認を。</p></div><div class="foot"><span>アプリで副業 永久保存版 ・ 03 SNS集客</span><span>26 / 38</span></div></div></div><div class="frame"><div class="page "><p class="eb">SNS集客</p><h2>続けるための<br>しくみ</h2><p class="lead">SNSは「続けた人」が勝ちます。気合いではなく、しくみで続けます。</p><div class="cards"><div class="card"><span class="n">01</span><h3>曜日ごとに型を決める</h3><p>月：つくっている過程、水：小ワザ、金：使った人の変化、のように決めておく。</p></div><div class="card"><span class="n">02</span><h3>ネタ帳をつくる</h3><p>お客さんに聞かれたこと、自分がつまずいたことは、全部ネタ。スマホのメモに貯める。</p></div><div class="card"><span class="n">03</span><h3>反応を記録する</h3><p>よく見られた投稿をメモして、同じ型をくり返す。当たった型は何度使ってもOK。</p></div></div><div class="point"><span>POINT</span><p>まずは<b>30日間、1日1投稿</b>。数字よりも「続けられる型」を見つける期間です。</p></div><div class="foot"><span>アプリで副業 永久保存版 ・ 03 SNS集客</span><span>27 / 38</span></div></div></div><div class="frame"><div class="page  alt"><p class="eb">SNS集客 ・ 自動化</p><h2>Bufferで<br>投稿を自動化する</h2><p class="lead">Buffer（バッファー）は、複数のSNSへの投稿を<br>まとめて予約できるツールです。</p><div class="cards"><div class="card"><h3>まとめて書いて、自動で出す</h3><p>週末に1週間分を書いて予約しておけば、決めた時間に自動で投稿されます。</p></div><div class="card"><h3>複数のSNSに一度に</h3><p>X・Instagram・Threads・TikTok・Facebookなどに、同じ画面から投稿できます。</p></div><div class="card"><h3>下書きを貯めておける</h3><p>思いついたネタを「アイデア」に保存。スマホアプリからもメモできます。</p></div><div class="card"><h3>反応をまとめて見られる</h3><p>どの投稿がよく見られたかを分析画面で確認し、次のネタ選びに使えます。</p></div></div><p class="note" style="margin-top:0">※無料プランは3つのSNSまで、それぞれ10件まで予約可（2026年10月時点）。最新の内容は公式サイトで確認してください。</p><div class="foot"><span>アプリで副業 永久保存版 ・ 03 SNS集客</span><span>28 / 38</span></div></div></div><div class="frame"><div class="page "><p class="eb">SNS集客 ・ 自動化</p><h2>Bufferで回す<br>1週間の流れ</h2><p class="lead">毎日SNSを開かなくても、発信が止まらないしくみです。</p><div class="term"><span>用語チェック</span><div><p><b>キュー</b>：投稿を予約して並べておく「順番待ちの列」。登録した時間になると上から順に投稿されます。</p></div></div><div class="steps"><div class="st"><span class="dot">1</span><div><h3>投稿の時間枠を決める</h3><p>「月・水・金の12時と20時」のように、投稿する時間をBufferに登録しておく（キュー）。</p></div></div><div class="st"><span class="dot">2</span><div><h3>週に1回、まとめて書く</h3><p>週末の1時間で、3つの型（過程・小ワザ・変化）から5〜7本を書いて予約。</p></div></div><div class="st"><span class="dot">3</span><div><h3>SNSごとに少し変える</h3><p>同じ内容でも、Xは短く、Instagramは画像中心、Threadsは会話っぽく。</p></div></div><div class="st"><span class="dot">4</span><div><h3>返信だけは自分で</h3><p>コメントやDMへの返事は、自動にしないで自分の言葉で。ここが信頼になります。</p></div></div><div class="st"><span class="dot">5</span><div><h3>週末に振り返る</h3><p>分析画面でよく見られた投稿を確認し、当たった型を翌週もくり返す。</p></div></div></div><div class="foot"><span>アプリで副業 永久保存版 ・ 03 SNS集客</span><span>29 / 38</span></div></div></div><div class="frame"><div class="page  alt"><p class="eb">SNS集客 ・ 自動化</p><h2>自動化で<br>失敗しないコツ</h2><div class="cards"><div class="card"><h3>全部を自動にしない</h3><p>予約投稿は「土台」。新機能の公開やお客さんとのやりとりは、その場で自分で投稿・返信する。</p></div><div class="card"><h3>同じ文を全SNSにコピペしない</h3><p>SNSごとに読み方が違います。冒頭の1行とハッシュタグだけでも変えると反応が変わります。</p></div><div class="card"><h3>出しっぱなしにしない</h3><p>予約したことを忘れて、時期外れの投稿が流れないよう、週に1回はキューを見直す。</p></div><div class="card"><h3>各SNSのルールを守る</h3><p>同じ投稿の連投や、機械的な大量フォローは制限の対象になることがあります。</p></div></div><div class="point"><span>POINT</span><p>自動化で浮いた時間は、<b>お客さんとの会話と、アプリの改善</b>に使いましょう。</p></div><div class="foot"><span>アプリで副業 永久保存版 ・ 03 SNS集客</span><span>30 / 38</span></div></div></div><div class="frame"><div class="page dark"><div class="dv"><p class="dn">04</p><h1>広告</h1><p class="ds">出すタイミングと、<br>守るべきルール</p></div></div></div><div class="frame"><div class="page  alt"><p class="eb">広告</p><h2>広告は<br>「あと」でいい</h2><p class="lead">広告は「売れる流れ」を大きくする道具。<br>流れがないうちに出すと、お金だけが減ります。</p><div class="gate">
-<p class="gate-t">広告を出す前のチェック</p>
-<div><span>✓</span>SNSや紹介から、自然に申し込みが来たことがある</div>
-<div><span>✓</span>紹介ページのCVRを、自分で計測できている</div>
-<div><span>✓</span>1人のお客さんを得るのに、いくらまで使えるか分かっている</div>
-</div><div class="point"><span>POINT</span><p>3つそろってから広告へ。<b>そろう前は、SNSと改善にお金と時間を</b>使います。</p></div><div class="foot"><span>アプリで副業 永久保存版 ・ 04 広告</span><span>32 / 38</span></div></div></div><div class="frame"><div class="page "><p class="eb">広告</p><h2>主な広告の<br>種類</h2><table><tr><th>種類</th><th>しくみ</th><th>向いている場面</th></tr><tr><td>検索広告</td><td>検索した言葉に<br>合わせて表示</td><td>「予約アプリ サロン」<br>など、もう探している人に</td></tr><tr><td>SNS広告</td><td>年齢・興味などで<br>相手を選んで表示</td><td>まだ知らない人に<br>画像や動画で知ってもらう</td></tr><tr><td>PR投稿の依頼</td><td>発信者に紹介を<br>お願いする</td><td>相手のファンと<br>お客さんが重なるとき</td></tr></table><div class="point"><span>POINT</span><p>最初は<b>検索広告</b>がおすすめ。すでに探している人に届くので、少ない予算でも結果が見えやすい。</p></div><div class="foot"><span>アプリで副業 永久保存版 ・ 04 広告</span><span>33 / 38</span></div></div></div><div class="frame"><div class="page  alt"><p class="eb">広告</p><h2>少ない予算で<br>試す手順</h2><div class="steps"><div class="st"><span class="dot">1</span><div><h3>上限を決める</h3><p>「1か月でここまで」と使う金額の上限を先に決める。足りなければ止める勇気を。</p></div></div><div class="st"><span class="dot">2</span><div><h3>1つずつ試す</h3><p>広告の文章・画像は、一度に1か所だけ変えて比べる。</p></div></div><div class="st"><span class="dot">3</span><div><h3>1件あたりの費用を見る</h3><p>「広告費 ÷ 申し込み数」で、1人のお客さんを得るのにいくらかかったかを出す。</p></div></div><div class="st"><span class="dot">4</span><div><h3>勝ちパターンだけ増やす</h3><p>1件あたりの費用が、お客さんから得られる金額より小さいものだけに予算を足す。</p></div></div></div><div class="foot"><span>アプリで副業 永久保存版 ・ 04 広告</span><span>34 / 38</span></div></div></div><div class="frame"><div class="page "><p class="eb">広告</p><h2>広告と発信で<br>守るルール</h2><p class="lead">迷ったら「事実だけを書く」。それが一番強くて、一番安全です。</p><div class="term"><span>用語チェック</span><div><p><b>ステマ</b>：ステルスマーケティング。広告なのに、広告だと分からないように見せる宣伝のこと。</p></div></div><div class="cards"><div class="card"><span class="n">01</span><h3>PRは「PR」と書く</h3><p>お金や商品を渡して紹介してもらう投稿は、広告だと分かるように表示する（ステマ規制）。</p></div><div class="card"><span class="n">02</span><h3>大げさに言わない</h3><p>「絶対」「業界No.1」「誰でも稼げる」など、根拠のない言い方はNG（景品表示法）。</p></div><div class="card"><span class="n">03</span><h3>作った口コミはNG</h3><p>実在しない声、頼んで書かせた高評価は、信用も法律も失います。</p></div><div class="card"><span class="n">04</span><h3>値引きの書き方に注意</h3><p>「通常〇円→今だけ△円」は、通常価格で実際に売っていたことが前提です。</p></div></div><div class="foot"><span>アプリで副業 永久保存版 ・ 04 広告</span><span>35 / 38</span></div></div></div><div class="frame"><div class="page  alt"><p class="eb">最後に</p><h2>30日の<br>行動プラン</h2><p class="lead">この資料を読んだら、明日からこう動きます。</p><div class="weeks">
-<div><b>1週目</b><h3>見つける</h3><p>アイデアを3つ書き出し、1文にする。10人に聞いて1つに絞る。</p></div>
-<div><b>2週目</b><h3>伝える準備</h3><p>紹介ページとSNSのプロフィールを整え、発信をスタート。</p></div>
-<div><b>3週目</b><h3>小さく作る</h3><p>1機能だけのアプリを作り、事前登録した人に使ってもらう。</p></div>
-<div><b>4週目</b><h3>直して出す</h3><p>感想をもとに1つずつ直して公開。毎日の発信は続ける。</p></div>
-</div><div class="foot"><span>アプリで副業 永久保存版 ・ 最後に</span><span>36 / 38</span></div></div></div><div class="frame"><div class="page "><p class="eb">最後に</p><h2>公開前<br>チェックリスト</h2><div class="chk">
-<div><span></span>誰の、何の困りごとを解決するか、1文で言える</div>
-<div><span></span>最初の1画面で「誰向け・何ができる・次の行動」が分かる</div>
-<div><span></span>押してほしいボタンは、1画面に1つ</div>
-<div><span></span>申し込みフォームは、本当に必要な項目だけ</div>
-<div><span></span>料金・解約・返金のルールが書いてある</div>
-<div><span></span>運営者情報と特定商取引法の表記がある</div>
-<div><span></span>計測ツールが入っている</div>
-<div><span></span>プロフィール→紹介ページ→LINEの通り道がつながっている</div>
-<div><span></span>載せている声や数字は、すべて本物</div>
-</div><div class="point"><span>POINT</span><p>スクショして、<b>毎月の見直し</b>にも使ってください。</p></div><div class="foot"><span>アプリで副業 永久保存版 ・ 最後に</span><span>37 / 38</span></div></div></div><div class="frame"><div class="page last-p"><div class="last">
-<p class="eb">最後に</p>
-<h2>アイデアは、<br>形にした人の<br>ものになる。</h2>
-<p class="lead">完ぺきな計画より、小さく出して直すこと。<br>この資料が、あなたの最初の一歩の<br>手助けになればうれしいです。</p>
-<div class="cta-box">
-<p class="cta-k">サクアプ</p>
-<h3>「こんなアプリ作れる？」<br>まずはLINEで気軽にどうぞ</h3>
-<p>基本料金＋1文字0.4円のわかりやすい料金で、<br>あなたのアイデアを形にします。</p>
-<a class="cta-btn" href="[LINE公式アカウントのURL]">LINEで無料相談する</a>
-</div>
-</div><div class="foot"><span>アプリで副業 永久保存版 ・ 最後に</span><span>38 / 38</span></div></div></div></div>
-<script>
-(function(){
- var deck=document.querySelector('.deck');
- function over(pg){return pg.scrollHeight>1922;}
- function units(pg){
-  var u=[];
-  pg.querySelectorAll(':scope>.cards>.card,:scope>.steps>.st,:scope>.chk>div,:scope>.weeks>div,:scope>table tr:not(:first-child)').forEach(function(x){u.push(x)});
-  return u;
- }
- function split(frame){
-  var pg=frame.firstElementChild; if(!over(pg))return null;
-  var nf=frame.cloneNode(false), np=pg.cloneNode(false); nf.appendChild(np);
-  var eb=pg.querySelector(':scope>.eb'), h=pg.querySelector(':scope>h2');
-  if(eb){var e2=eb.cloneNode(true);e2.innerHTML+=' <span class="cont">・ つづき</span>';np.appendChild(e2);}
-  if(h)np.appendChild(h.cloneNode(true));
-  var foot=pg.querySelector(':scope>.foot'); var tail=[];
-  frame.parentNode.insertBefore(nf,frame.nextSibling);
-  var guard=0;
-  while(over(pg)&&guard++<40){
-   var pt=pg.querySelector(':scope>.point, :scope>.note:last-of-type');
-   var last=[].slice.call(pg.children).filter(function(c){return c!==foot}).pop();
-   if(last&&(last.classList.contains('point')||last.classList.contains('note'))){tail.unshift(last);last.remove();continue;}
-   var us=units(pg); if(!us.length)break; var it=us[us.length-1]; var box=it.closest('.cards,.steps,.chk,.weeks,table');
-   var target=np.querySelector('[data-src="'+(box.dataset.k||(box.dataset.k=Math.random().toString(36).slice(2)))+'"]');
-   if(!target){target=box.cloneNode(false);target.setAttribute('data-src',box.dataset.k);if(box.tagName==='TABLE'){target.appendChild(box.rows[0].cloneNode(true));}np.appendChild(target);}
-   if(box.tagName==='TABLE'){var hdr=target.rows[0];hdr.parentNode.insertBefore(it,hdr.nextSibling);}
-   else target.insertBefore(it,target.firstChild);
-   if(!units({querySelectorAll:function(){return box.querySelectorAll(box.tagName==='TABLE'?'tr:not(:first-child)':':scope>*')}}).length)box.remove();
-  }
-  if(!np.querySelector('.card,.st,.chk>div,.weeks>div,tr:not(:first-child)')){
-   var us2=units(pg); if(us2.length>1){var it2=us2[us2.length-1];var box2=it2.closest('.cards,.steps,.chk,.weeks,table');var t2=box2.cloneNode(false);if(box2.tagName==='TABLE'){t2.appendChild(box2.rows[0].cloneNode(true));t2.appendChild(it2);}else t2.appendChild(it2);np.appendChild(t2);}
-  }
-  tail.forEach(function(t){np.appendChild(t)});
-  if(foot)np.appendChild(foot.cloneNode(true));
-  return nf;
- }
- var fr=[].slice.call(deck.children);
- for(var i=0;i<fr.length;i++){var nf=split(fr[i]);var g=0;while(nf&&g++<5){nf=split(nf);}}
- var all=deck.children, n=all.length;
- [].forEach.call(all,function(f,i){var s=f.querySelector('.foot span:last-child');if(s)s.textContent=String(i+1).padStart(2,'0')+' / '+String(n).padStart(2,'0');});
- var ih=document.querySelector('.intro-h');if(ih)ih.innerHTML=ih.innerHTML.replace(/全\d+ページ/,'全'+n+'ページ');
-})();
-(function(){
+<div style="width:86%"><b>プロフィール</b><span>何をしている人かわかる</span></div>
+<div style="width:72%"><b>紹介ページ</b><span>くわしく知って納得</span></div>
+<div style="width:58%"><b>LINE登録</b><span>気軽に相談</span></div>
+</div><div class="point"><span>POINT</span><p>プロフィールに<b>「誰の何を解決するか」とリンク</b>があるか、今すぐ確認を。</p></div><div class="foot"><span>アプリで副業 永久保存版 ・ 03 SNS集客</span><span>31 / 46</span></div></div></div><div class="frame"><div class="page  alt"><p class="eb">SNS集客</p><h2>続けるための<br>しくみ</h2><div class="week"><div class="a"><b>月</b><p>過程</p></div><div class=""><b>火</b><p></p></div><div class="b"><b>水</b><p>小ワザ</p></div><div class=""><b>木</b><p></p></div><div class="c"><b>金</b><p>変化</p></div><div class=""><b>土</b><p></p></div><div class="d"><b>日</b><p>まとめて<br>書く</p></div></div><div class="icards"><div class="icard"><span class="ib"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h9l4 4v14H6Z"/><path d="M14 3v5h5M9 13h7M9 17h5"/></svg></span><div><h3>ネタ帳をつくる</h3><p>聞かれたこと、つまずいたことは全部ネタ</p></div></div><div class="icard"><span class="ib"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg></span><div><h3>反応を記録する</h3><p>よく見られた型をくり返す</p></div></div></div><div class="point"><span>POINT</span><p>まず<b>30日間</b>。数字より「続けられる型」を見つける期間です。</p></div><div class="foot"><span>アプリで副業 永久保存版 ・ 03 SNS集客</span><span>32 / 46</span></div></div></div><div class="frame"><div class="page "><p class="eb">SNS集客 ・ 自動化</p><h2>Bufferで<br>投稿を自動化</h2><p class="lead">Buffer（バッファー）は、複数のSNSへの投稿をまとめて予約できるツールです。</p><div class="tiles"><div class="tile"><span class="ib"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg></span><h3>まとめて予約</h3><p>週末に1週間分を予約</p></div><div class="tile"><span class="ib"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 3 9 5-9 5-9-5Z"/><path d="m3 13 9 5 9-5"/></svg></span><h3>複数SNSに一度に</h3><p>X・Instagram・Threadsなど</p></div><div class="tile"><span class="ib"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.9.7 1.5 1.6 1.5 2.6V17h4v-.5c0-1 .6-1.9 1.5-2.6A6 6 0 0 0 12 3Z"/></svg></span><h3>ネタを保存</h3><p>スマホからメモできる</p></div><div class="tile"><span class="ib"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg></span><h3>反応を分析</h3><p>よく見られた投稿がわかる</p></div></div><p class="note">※無料プランは3つのSNSまで、各10件まで予約可（2026年10月時点）。最新は公式サイトで確認してください。</p><div class="foot"><span>アプリで副業 永久保存版 ・ 03 SNS集客</span><span>33 / 46</span></div></div></div><div class="frame"><div class="page  alt"><p class="eb">SNS集客 ・ 自動化</p><h2>Bufferで回す<br>1週間</h2><div class="buf"><div><b>月</b><p class=t1>12:00 過程</p></div><div><b>火</b></div><div><b>水</b><p class=t2>12:00 小ワザ</p><p class=t2>20:00 小ワザ</p></div><div><b>木</b></div><div><b>金</b><p class=t3>20:00 変化</p></div><div><b>土</b></div><div><b>日</b><p class=t4>まとめて予約</p></div></div><div class="term"><span>用語チェック</span><div><p><b>キュー</b>：予約した投稿の「順番待ちの列」。決めた時間に上から自動で投稿されます。</p></div></div><div class="steps"><div class="st"><span class="dot">1</span><div><h3>投稿する時間枠を決める</h3><p>例：月・水・金の12時と20時</p></div></div><div class="st"><span class="dot">2</span><div><h3>日曜に1時間でまとめて書く</h3><p>3つの型から5〜7本</p></div></div><div class="st"><span class="dot">3</span><div><h3>返信だけは自分で</h3><p>ここが信頼になります</p></div></div></div><div class="foot"><span>アプリで副業 永久保存版 ・ 03 SNS集客</span><span>34 / 46</span></div></div></div><div class="frame"><div class="page "><p class="eb">SNS集客 ・ 自動化</p><h2>自動化で<br>失敗しないコツ</h2><div class="tiles"><div class="tile"><span class="ib"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h16v11H9l-5 4Z"/></svg></span><h3>全部を自動にしない</h3><p>返信や新機能の告知はその場で</p></div><div class="tile"><span class="ib"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16Z"/><path d="m14 6 4 4"/></svg></span><h3>コピペしない</h3><p>SNSごとに1行目を変える</p></div><div class="tile"><span class="ib"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg></span><h3>週1でキューを見る</h3><p>時期外れの投稿を防ぐ</p></div><div class="tile"><span class="ib"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 2 20h20Z"/><path d="M12 10v4M12 17h.01"/></svg></span><h3>各SNSのルールを守る</h3><p>連投・大量フォローはNG</p></div></div><div class="point"><span>POINT</span><p>自動化で浮いた時間は、<b>お客さんとの会話と改善</b>に。</p></div><div class="foot"><span>アプリで副業 永久保存版 ・ 03 SNS集客</span><span>35 / 46</span></div></div></div><div class="frame"><div class="page sumpg"><p class="eb">03 SNS集客</p><h2>3行まとめ</h2><div class="sums"><div class="sm"><b>1</b><p>SNSは1つに絞り、3つの型で投稿する</p></div><div class="sm"><b>2</b><p>投稿→プロフィール→紹介ページ→LINEの通り道を作る</p></div><div class="sm"><b>3</b><p>Bufferで予約投稿、返信だけは自分の言葉で</p></div></div><p class="sum-f">スクショして、いつでも見返してください</p><div class="foot"><span>アプリで副業 永久保存版 ・ 03 SNS集客</span><span>36 / 46</span></div></div></div><div class="frame"><div class="page dark"><div class="dv"><p class="dn">04</p><h1>広告</h1><p class="ds">出すタイミングと<br>守るべきルール</p></div></div></div><div class="frame"><div class="page soft"><p class="eb">04 広告</p><div class="chara"><div class="bubble">広告って、いつから<br>出せばいいの？</div><img src="worry.webp" alt="" class="stk"></div>
+<div class="learn"><p class="learn-t">この章でわかること</p><ul><li><svg class="ck" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 5 5 9-10"/></svg>広告を出していいタイミング</li><li><svg class="ck" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 5 5 9-10"/></svg>少ない予算での試し方</li><li><svg class="ck" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 5 5 9-10"/></svg>広告で守るべきルール</li></ul></div><div class="foot"><span>アプリで副業 永久保存版 ・ 04 広告</span><span>38 / 46</span></div></div></div><div class="frame"><div class="page "><p class="eb">広告</p><h2>広告は<br>「あと」でいい</h2><p class="lead">広告は「売れる流れ」を大きくする道具。流れがないうちに出すと、お金だけが減ります。</p><div class="gate"><p class="gate-t">広告を出す前のチェック</p>
+<div><span><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 5 5 9-10"/></svg></span>SNSなどから、自然に申し込みが来たことがある</div>
+<div><span><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 5 5 9-10"/></svg></span>紹介ページのCVRを計測できている</div>
+<div><span><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 5 5 9-10"/></svg></span>1人のお客さんにいくらまで使えるか分かっている</div></div><div class="foot"><span>アプリで副業 永久保存版 ・ 04 広告</span><span>39 / 46</span></div></div></div><div class="frame"><div class="page  alt"><p class="eb">広告</p><h2>広告の<br>種類</h2><div class="icards"><div class="icard"><span class="ib"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg></span><div><h3>検索広告</h3><p>検索した言葉に合わせて表示。もう探している人に届く。</p></div></div><div class="icard"><span class="ib"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="6" y="2" width="12" height="20" rx="3"/><path d="M11 18h2"/></svg></span><div><h3>SNS広告</h3><p>興味などで相手を選んで表示。まだ知らない人に。</p></div></div><div class="icard"><span class="ib"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10v4h4l7 5V5L7 10Z"/><path d="M18 9a4 4 0 0 1 0 6"/></svg></span><div><h3>PR投稿の依頼</h3><p>発信者に紹介をお願いする。ファン層が合うときに。</p></div></div></div><div class="point"><span>POINT</span><p>最初は<b>検索広告</b>がおすすめ。少ない予算でも結果が見えやすい。</p></div><div class="foot"><span>アプリで副業 永久保存版 ・ 04 広告</span><span>40 / 46</span></div></div></div><div class="frame"><div class="page "><p class="eb">広告</p><h2>1件いくらかを<br>計算する</h2><div class="calc">
+<div><small>広告費</small><b>10,000円</b></div><i>÷</i>
+<div><small>申し込み</small><b>5件</b></div><i>＝</i>
+<div class="res"><small>1件あたり</small><b>2,000円</b></div></div><p class="note">※数字は計算のしかたを説明するための例です</p><div class="steps"><div class="st"><span class="dot">1</span><div><h3>上限を決める</h3><p>「1か月でここまで」を先に決める</p></div></div><div class="st"><span class="dot">2</span><div><h3>1か所ずつ変えて試す</h3><p>文章か画像、どちらか1つだけ</p></div></div><div class="st"><span class="dot">3</span><div><h3>勝ちパターンだけ増やす</h3><p>1件あたりの費用＜得られる金額のもの</p></div></div></div><div class="foot"><span>アプリで副業 永久保存版 ・ 04 広告</span><span>41 / 46</span></div></div></div><div class="frame"><div class="page  alt"><p class="eb">広告</p><h2>守るべき<br>4つのルール</h2><div class="tiles"><div class="tile"><span class="ib"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12V4h8l10 10-8 8Z"/><circle cx="8" cy="9" r="1.5"/></svg></span><h3>PRは「PR」と書く</h3><p>広告だと分かるように</p></div><div class="tile"><span class="ib"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 2 20h20Z"/><path d="M12 10v4M12 17h.01"/></svg></span><h3>大げさに言わない</h3><p>「絶対」「誰でも稼げる」はNG</p></div><div class="tile"><span class="ib"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h16v11H9l-5 4Z"/></svg></span><h3>作った口コミはNG</h3><p>本物の声だけを使う</p></div><div class="tile"><span class="ib"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 4l6 8 6-8M12 12v8M8 13h8M8 16h8"/></svg></span><h3>値引きの書き方</h3><p>通常価格の実績が前提</p></div></div><div class="term"><span>用語チェック</span><div><p><b>ステマ</b>：広告なのに広告と分からないように見せる宣伝。法律で規制されています。</p></div></div><div class="point"><span>POINT</span><p>迷ったら<b>「事実だけを書く」</b>。一番強くて、一番安全です。</p></div><div class="foot"><span>アプリで副業 永久保存版 ・ 04 広告</span><span>42 / 46</span></div></div></div><div class="frame"><div class="page sumpg"><p class="eb">04 広告</p><h2>3行まとめ</h2><div class="sums"><div class="sm"><b>1</b><p>広告は、自然に売れる流れができてから</p></div><div class="sm"><b>2</b><p>上限を決め、1件あたりの費用で判断する</p></div><div class="sm"><b>3</b><p>PR表記・誇大表現・口コミのルールを守る</p></div></div><p class="sum-f">スクショして、いつでも見返してください</p><div class="foot"><span>アプリで副業 永久保存版 ・ 04 広告</span><span>43 / 46</span></div></div></div><div class="frame"><div class="page  alt"><p class="eb">最後に</p><h2>30日の<br>行動プラン</h2><div class="weeks">
+<div><b>1週目</b><h3>見つける</h3><p>アイデアを1文に。10人に聞いて1つに絞る</p></div>
+<div><b>2週目</b><h3>伝える準備</h3><p>紹介ページとプロフィールを整え、発信開始</p></div>
+<div><b>3週目</b><h3>小さく作る</h3><p>1機能のアプリを、事前登録者に使ってもらう</p></div>
+<div><b>4週目</b><h3>直して出す</h3><p>感想をもとに1つずつ直して公開</p></div></div><div class="foot"><span>アプリで副業 永久保存版 ・ 最後に</span><span>44 / 46</span></div></div></div><div class="frame"><div class="page "><p class="eb">最後に</p><h2>公開前<br>チェックリスト</h2><div class="chk"><div><span></span>誰の何を解決するか、1文で言える</div><div><span></span>最初の1画面で、誰向けか伝わる</div><div><span></span>押してほしいボタンは1画面に1つ</div><div><span></span>フォームは必要な項目だけ</div><div><span></span>料金・解約・返金のルールがある</div><div><span></span>運営者情報と特商法の表記がある</div><div><span></span>アナリティクスが入っている</div><div><span></span>プロフィール→紹介ページ→LINEがつながっている</div><div><span></span>声や数字は、すべて本物</div></div><div class="foot"><span>アプリで副業 永久保存版 ・ 最後に</span><span>45 / 46</span></div></div></div><div class="frame"><div class="page soft"><div class="last"><div class="chara end"><div class="bubble">小さく出して、<br>少しずつ育てれば大丈夫！</div><img src="smile.webp" alt="" class="stk"></div>
+<h2>アイデアは、<br>形にした人のものになる。</h2>
+<div class="cta-box"><p class="cta-k">サクアプ</p><h3>「こんなアプリ作れる？」<br>まずはLINEで気軽にどうぞ</h3>
+<a class="cta-btn" href="[LINE公式アカウントのURL]">LINEで無料相談する</a></div></div><div class="foot"><span>アプリで副業 永久保存版 ・ 最後に</span><span>46 / 46</span></div></div></div></div><script>(function(){
  var deck=document.querySelector('.deck');
  [].slice.call(deck.children).forEach(function(f){var s=document.createElement('div');s.className='slot';deck.insertBefore(s,f);s.appendChild(f);});
- var slots=deck.children,n=slots.length,cur=0,lock=false;
+ var n=deck.children.length,cur=0,lock=false;
  var hud=document.createElement('div');hud.className='hud';hud.innerHTML='<button type="button" aria-label="前のページ">‹</button><span>1 / '+n+'</span><button type="button" aria-label="次のページ">›</button><a href="app-fukugyo-guide.pdf">PDF</a>';document.body.appendChild(hud);
  var lbl=hud.querySelector('span'),bs=hud.querySelectorAll('button');
- function go(i){i=Math.max(0,Math.min(n-1,i));deck.scrollTo({left:i*deck.clientWidth,behavior:'smooth'});}
  function idx(){return Math.round(deck.scrollLeft/deck.clientWidth);}
+ function go(i){i=Math.max(0,Math.min(n-1,i));deck.scrollTo({left:i*deck.clientWidth,behavior:'smooth'});}
  deck.addEventListener('scroll',function(){cur=idx();lbl.textContent=(cur+1)+' / '+n;},{passive:true});
  bs[0].onclick=function(){go(idx()-1)};bs[1].onclick=function(){go(idx()+1)};
  addEventListener('keydown',function(e){if(['ArrowRight','ArrowDown','PageDown',' '].indexOf(e.key)>=0){e.preventDefault();go(idx()+1)}else if(['ArrowLeft','ArrowUp','PageUp'].indexOf(e.key)>=0){e.preventDefault();go(idx()-1)}});
@@ -242,6 +274,5 @@ td:first-child{color:var(--ink);font-weight:700}
  deck.addEventListener('touchend',function(e){if(!t)return;t=false;var p=e.changedTouches[0],dx=p.clientX-sx,dy=p.clientY-sy;if(Math.abs(dy)>40&&Math.abs(dy)>Math.abs(dx)*1.2){go(idx()+(dy<0?1:-1));}},{passive:true});
  addEventListener('resize',function(){deck.scrollLeft=cur*deck.clientWidth;});
 })();
-function fit(){document.querySelectorAll('.frame').forEach(function(f){var p=f.firstElementChild;p.style.transform='scale('+(f.clientWidth/1080)+')';});}
-fit();addEventListener('resize',fit);
-</script></body></html>
+function fit(){document.querySelectorAll('.frame').forEach(function(f){f.firstElementChild.style.transform='scale('+(f.clientWidth/1080)+')';});}
+fit();addEventListener('resize',fit);</script></body></html>
