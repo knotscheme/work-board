@@ -201,16 +201,18 @@ td:first-child{color:var(--ink);font-weight:700}
  html,body{height:100%;overflow:hidden;overscroll-behavior:none}
  .deck{position:fixed;inset:0;display:flex;flex-direction:row;align-items:center;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;scrollbar-width:none;overscroll-behavior:contain}
  .deck::-webkit-scrollbar{display:none}
- .slot{flex:none;width:100vw;height:100%;display:flex;align-items:center;justify-content:center;scroll-snap-align:center;scroll-snap-stop:always;padding:10px 8px 70px}
+ .slot{flex:none;width:100vw;height:100%;display:flex;align-items:center;justify-content:center;scroll-snap-align:center;scroll-snap-stop:always;padding:10px 8px 72px}
  .frame{width:min(calc(100vw - 16px),calc((100dvh - 84px) * 9 / 16));aspect-ratio:9/16;flex:none;position:relative;overflow:hidden;border-radius:18px;box-shadow:0 10px 40px -20px rgba(0,0,0,.35)}
  .frame .mark{position:absolute;top:0;right:22px;width:22px;height:34px;background:#F0A010;clip-path:polygon(0 0,100% 0,100% 100%,50% 75%,0 100%);display:none;z-index:3}
  .frame.marked .mark{display:block}
- .bar{position:fixed;left:0;right:0;bottom:0;height:64px;display:flex;align-items:center;justify-content:center;gap:10px;padding:0 10px env(safe-area-inset-bottom);background:rgba(247,251,250,.94);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-top:1px solid #DCE9E7;z-index:10}
- .bar button,.bar a{display:inline-flex;align-items:center;gap:6px;height:42px;border:0;border-radius:999px;background:#fff;color:#14211F;font:700 13px/1 "Noto Sans JP",sans-serif;padding:0 14px;box-shadow:0 1px 4px rgba(0,0,0,.08);cursor:pointer;text-decoration:none}
- .bar svg{width:18px;height:18px}
- .bar .nav{width:42px;justify-content:center;padding:0;font-size:20px;color:#0E7C8C}
- .bar .pg{font:700 13px/1 Inter,"Noto Sans JP",sans-serif;min-width:64px;text-align:center;color:#2f3d3b}
- .bar .bm.on{background:#FFF4D1;color:#9A5A00}
+ .bar{position:fixed;left:50%;bottom:calc(14px + env(safe-area-inset-bottom));transform:translateX(-50%);height:46px;display:flex;align-items:center;gap:2px;padding:0 6px;border-radius:999px;background:rgba(20,33,31,.62);backdrop-filter:blur(14px) saturate(140%);-webkit-backdrop-filter:blur(14px) saturate(140%);box-shadow:0 8px 24px -10px rgba(0,0,0,.45);z-index:10;overflow:hidden;transition:opacity .3s}
+ .bar button{width:38px;height:38px;display:grid;place-items:center;border:0;border-radius:50%;background:none;color:#fff;cursor:pointer;padding:0;opacity:.92}
+ .bar button:active{background:rgba(255,255,255,.14)}
+ .bar svg{width:20px;height:20px}
+ .bar .pg{font:600 12px/1 Inter,"Noto Sans JP",sans-serif;color:rgba(255,255,255,.85);min-width:58px;text-align:center;letter-spacing:.04em}
+ .bar .bm.on{color:#FFC83D}.bar .bm.on svg{fill:#FFC83D}
+ .bar .prog{position:absolute;left:0;bottom:0;height:2px;width:var(--p,0%);background:#FFC83D;transition:width .3s}
+ .bar.dim{opacity:.35}
  .sheet-bg{position:fixed;inset:0;background:rgba(10,25,24,.35);opacity:0;pointer-events:none;transition:opacity .25s;z-index:20}
  .sheet{position:fixed;left:0;right:0;bottom:0;max-height:78dvh;background:#fff;border-radius:22px 22px 0 0;transform:translateY(105%);transition:transform .3s cubic-bezier(.2,.8,.2,1);z-index:21;display:flex;flex-direction:column;padding-bottom:env(safe-area-inset-bottom)}
  body.open .sheet{transform:none}body.open .sheet-bg{opacity:1;pointer-events:auto}
@@ -250,7 +252,7 @@ var marks=load(KEY,[]),cur=0,lock=false;
 var svgB='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M6 3h12v18l-6-4-6 4Z"/></svg>';
 var svgL='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h16M4 12h16M4 18h10"/></svg>';
 var bar=document.createElement('div');bar.className='bar';
-bar.innerHTML='<button class="nav" type="button" aria-label="前のページ">‹</button><button class="toc" type="button">'+svgL+'目次</button><span class="pg">1 / '+n+'</span><button class="bm" type="button">'+svgB+'しおり</button><button class="nav" type="button" aria-label="次のページ">›</button>';
+bar.innerHTML='<button class="nav" type="button" aria-label="前のページ"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m15 6-6 6 6 6"/></svg></button><button class="toc" type="button" aria-label="目次">'+svgL+'</button><span class="pg">1 / '+n+'</span><button class="bm" type="button" aria-label="しおり">'+svgB+'</button><button class="nav" type="button" aria-label="次のページ"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg></button><i class="prog"></i>';
 document.body.appendChild(bar);
 var bg=document.createElement('div');bg.className='sheet-bg';document.body.appendChild(bg);
 var sh=document.createElement('div');sh.className='sheet';sh.setAttribute('role','dialog');sh.setAttribute('aria-label','目次としおり');
@@ -259,7 +261,7 @@ document.body.appendChild(sh);
 var list=sh.querySelector('.list'),tab='toc',navs=bar.querySelectorAll('.nav'),pg=bar.querySelector('.pg'),bmBtn=bar.querySelector('.bm');
 function idx(){return Math.round(deck.scrollLeft/deck.clientWidth)}
 function go(i,instant){i=Math.max(0,Math.min(n-1,i));deck.scrollTo({left:i*deck.clientWidth,behavior:instant?'auto':'smooth'})}
-function upd(){cur=idx();pg.textContent=(cur+1)+' / '+n;var on=marks.indexOf(frames[cur].id)>=0;bmBtn.classList.toggle('on',on);save(LAST,cur);}
+function upd(){cur=idx();pg.textContent=(cur+1)+' / '+n;bar.style.setProperty('--p',((cur+1)/n*100)+'%');var on=marks.indexOf(frames[cur].id)>=0;bmBtn.classList.toggle('on',on);save(LAST,cur);}
 function paintMarks(){frames.forEach(function(f){f.classList.toggle('marked',marks.indexOf(f.id)>=0)});upd();}
 deck.addEventListener('scroll',upd,{passive:true});
 navs[0].onclick=function(){go(idx()-1)};navs[1].onclick=function(){go(idx()+1)};
@@ -296,7 +298,9 @@ var sx=0,sy=0,t=false;
 deck.addEventListener('touchstart',function(e){var p=e.touches[0];sx=p.clientX;sy=p.clientY;t=true;},{passive:true});
 deck.addEventListener('touchmove',function(e){if(!t)return;var p=e.touches[0];if(Math.abs(p.clientY-sy)>Math.abs(p.clientX-sx))e.preventDefault();},{passive:false});
 deck.addEventListener('touchend',function(e){if(!t)return;t=false;var p=e.changedTouches[0],dx=p.clientX-sx,dy=p.clientY-sy;
- if(Math.abs(dy)>40&&Math.abs(dy)>Math.abs(dx)*1.2){ if(dy<0&&sy>innerHeight*0.82){open('toc');return;} go(idx()+(dy<0?1:-1)); }},{passive:true});
+ if(Math.abs(dy)>40&&Math.abs(dy)>Math.abs(dx)*1.2){ go(idx()+(dy<0?1:-1)); }},{passive:true});
+var idleT;function wake(){bar.classList.remove('dim');clearTimeout(idleT);idleT=setTimeout(function(){if(!document.body.classList.contains('open'))bar.classList.add('dim')},3500);}
+['scroll','touchstart','mousemove','keydown'].forEach(function(ev){(ev==='scroll'?deck:window).addEventListener(ev,wake,{passive:true})});wake();
 paintMarks();
 var last=load(LAST,0);
 if(last>1&&last<n){var r=document.createElement('div');r.className='resume';r.innerHTML='前回の続き（p.'+(last+1)+'）<button type="button">ここから読む</button><button type="button" class="x" aria-label="閉じる">×</button>';document.body.appendChild(r);
