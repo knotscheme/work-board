@@ -286,19 +286,34 @@ function textOf(i){var pg=frames[i].querySelector('.page');var sel='h1,h2,.bubbl
 var au=new Audio();au.preload='auto';try{au.preservesPitch=true;au.webkitPreservesPitch=true;}catch(e){}
 var RATES=[0.8,1,1.25,1.5],rate=load('sakuapp-guide-rate',1);if(RATES.indexOf(rate)<0)rate=1;
 var spdBtn=bar.querySelector('.spd');function showRate(){spdBtn.textContent=(rate===1?'1.0':String(rate))+'x';try{au.playbackRate=rate;au.defaultPlaybackRate=rate;}catch(e){}}showRate();
-spdBtn.onclick=function(){rate=RATES[(RATES.indexOf(rate)+1)%RATES.length];save('sakuapp-guide-rate',rate);showRate();if(synth&&synth.speaking&&playing){stopAll();readCur();}};function pad(x){return ('00'+x).slice(-3)}
-function stopAll(){token++;clearTimeout(timer);clearTimeout(settleT);try{au.pause();au.onended=au.onerror=null;}catch(e){}if(synth)synth.cancel();say.classList.remove('on');}
+spdBtn.onclick=function(){rate=RATES[(RATES.indexOf(rate)+1)%RATES.length];save('sakuapp-guide-rate',rate);showRate();if(playing&&useFull){full.playbackRate=rate;full.defaultPlaybackRate=rate;}else if(synth&&synth.speaking&&playing){stopAll();readCur();}};function pad(x){return ('00'+x).slice(-3)}
+function stopAll(){token++;clearTimeout(timer);clearTimeout(settleT);try{au.pause();au.onended=au.onerror=null;}catch(e){}try{full.pause();}catch(e){}if(synth)synth.cancel();say.classList.remove('on');}
 var reading=-1,target=-1,pendingAuto=false,autoT=null,endT=null;
 function readCur(i){if(typeof i!=='number')i=idx();stopAll();var my=++token;reading=i;pendingAuto=false;clearTimeout(autoT);var txt=frames[i].dataset.say||textOf(i);say.textContent=txt.length>70?txt.slice(0,70)+'…':txt;say.classList.add('on');
  var next=function(){if(my!==token||!playing)return;if(i>=n-1){setPlaying(false);return;}target=i+1;pendingAuto=true;go(target);clearTimeout(autoT);autoT=setTimeout(function(){if(!playing||!pendingAuto)return;if(idx()!==target)go(target,true);else readCur(target);},1100);};
  if(!txt){timer=setTimeout(next,1500);return;}
  var tts=function(){if(my!==token)return;if(synth){var u=new SpeechSynthesisUtterance(txt);u.lang='ja-JP';if(voice)u.voice=voice;u.rate=0.98*rate;u.pitch=1.08;u.onend=function(){timer=setTimeout(next,500)};u.onerror=function(){timer=setTimeout(next,800)};synth.cancel();synth.speak(u);}else{timer=setTimeout(next,Math.max(2500,txt.length*140));}};
  au.onended=function(){if(my===token)timer=setTimeout(next,450)};au.onerror=function(){tts()};au.src='audio/p'+pad(i+1)+'.mp3';au.playbackRate=rate;au.defaultPlaybackRate=rate;var pr=au.play();if(pr&&pr.catch)pr.catch(function(){tts()});}
-function setPlaying(v){playing=v;if(!v){pendingAuto=false;clearTimeout(autoT);clearTimeout(endT);reading=-1;}bar.classList.toggle('playing',v);playBtn.setAttribute('aria-label',v?'読み上げを停止':'読み上げを再生');if(v){readCur();}else stopAll();}
+var OFFS=[0.0, 7.661, 17.433, 26.534, 35.261, 46.154, 50.497, 60.59, 69.221, 78.247, 85.215, 91.766, 107.565, 125.594, 133.351, 145.545, 153.973, 163.853, 174.543, 181.937, 187.4, 203.189, 210.668, 218.275, 225.573, 238.397, 247.199, 260.875, 269.517, 278.629, 288.028, 306.003, 314.912, 321.965, 328.911, 335.825, 342.344, 353.887, 362.327, 372.046, 379.429, 385.917, 403.316, 410.027, 426.872, 447.791, 455.804, 469.811, 476.469, 486.125, 493.263, 498.971, 508.467, 516.362, 523.628, 531.587, 546.416, 555.41, 563.177, 571.371, 578.563, 593.69, 601.287, 610.462, 621.099, 631.063, 643.471, 648.785, 664.243, 671.882, 678.977, 686.595, 695.547, 706.45, 728.767, 736.982, 744.515, 751.877, 758.748, 777.129, 784.075, 802.359, 819.343, 825.937, 838.931, 847.999, 856.919, 864.739, 870.117, 876.061, 883.156, 890.475, 897.453, 903.322, 921.383, 928.275, 941.344, 950.423, 958.052, 964.731, 971.379, 988.309, 997.1, 1007.971, 1015.397, 1023.037, 1035.359, 1057.227, 1068.269, 1075.429, 1084.06, 1095.198, 1102.944, 1111.629, 1117.881, 1126.918, 1133.043, 1152.746, 1158.839, 1173.251, 1192.549, 1198.525, 1206.975, 1214.625, 1222.84, 1231.183, 1238.193, 1253.289, 1259.701, 1267.159, 1276.015, 1298.427, 1307.453, 1317.098, 1326.401, 1337.593, 1344.389, 1362.215, 1376.191, 1382.785, 1396.227],useFull=true,full=new Audio();full.preload='metadata';full.src='audio/full.mp3';try{full.preservesPitch=true;full.webkitPreservesPitch=true;}catch(e){}
+function showSay(i){var txt=frames[i].dataset.say||textOf(i);say.textContent=txt.length>70?txt.slice(0,70)+'…':txt;say.classList.add('on');}
+function pageAt(t){var lo=0,hi=n-1;while(lo<hi){var m=(lo+hi+1)>>1;if(OFFS[m]<=t+0.05)lo=m;else hi=m-1;}return lo;}
+function ms(i){if(!('mediaSession' in navigator))return;try{navigator.mediaSession.metadata=new MediaMetadata({title:label(frames[i])||'アプリで副業 永久保存版',artist:'p.'+(i+1)+' ・ '+(frames[i].dataset.ch||''),album:'アプリで副業 永久保存版'});}catch(e){}}
+function seekTo(i){var f=function(){try{full.currentTime=OFFS[i];}catch(e){}};if(full.readyState>=1)f();else full.addEventListener('loadedmetadata',f,{once:true});}
+function fullPlay(i){stopAll();reading=i;showSay(i);ms(i);seekTo(i);full.playbackRate=rate;full.defaultPlaybackRate=rate;var pr=full.play();if(pr&&pr.catch)pr.catch(function(e){if(e&&e.name==='NotAllowedError'){setPlaying(false);return;}useFull=false;if(playing)readCur(i);});}
+full.addEventListener('timeupdate',function(){if(!playing||!useFull||full.paused)return;var k=pageAt(full.currentTime);if(k!==reading){reading=k;showSay(k);ms(k);go(k,document.hidden);}});
+full.addEventListener('ended',function(){if(playing&&useFull)setPlaying(false);});
+full.addEventListener('error',function(){if(!useFull)return;useFull=false;if(playing)readCur(reading>=0?reading:idx());});
+if('mediaSession' in navigator){try{var MS=navigator.mediaSession;
+ MS.setActionHandler('play',function(){if(!playing)setPlaying(true);else full.play();});
+ MS.setActionHandler('pause',function(){if(playing)setPlaying(false);});
+ MS.setActionHandler('previoustrack',function(){var k=Math.max(0,(reading>=0?reading:idx())-1);if(playing&&useFull){fullPlay(k);go(k,document.hidden);}else go(k);});
+ MS.setActionHandler('nexttrack',function(){var k=Math.min(n-1,(reading>=0?reading:idx())+1);if(playing&&useFull){fullPlay(k);go(k,document.hidden);}else go(k);});
+}catch(e){}}
+function setPlaying(v){playing=v;if(!v){pendingAuto=false;clearTimeout(autoT);clearTimeout(endT);reading=-1;}bar.classList.toggle('playing',v);playBtn.setAttribute('aria-label',v?'読み上げを停止':'読み上げを再生');if(v){if(useFull)fullPlay(idx());else readCur();}else stopAll();}
 playBtn.onclick=function(){setPlaying(!playing)};
 deck.addEventListener('touchmove',function(){if(pendingAuto){pendingAuto=false;clearTimeout(autoT);}},{passive:true});
-deck.addEventListener('scroll',function(){if(!playing)return;clearTimeout(endT);endT=setTimeout(function(){if(!playing)return;var k=idx();if(pendingAuto&&k!==target)return;if(pendingAuto||k!==reading)readCur(k);},220);},{passive:true});
-document.addEventListener('visibilitychange',function(){if(document.hidden&&playing)setPlaying(false)});
+deck.addEventListener('scroll',function(){if(!playing)return;clearTimeout(endT);endT=setTimeout(function(){if(!playing)return;var k=idx();if(useFull){if(k!==reading&&!document.hidden)fullPlay(k);return;}if(pendingAuto&&k!==target)return;if(pendingAuto||k!==reading)readCur(k);},220);},{passive:true});
+document.addEventListener('visibilitychange',function(){if(!document.hidden&&playing&&reading>=0&&idx()!==reading)go(reading,true);});
 navs[0].onclick=function(){go(idx()-1)};navs[1].onclick=function(){go(idx()+1)};
 bmBtn.onclick=function(){var id=frames[cur].id,i=marks.indexOf(id);if(i>=0)marks.splice(i,1);else marks.push(id);save(KEY,marks);paintMarks();};
 function label(f){var t=f.dataset.label||'',tp=f.dataset.topic||'';return (tp&&t!==tp?tp+' ・ ':'')+t}
