@@ -1060,6 +1060,13 @@ header#hd .hbar{background:rgba(14,124,140,.92)!important}
 }
 #contact .btns .btn{min-width:min(100%,340px);min-height:58px;font-size:17px}
 .xalt{margin:14px 0 0;font-size:13px;color:#dff2f3}.xalt a{color:#fff;text-decoration:underline;text-underline-offset:3px}
+
+.stripe-note{margin-top:16px;padding:14px 16px;border-radius:14px;background:#fff8e6;border:1px solid #f3dfa6}
+.stripe-note b{display:flex;align-items:center;gap:6px;font-size:14px;color:#7a5200}
+.stripe-note .ico{width:18px;height:18px;padding:0;margin:0;background:none!important;color:#b07a00!important}
+.stripe-note p{margin:6px 0 0;font-size:13px;line-height:1.8;color:#5c4a1e}
+.stripe-note strong{color:#3d2f0c}
+.stripe-note a{color:var(--brand);font-weight:700;text-decoration:underline;text-underline-offset:3px}
 </style>
 <style>
 /* ヘッダー：ヒーロー（動画ヒーロー＋#intro）を過ぎてから表示 */
@@ -1259,7 +1266,7 @@ header#hd .btn{min-height:34px;padding:0 16px;font-size:13px;border-radius:999px
    <div class="xh"><span class="xl">追加機能</span><div class="xf"><span>1文字</span><em>＝</em><strong>0.4<small>円</small></strong></div></div>
    <p class="xd">決済やLINE通知など、足したい機能はプログラムの文字数（作業量の目安）で計算します。</p>
    <ul class="xlist"><li><span class="xn">メール自動送信</span><span class="xb"><i style="--w:100%"></i></span><span class="xc">約10,000文字</span><b class="xp">+4,000<small>円</small></b></li><li><span class="xn">画像アップロード</span><span class="xb"><i style="--w:80%"></i></span><span class="xc">約8,000文字</span><b class="xp">+3,200<small>円</small></b></li><li><span class="xn">データCSV出力</span><span class="xb"><i style="--w:50%"></i></span><span class="xc">約5,000文字</span><b class="xp">+2,000<small>円</small></b></li></ul>
-   <p class="xs">例：15,000文字の機能なら <b>6,000円</b></p>
+   <p class="xs">例：15,000文字の機能なら <b>6,000円</b></p><div class="stripe-note"><b><svg class="ico sm" aria-hidden="true"><use href="#i-card"/></svg>カード決済を付ける場合</b><p>あなた名義の <strong>Stripeアカウントの開設と初期設定</strong> が必要です（本人確認・口座登録など）。売上の入金先になるため、開設はご本人に行っていただきます。設定がむずかしい方は、<a href="#option">初期設定の代行</a> もお受けしています。</p></div>
   </div>
   <div class="xcard pay">
    <div class="xh"><span class="xl">分割払い</span><p class="xd" style="margin:0">基本料金＋追加機能の合計を、分割でお支払いいただけます。</p></div>
@@ -1310,7 +1317,7 @@ header#hd .btn{min-height:34px;padding:0 16px;font-size:13px;border-radius:999px
     <li><svg class="ico" aria-hidden="true"><use href="#i-link"/></svg><span><b>サイトアドレス<wbr>（URL）の発行</b><small>公開用のURLを発行し、アプリにつなぎます</small></span></li>
     <li><svg class="ico" aria-hidden="true"><use href="#i-lock"/></svg><span><b>SSL（HTTPS）設定</b><small>鍵マーク付きの安全な通信を設定</small></span></li>
     <li><svg class="ico" aria-hidden="true"><use href="#i-mail"/></svg><span><b>独自ドメインの<wbr>メール設定</b><small>info@あなたのドメイン などを用意</small></span></li>
-    <li><svg class="ico" aria-hidden="true"><use href="#i-zap"/></svg><span><b>公開作業・<wbr>外部連携の初期設定</b><small>本番公開と、Stripe・LINEなどの設定をお手伝い</small></span></li>
+    <li><svg class="ico" aria-hidden="true"><use href="#i-card"/></svg><span><b>Stripe（カード決済）<wbr>の開設サポート・初期設定</b><small>開設の手順をご案内し、商品・料金・入金設定までを代行</small></span></li><li><svg class="ico" aria-hidden="true"><use href="#i-zap"/></svg><span><b>公開作業・<wbr>外部連携の初期設定</b><small>本番公開と、Stripe・LINEなどの設定をお手伝い</small></span></li>
    </ul>
    <p class="note" style="margin-top:18px">※ドメイン・サーバーの利用料は実費がかかります。代行の費用は、項目ごとにお見積もりでお出しします。[代行手数料の有無・金額を記入]</p>
   </div>
@@ -1342,7 +1349,7 @@ header#hd .btn{min-height:34px;padding:0 16px;font-size:13px;border-radius:999px
  <details open><summary>専門用語がわからなくても大丈夫ですか？</summary><p>大丈夫です。ご相談では、むずかしい言葉を使わずにお話しします。「何ができるのか」から一緒に考えましょう。ITの知識がなくても、ざっくりしたアイデアで頼めます。</p></details>
  <details><summary>「文字数」と言われても、見当がつきません。</summary><p>文字数は、機能をつくるためのプログラムの量で、作業量の目安です。数えるのはこちらなので、調べる必要はありません。見積もりで、機能ごとの金額をお見せします。</p></details>
  <details><summary>お客様の個人情報や決済情報は安全ですか？</summary><p>カード情報はStripeの画面で処理され、あなたのアプリには保存されません。ログインには実績のある仕組みを使い、データはお客様ごとに見られる範囲を分け、通信は暗号化します。[個人情報の取り扱い方針・公開前の確認内容を記入]</p></details>
- <details><summary>サーバー代など、ほかに費用はかかりますか？</summary><p>サーバーやデータベースの利用料は、アプリの規模によって変わります。必要な費用と支払い先は、お見積もりの段階でお伝えします。[月額費用の有無と目安を記入]</p></details>
+ <details><summary>カード決済を付けるには、何が必要ですか？</summary><p>決済サービス「Stripe」のアカウントが必要です。売上の入金先になるため、本人確認や銀行口座の登録を含めて、あなたの名義で開設していただきます。開設後の商品・料金・入金などの初期設定は、代行もお受けしています。なお、Stripeの決済手数料（売上に応じた数%）は、Stripeに直接お支払いいただく形になります。</p></details><details><summary>サーバー代など、ほかに費用はかかりますか？</summary><p>サーバーやデータベースの利用料は、アプリの規模によって変わります。必要な費用と支払い先は、お見積もりの段階でお伝えします。[月額費用の有無と目安を記入]</p></details>
  <details><summary>あとから追加で請求されることはありますか？</summary><p>開発費用は「基本料金＋追加機能の文字数×<span class="nb">0.4円」</span>で、見積もりの時点で先にお出しします。[お見積もり後に仕様を変更する場合の扱いを記入]</p></details>
  <details><summary>公開後の修正やアップデートもお願いできますか？</summary><p>はい。月額3,500円の運用保守プランで、バグ修正やアップデート対応、微調整（月に5回まで、毎月リセット）を承ります。新しい機能の追加は、追加機能としてお見積もりします。</p></details>
  <details><summary>分割払いの手数料はいくらですか？</summary><p>3・6・12ヶ月から選べて、手数料は5〜15%です。回数が多いほど、毎月の負担は小さくなります。</p></details>
