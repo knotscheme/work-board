@@ -127,6 +127,10 @@ h1,h2,h3,p{margin:0}
 .scrow input{flex:1;min-width:0;width:0;border:0;background:transparent;font-size:16px;font-weight:700;padding:4px 0}
 .scrow button{border:1px solid var(--line);background:#fff;border-radius:8px;width:32px;height:32px;cursor:pointer;font-size:13px;flex:none}
 .scrow .go{width:auto;padding:0 10px;font-weight:700;color:var(--brand)}
+.icb{width:38px!important;height:38px!important;border-radius:10px!important;border:1.5px solid var(--brand)!important;color:var(--brand);display:grid;place-items:center;padding:0}.icb svg{width:20px;height:20px}
+.icpal{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:6px;background:var(--bg);border-radius:12px;padding:8px;margin-top:-2px}
+.icpal button{aspect-ratio:1;border:1.5px solid var(--line);background:#fff;border-radius:10px;display:grid;place-items:center;cursor:pointer;color:var(--text);padding:0}.icpal button svg{width:20px;height:20px}.icpal button.on{border-color:var(--brand);color:var(--brand);background:var(--mint)}
+.icpal .auto{grid-column:span 2;aspect-ratio:auto;font-size:12px;font-weight:700}
 .addscr{margin-top:10px;border:1.5px dashed var(--brand);background:#fff;color:var(--brand);border-radius:12px;padding:10px;width:100%;font-weight:700;cursor:pointer}
 .chk{display:flex;gap:8px;align-items:center;font-size:14px;font-weight:700;margin-top:14px}
 .est{margin-top:16px;background:var(--card);border:2px solid var(--brand);border-radius:18px;padding:16px}
@@ -149,13 +153,13 @@ footer{text-align:center;font-size:12px;color:var(--muted);padding:24px 16px 40p
  <div class="stage">
   <div class="phone" id="phone"><div class="scr" id="scr"></div><div id="tabbar"></div></div>
   <div class="snav" id="snav"></div>
-  <p class="cap">画面のパーツをタップすると編集できます。下のメニューで画面を切りかえられます。</p>
+  <p class="cap">画面のパーツをタップすると編集できます。下のメニューを押すと、その画面に切りかわります。</p>
  </div>
  <div>
   <div class="panel">
-   <div class="tabs" role="tablist"><button type="button" data-p="tpl" class="on">ひな形</button><button type="button" data-p="scr">画面</button><button type="button" data-p="add">パーツ</button><button type="button" data-p="edit">編集</button></div>
+   <div class="tabs" role="tablist"><button type="button" data-p="tpl" class="on">ひな形</button><button type="button" data-p="scr">メニュー</button><button type="button" data-p="add">パーツ</button><button type="button" data-p="edit">編集</button></div>
    <div class="pane on" id="p-tpl"><p class="lbl">どんなアプリに近いですか？</p><div class="tpls" id="tpls"></div><p class="note">ひな形を選ぶと、今の内容は置きかわります。</p></div>
-   <div class="pane" id="p-scr"><p class="lbl">アプリの画面（下のメニュー）</p><div class="scrs" id="scrs"></div><button type="button" class="addscr" id="addscr">＋ 画面を追加</button><label class="chk"><input type="checkbox" id="showtab"> 下のメニューを表示する</label>
+   <div class="pane" id="p-scr"><p class="lbl">下のメニュー</p><p class="note" style="margin:-4px 0 10px">メニューの1つ1つが、アプリの1画面です。名前を変えたり、アイコンを選んだりできます（5つまで）。</p><div class="scrs" id="scrs"></div><button type="button" class="addscr" id="addscr">＋ メニューを追加</button><label class="chk"><input type="checkbox" id="showtab"> 下のメニューを表示する</label>
     <p class="lbl">アプリの色</p><div class="sw" id="sw"></div></div>
    <div class="pane" id="p-add"><p class="lbl" id="addlbl">タップで今の画面に追加されます</p><div class="parts" id="parts"></div></div>
    <div class="pane" id="p-edit"><div id="editor"></div></div>
@@ -180,6 +184,7 @@ var lines=function(s){return String(s||'').split('\n').map(function(x){return x.
 var cols=function(l){return l.split(/[,，、]/)};
 var SV=function(d){return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'+d+'</svg>'};
 var IC={home:'<path d="m3 11 9-8 9 8"/><path d="M5 10v10h14V10"/>',cal:'<rect x="3" y="4" width="18" height="17" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>',clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',user:'<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>',list:'<path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/>',card:'<rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/>',bell:'<path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10 21h4"/>',ticket:'<path d="M3 8a2 2 0 0 0 0 4v4h18v-4a2 2 0 0 0 0-4V4H3Z"/>',pen:'<path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/>',users:'<circle cx="9" cy="8" r="4"/><path d="M2 21a7 7 0 0 1 14 0M17 4a4 4 0 0 1 0 8M22 21a7 7 0 0 0-4-6"/>',gear:'<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1Z"/>',chat:'<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2Z"/>',star:'<path d="m12 2 3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1Z"/>',bag:'<path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4ZM3 6h18M16 10a4 4 0 0 1-8 0"/>'};
+function iconOf(s){return s.icon&&IC[s.icon]?IC[s.icon]:iconFor(s.name)}
 function iconFor(n){n=n||'';var m=[[/ホーム|トップ/,'home'],[/予約|日程|カレンダー/,'cal'],[/履歴|注文履歴|進み/,'clock'],[/マイ|会員|プロフィール/,'user'],[/メニュー|一覧|商品/,'list'],[/会計|支払|決済/,'card'],[/呼び出し|通知|お知らせ/,'bell'],[/回数券|チケット|クーポン/,'ticket'],[/投稿|日記|ブログ/,'pen'],[/メンバー|仲間/,'users'],[/設定/,'gear'],[/メッセージ|相談|チャット/,'chat'],[/作品|ギャラリー|お気に入り/,'star'],[/ショップ|カート|購入/,'bag']];for(var i=0;i<m.length;i++)if(m[i][0].test(n))return IC[m[i][1]];return IC.list}
 var img=function(src,cls){return src?'<img'+(cls?' class="'+cls+'"':'')+' src="'+E(src)+'" alt="">':''};
 /* parts */
@@ -232,7 +237,7 @@ var T={
  blank:{n:'白紙から作る',d:'名前と画面だけ',c:0,im:'',s:[S('ホーム',[['head',{title:'あなたのアプリ',sub:'ひとこと説明',img:''}]]),S('マイページ',[['ttl',{title:'マイページ'}]])]}
 };
 var COLORS=[['#0e7c8c','#0b6477'],['#e0607e','#b93d5c'],['#7a5cff','#5537d1'],['#e07a2f','#b85a17'],['#2f9e5b','#1f7743'],['#2b2a3a','#14131f']];
-var BASE=7700,KEY='sakuapp-builder-v2';
+var BASE=7700,KEY='sakuapp-builder-v2',icOpen=-1;
 var st={tpl:'salon',c:0,screens:[],cur:0,sel:-1,tab:true};
 function mk(t,o){var b={t:t};var d=P[t].def;for(var k in d)b[k]=Array.isArray(d[k])?d[k].slice():d[k];if(o)for(var k2 in o)b[k2]=o[k2];return b}
 function useTpl(k){var t=T[k];st.tpl=k;st.c=t.c;st.tab=true;st.screens=t.s.map(function(s){return {name:s.name,blocks:s.blocks.map(function(x){return mk(x[0],x[1])})}});st.cur=0;st.sel=-1;render()}
@@ -245,7 +250,7 @@ function render(){
  var c=COLORS[st.c]||COLORS[0];phone.style.setProperty('--pc',c[0]);phone.style.setProperty('--pc2',c[1]);
  var bl=cur().blocks;
  scr.innerHTML=bl.length?bl.map(function(b,i){return '<div class="blk'+(i===st.sel?' sel':'')+'" data-i="'+i+'">'+P[b.t].r(b)+'</div>'}).join(''):'<p class="empty">「パーツ」タブから、この画面に部品を足してみましょう</p>';
- document.getElementById('tabbar').innerHTML=st.tab?'<nav class="p-tab">'+st.screens.slice(0,5).map(function(s,i){return '<button type="button" data-s="'+i+'" class="'+(i===st.cur?'on':'')+'">'+SV(iconFor(s.name))+E(s.name)+'</button>'}).join('')+'</nav>':'';
+ document.getElementById('tabbar').innerHTML=st.tab?'<nav class="p-tab">'+st.screens.slice(0,5).map(function(s,i){return '<button type="button" data-s="'+i+'" class="'+(i===st.cur?'on':'')+'">'+SV(iconOf(s))+E(s.name)+'</button>'}).join('')+'</nav>':'';
  document.getElementById('snav').innerHTML=st.tab?'':st.screens.map(function(s,i){return '<button type="button" data-s="'+i+'" class="'+(i===st.cur?'on':'')+'">'+E(s.name)+'</button>'}).join('');
  document.querySelectorAll('.tpl').forEach(function(x){x.classList.toggle('on',x.dataset.k===st.tpl)});
  document.querySelectorAll('#sw button').forEach(function(x,i){x.classList.toggle('on',i===st.c)});
@@ -255,7 +260,7 @@ function render(){
 }
 function go(i){if(i===st.cur)return;st.cur=i;st.sel=-1;render();scr.scrollTop=0}
 function screensPane(){var box=document.getElementById('scrs');if(box.contains(document.activeElement)&&document.activeElement.tagName==='INPUT')return;
- box.innerHTML=st.screens.map(function(s,i){return '<div class="scrow'+(i===st.cur?' on':'')+'"><input type="text" value="'+E(s.name)+'" data-r="'+i+'" aria-label="画面の名前"><button type="button" class="go" data-g="'+i+'">表示</button><button type="button" data-u="'+i+'" aria-label="上へ">↑</button><button type="button" data-x="'+i+'" aria-label="削除">✕</button></div>'}).join('');
+ box.innerHTML=st.screens.map(function(s,i){return '<div class="scrow'+(i===st.cur?' on':'')+'"><button type="button" class="icb" data-ic="'+i+'" aria-label="アイコンを選ぶ">'+SV(iconOf(s))+'</button><input type="text" value="'+E(s.name)+'" data-r="'+i+'" aria-label="メニューの名前"><button type="button" class="go" data-g="'+i+'">開く</button><button type="button" data-u="'+i+'" aria-label="上へ">↑</button><button type="button" data-x="'+i+'" aria-label="削除">✕</button></div>'+(icOpen===i?'<div class="icpal">'+Object.keys(IC).map(function(k){return '<button type="button" data-pick="'+k+'" data-for="'+i+'" class="'+(s.icon===k?'on':'')+'">'+SV(IC[k])+'</button>'}).join('')+'<button type="button" class="auto'+(!s.icon?' on':'')+'" data-pick="" data-for="'+i+'">自動</button></div>':'')}).join('');
  document.getElementById('addscr').style.display=st.screens.length>=5?'none':'block'}
 function editor(){var ed=document.getElementById('editor'),b=cur().blocks[st.sel];
  if(!b){ed.innerHTML='<p class="hint">画面の中のパーツをタップすると、ここで文字や写真を変えたり、並べかえたりできます。</p>';return}
@@ -295,13 +300,15 @@ document.getElementById('editor').addEventListener('click',function(e){var a=e.t
  else if(a.dataset.a==='del'){bl.splice(i,1);st.sel=-1}
  render()});
 var sp=document.getElementById('p-scr');
-sp.addEventListener('input',function(e){var r=e.target.dataset.r;if(r==null)return;st.screens[+r].name=e.target.value||'画面';var tb=document.querySelector('.p-tab [data-s="'+r+'"]');if(tb)tb.innerHTML=SV(iconFor(e.target.value))+E(e.target.value);save()});
+sp.addEventListener('input',function(e){var r=e.target.dataset.r;if(r==null)return;st.screens[+r].name=e.target.value||'画面';var tb=document.querySelector('.p-tab [data-s="'+r+'"]');if(tb)tb.innerHTML=SV(iconOf(st.screens[+r]))+E(e.target.value);var ib=document.querySelector('[data-ic="'+r+'"]');if(ib)ib.innerHTML=SV(iconOf(st.screens[+r]));save()});
 sp.addEventListener('change',function(e){if(e.target.dataset.r!=null)render()});
-sp.addEventListener('click',function(e){var t=e.target;
- if(t.dataset.g!=null){go(+t.dataset.g)}
+sp.addEventListener('click',function(e){var t=e.target.closest('button')||e.target;
+ if(t.dataset.ic!=null){var k=+t.dataset.ic;icOpen=icOpen===k?-1:k;screensPane()}
+ else if(t.dataset.pick!=null){var f=+t.dataset.for;st.screens[f].icon=t.dataset.pick||'';icOpen=-1;render()}
+ else if(t.dataset.g!=null){go(+t.dataset.g)}
  else if(t.dataset.u!=null){var i=+t.dataset.u;if(i>0){var s=st.screens.splice(i,1)[0];st.screens.splice(i-1,0,s);if(st.cur===i)st.cur=i-1;else if(st.cur===i-1)st.cur=i;render()}}
- else if(t.dataset.x!=null){if(st.screens.length<=1){toast('画面は1つ以上必要です');return}var j=+t.dataset.x;st.screens.splice(j,1);if(st.cur>=st.screens.length)st.cur=st.screens.length-1;st.sel=-1;render()}});
-document.getElementById('addscr').addEventListener('click',function(){if(st.screens.length>=5)return;st.screens.push({name:'新しい画面',blocks:[mk('ttl',{title:'新しい画面'})]});st.cur=st.screens.length-1;st.sel=-1;render();toast('画面を追加しました。名前を変えてみましょう')});
+ else if(t.dataset.x!=null){if(st.screens.length<=1){toast('メニューは1つ以上必要です');return}var j=+t.dataset.x;st.screens.splice(j,1);if(st.cur>=st.screens.length)st.cur=st.screens.length-1;st.sel=-1;render()}});
+document.getElementById('addscr').addEventListener('click',function(){if(st.screens.length>=5)return;st.screens.push({name:'新しいメニュー',blocks:[mk('ttl',{title:'新しいメニュー'})]});st.cur=st.screens.length-1;st.sel=-1;render();toast('メニューを追加しました。名前とアイコンを変えてみましょう')});
 document.getElementById('showtab').addEventListener('change',function(){st.tab=this.checked;render()});
 document.getElementById('sw').innerHTML=COLORS.map(function(c,i){return '<button type="button" aria-label="色'+(i+1)+'" style="background:linear-gradient(135deg,'+c[0]+','+c[1]+')"></button>'}).join('');
 document.getElementById('sw').addEventListener('click',function(e){var b=e.target.closest('button');if(!b)return;st.c=[].indexOf.call(b.parentNode.children,b);render()});
