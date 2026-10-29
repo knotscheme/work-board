@@ -76,7 +76,7 @@ var sh=document.getElementById('sheet');
 if(!st||!st.screens||!st.screens.length){sh.innerHTML='<div class="empty"><h1 style="font-size:20px">まだ画面がありません</h1><p style="color:#4f6a6e;margin-top:6px">アプリ画面メーカーで画面をつくると、ここに構成案が自動でまとまります。</p><a href="index.html">画面メーカーでつくる</a></div>';return}
 var appName=(function(){for(var i=0;i<st.screens.length;i++){var h=st.screens[i].blocks.filter(function(b){return b.t==='head'})[0];if(h&&h.title)return h.title}return 'わたしのアプリ'})();
 /* features */
-var feats={};st.screens.forEach(function(s){s.blocks.forEach(function(b){var d=D[b.t];if(d&&d[1])feats[d[1]]=d[2]})});
+var feats={};st.screens.forEach(function(s){s.blocks.forEach(function(b){var d=D[b.t];if(d&&d[1])feats[d[1]]=d[2];if(b.t==='paysel'&&/カード|PayPay|ペイペイ|電子/.test(b.items||''))feats['カード決済']=6000})});
 var later=ex.later||{};
 function ed(key,def){var v=ex[key]!=null?ex[key]:def;return '<span contenteditable="true" data-ed="'+key+'">'+E(v)+'</span>'}
 function screenDoes(s){var out=[];s.blocks.forEach(function(b){var d=D[b.t];if(!d||!d[0])return;var t=d[0];if(b.t==='menu'||b.t==='hist'||b.t==='list'){var n=lines(b.items).length;if(n)t+='（'+n+'件）'}if(out.indexOf(t)<0)out.push(t)});return out}
