@@ -76,6 +76,11 @@ h1,h2,h3,p{margin:0}
 .p-gal{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px}.p-gal i{aspect-ratio:1;border-radius:9px;background:linear-gradient(135deg,rgba(255,255,255,.7),rgba(255,255,255,.2)),var(--pc);overflow:hidden}
 .p-gal i img{width:100%;height:100%;object-fit:cover;display:block}
 .p-ps{background:#fff;border:1px solid #e3ecec;border-radius:12px;overflow:hidden}.p-ps div{display:flex;align-items:center;gap:10px;padding:10px 12px;border-top:1px solid #eef3f3;font-size:12.5px;font-weight:700}.p-ps div:first-child{border-top:0}.p-ps i{width:16px;height:16px;border-radius:50%;border:2px solid #c9d3d3;flex:none}.p-ps .on{background:#f2f8f8}.p-ps .on i{border:5px solid var(--pc)}
+.p-no{background:#fff;border:1px solid #e3ecec;border-radius:14px;padding:10px}.p-no small{display:block;font-size:10.5px;color:#6b7b7d;margin-bottom:6px}
+.p-no-d{display:flex;align-items:baseline;gap:6px;justify-content:center;background:#f3f6f6;border-radius:10px;padding:6px}.p-no-d span{font-size:12px;font-weight:700;color:#6b7b7d}.p-no-d b{font:800 26px Inter,sans-serif;letter-spacing:.06em;color:var(--pc)}
+.p-no-i{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:8px 2px;font-size:12.5px;font-weight:700}.p-qty{display:flex;align-items:center;gap:8px}.p-qty i{width:22px;height:22px;border-radius:50%;border:1.5px solid var(--pc);color:var(--pc);display:grid;place-items:center;font-style:normal;font-weight:900;line-height:1}.p-qty b{min-width:14px;text-align:center}
+.p-kp{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px}.p-kp span{background:#f3f6f6;border-radius:9px;padding:7px 0;text-align:center;font:800 15px Inter,sans-serif}.p-kp span.s{font:700 11px 'Noto Sans JP',sans-serif;display:grid;place-items:center;color:#6b7b7d}
+.p-no-btn{margin-top:8px;border-radius:11px;padding:10px;text-align:center;font-weight:900;font-size:13px;color:#fff;background:linear-gradient(135deg,var(--pc),var(--pc2))}
 .p-cart{margin:6px 12px;border-radius:12px;padding:11px 14px;color:#fff;background:#14212a;display:flex;justify-content:space-between;font-weight:900;font-size:13px}
 .p-hist{background:#fff;border:1px solid #e3ecec;border-radius:12px;overflow:hidden}
 .p-hist div{display:flex;align-items:center;gap:10px;padding:10px 12px;border-top:1px solid #eef3f3;font-size:12px}.p-hist div:first-child{border-top:0}
@@ -272,9 +277,10 @@ var P={
  member:{n:'月額メンバー',d:'会員だけの有料プラン',ft:['月額課金',6000],def:{title:'メンバー限定の投稿が読めます',price:'980円 / 月',label:'メンバーになる'},f:[['title','説明'],['price','月額'],['label','ボタンの文字']],r:function(b){return '<div class="p-sec"><div class="p-mem"><b>'+E(b.title)+'</b><em>'+E(b.price)+'</em><span>'+E(b.label)+'</span></div></div>'}},
  gal:{n:'写真ギャラリー',d:'作品や店内の写真を並べる',ft:['画像アップロード',3200],def:{title:'ギャラリー',imgs:['img/c1.jpg','img/c2.jpg','img/c3.jpg','img/c4.jpg','img/c5.jpg','img/c6.jpg']},f:[['imgs','写真（6枚まで）','m',500],['title','見出し']],r:function(b){var im=(b.imgs||[]).slice(0,6),s='';for(var i=0;i<6;i++)s+='<i>'+img(im[i])+'</i>';return '<div class="p-sec"><p class="p-t">'+E(b.title)+'</p><div class="p-gal">'+s+'</div></div>'}},
  paysel:{n:'支払い方法えらび',d:'カード・現金などを選ぶ',def:{title:'お支払い方法',items:'カードで支払う\nレジで現金で支払う\nPayPayで支払う'},f:[['title','見出し'],['items','支払い方法（1行に1つ）','t']],r:function(b){return '<div class="p-sec"><p class="p-t">'+E(b.title)+'</p><div class="p-ps">'+lines(b.items).map(function(x,i){return '<div class="'+(i===1?'on':'')+'"><i></i>'+E(x)+'</div>'}).join('')+'</div></div>'}},
+ numord:{n:'番号で注文',d:'メニュー番号を入れて送信',def:{title:'番号で注文',hint:'メニュー表の番号を入力してください',num:'12',item:'ハウスコーヒー',qty:'2',label:'送信して注文する'},f:[['title','見出し'],['hint','説明'],['num','入力中の番号（見本）'],['item','番号に合う商品名（見本）'],['qty','数量（見本）'],['label','ボタンの文字']],r:function(b){var k=['1','2','3','4','5','6','7','8','9','クリア','0','⌫'];return '<div class="p-sec"><p class="p-t">'+E(b.title)+'</p><div class="p-no"><small>'+E(b.hint)+'</small><div class="p-no-d"><span>No.</span><b>'+E(b.num)+'</b></div><div class="p-no-i"><span>'+E(b.item)+'</span><div class="p-qty"><i>−</i><b>'+E(b.qty)+'</b><i>＋</i></div></div><div class="p-kp">'+k.map(function(x){return '<span class="'+(x.length>1?'s':'')+'">'+x+'</span>'}).join('')+'</div><div class="p-no-btn">'+E(b.label)+'</div></div></div>'}},
  cart:{n:'注文ボタン（カート）',d:'選んだ商品をまとめて注文',def:{label:'カート 3点',total:'注文する 2,700円'},f:[['label','左の文字'],['total','右の文字']],r:function(b){return '<div class="p-cart"><span>'+E(b.label)+'</span><span>'+E(b.total)+'</span></div>'}}
 };
-var ORDER=['head','ttl','hero','notice','menu','cal','slots','btn','pay','paysel','form','line','mail','hist','prof','list','coupon','shop','ticket','member','gal','cart'];
+var ORDER=['head','ttl','hero','notice','menu','cal','slots','btn','pay','paysel','form','line','mail','hist','prof','list','coupon','shop','ticket','member','gal','numord','cart'];
 function S(n,b){return {name:n,blocks:b}}
 var T={
  salon:{n:'サロンの予約',d:'美容室・ネイル・エステ',c:0,im:'img/salon.jpg',s:[
@@ -283,7 +289,7 @@ var T={
   S('履歴',[['ttl',{title:'予約履歴'}],['hist']]),
   S('マイページ',[['prof'],['list'],['shop']])]},
  food:{n:'飲食店のQR注文',d:'カフェ・レストラン',c:3,im:'img/food.jpg',s:[
-  S('メニュー',[['head',{title:'Trattoria Sole',sub:'テーブル 5'}],['hero',{title:'本日のおすすめ',sub:'深煎りコーヒーとグラスワイン',img:'img/food.jpg'}],['menu',{title:'おすすめ',items:'ハウスコーヒー,深煎り,450円\nカフェラテ,自家製ミルク,550円\nグラスワイン,赤・白,700円',imgs:['img/f1.jpg','img/c3.jpg','img/f3.jpg']}],['cart']]),
+  S('メニュー',[['head',{title:'Trattoria Sole',sub:'テーブル 5'}],['hero',{title:'本日のおすすめ',sub:'深煎りコーヒーとグラスワイン',img:'img/food.jpg'}],['menu',{title:'おすすめ',items:'ハウスコーヒー,深煎り,450円\nカフェラテ,自家製ミルク,550円\nグラスワイン,赤・白,700円',imgs:['img/f1.jpg','img/c3.jpg','img/f3.jpg']}],['numord'],['cart']]),
   S('注文履歴',[['ttl',{title:'ご注文の状況'}],['hist',{title:'テーブル 5',items:'12:05,グラスワイン,準備中\n12:05,ハウスコーヒー,お届け済み'}]]),
   S('お会計',[['ttl',{title:'お会計'}],['hist',{title:'ご注文の合計',items:'×1,グラスワイン,700円\n×2,ハウスコーヒー,900円'}],['paysel'],['btn',{label:'お会計に進む 1,600円'}]]),
   S('呼び出し',[['ttl',{title:'店員を呼ぶ'}],['notice',{title:'ご用件',text:'お水・取り皿などお気軽にどうぞ'}],['btn',{label:'店員を呼ぶ'}]])]},
@@ -438,7 +444,7 @@ function admRender(){var c=COLORS[st.c]||COLORS[0],el=document.getElementById('a
  var A=[];
  if(kind==='food'){
   var tb=function(n,items,st2,cls,btn){return '<div class="am-table"><div class="am-tt"><b>卓 '+n+'</b><em class="tg '+cls+'">'+st2+'</em></div><p>'+items+'</p>'+(btn?'<div class="am-sbtn">'+btn+'</div>':'')+'</div>'};
-  A.push({n:'注文',ic:'list',h:head('注文','リアルタイムで届きます')+'<div class="p-sec">'+kpi([['調理待ち','3件',''],['今日の注文','24件','▲ 3件']])+'</div><div class="p-sec am-grid">'+tb(5,E(mi(0).n)+' ×2','調理中','w','提供済みにする')+tb(2,E(mi(1).n)+' ×1','提供済み','g','おかわり')+tb(8,E(mi(2).n)+' ×3'+(cash?'<br>現金でお支払い':''),'お会計','r','支払い済みにする')+tb(3,'—','空席','','')+'</div>'});
+  A.push({n:'注文',ic:'list',h:head('注文','リアルタイムで届きます')+'<div class="p-sec">'+kpi([['調理待ち','3件',''],['今日の注文','24件','▲ 3件']])+'</div><div class="p-sec am-grid">'+tb(5,(has.numord?'No.12 ':'')+E(mi(0).n)+' ×2','調理中','w','提供済みにする')+tb(2,E(mi(1).n)+' ×1','提供済み','g','おかわり')+tb(8,E(mi(2).n)+' ×3'+(cash?'<br>現金でお支払い':''),'お会計','r','支払い済みにする')+tb(3,'—','空席','','')+'</div>'});
   A.push({n:'売上',ic:'card',h:sales});A.push({n:'メニュー',ic:'pen',h:menuScr});A.push({n:'設定',ic:'gear',h:settings});
  }else if(kind==='salon'||kind==='school'){
   var tl=function(t,n,m,tag,cls){return '<div class="am-tl"><small>'+t+'</small><div><b>'+E(n)+'</b><span>'+E(m)+'</span></div><em class="tg '+(cls||'')+'">'+E(tag)+'</em></div>'};
