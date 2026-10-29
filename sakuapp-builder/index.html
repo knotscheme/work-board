@@ -148,6 +148,9 @@ h1,h2,h3,p{margin:0}
 .pv-box.frame{border:10px solid #14212a;border-radius:44px;box-shadow:0 30px 80px rgba(0,0,0,.5)}
 .pv-scr{flex:1;overflow-y:auto;overflow-x:hidden;padding:14px 0;-webkit-overflow-scrolling:touch;scrollbar-width:none}.pv-scr::-webkit-scrollbar{display:none}
 .pv-box.frame .pv-scr{padding-top:36px}
+.pv-box.mob{position:fixed;left:0;top:0;width:100%;height:var(--vh,100%);transform:none!important;padding-top:env(safe-area-inset-top,0px);border:0;border-radius:0}
+.pv-box.mob .pv-scr{zoom:var(--z,1);padding:8px 0 10px}
+.pv-tabw{background:#fff;flex:none}.pv-box.mob .pv-tabw{padding-bottom:env(safe-area-inset-bottom,0px)}.pv-box.mob .p-tab{zoom:var(--z,1);padding:5px 4px 6px}
 .pv-x{position:fixed;right:12px;top:calc(env(safe-area-inset-top,0px) + 10px);z-index:31;border:0;border-radius:99px;background:rgba(20,33,42,.82);color:#fff;font-weight:700;font-size:13px;padding:8px 14px;cursor:pointer;-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
 .blk{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
 .blk.dragsrc{opacity:.25}
@@ -189,7 +192,7 @@ footer{text-align:center;font-size:12px;color:var(--muted);padding:24px 16px 40p
  </div>
 </main>
 <footer><a href="../sakuapp-starter/index.html">スターターパックに戻る</a>　<a href="../sakuapp-lp/index.html">サクアプについて</a>　<a href="../sakuapp-lp/privacy.html">プライバシーポリシー</a></footer>
-<div class="pv" id="pv" hidden><div class="pv-box" id="pvbox"><div class="pv-scr" id="pvscr"></div><div id="pvtab"></div></div><button type="button" class="pv-x" id="pvclose">✕ 編集にもどる</button></div>
+<div class="pv" id="pv" hidden><div class="pv-box" id="pvbox"><div class="pv-scr" id="pvscr"></div><div class="pv-tabw" id="pvtab"></div></div><button type="button" class="pv-x" id="pvclose">✕ 編集にもどる</button></div>
 <div class="toast" id="toast"></div>
 <script>
 (function(){
@@ -367,16 +370,15 @@ var pv=document.getElementById('pv'),pvbox=document.getElementById('pvbox'),pvsc
 function pvRender(){var c=COLORS[st.c]||COLORS[0];pvbox.style.setProperty('--pc',c[0]);pvbox.style.setProperty('--pc2',c[1]);var sc=st.screens[pvCur];
  pvscr.innerHTML=sc.blocks.length?sc.blocks.map(function(b){return P[b.t].r(b)}).join(''):'<p class="empty">この画面には、まだパーツがありません</p>';pvscr.scrollTop=0;
  document.getElementById('pvtab').innerHTML=st.tab?'<nav class="p-tab">'+st.screens.slice(0,5).map(function(s,i){return '<button type="button" data-v="'+i+'" class="'+(i===pvCur?'on':'')+'">'+SV(iconOf(s))+E(s.name)+'</button>'}).join('')+'</nav>':'';}
-function pvFit(){var W=window.innerWidth,H=window.innerHeight,s;
- if(W<=600){s=W/300;pvbox.classList.remove('frame');pvbox.style.height=(H/s)+'px';pvbox.style.paddingTop='calc(env(safe-area-inset-top,0px) / '+s+')';}
- else{pvbox.classList.add('frame');s=Math.min(1.5,(H-40)/630);pvbox.style.height='610px';pvbox.style.paddingTop='0'}
- pvbox.style.transform='scale('+s+')';}
+function pvFit(){var vv=window.visualViewport,W=window.innerWidth,H=vv?vv.height:window.innerHeight;
+ if(W<=600){pvbox.classList.add('mob');pvbox.classList.remove('frame');pvbox.style.removeProperty('height');pvbox.style.setProperty('--vh',H+'px');pvbox.style.setProperty('--z',Math.min(W/320,1.3).toFixed(3));pvbox.style.transform='none'}
+ else{pvbox.classList.remove('mob');pvbox.classList.add('frame');var s=Math.min(1.5,(H-40)/630);pvbox.style.height='610px';pvbox.style.transform='scale('+s+')'}}
 function pvOpen(){pvCur=st.cur;pv.hidden=false;document.documentElement.style.overflow='hidden';pvFit();pvRender()}
 function pvClose(){pv.hidden=true;document.documentElement.style.overflow='';if(pvCur!==st.cur){st.cur=pvCur;st.sel=-1;render()}}
 document.getElementById('pvopen').addEventListener('click',pvOpen);
 document.getElementById('pvclose').addEventListener('click',pvClose);
 pv.addEventListener('click',function(e){var t=e.target.closest('[data-v]');if(t){pvCur=+t.dataset.v;pvRender()}});
-window.addEventListener('resize',function(){if(!pv.hidden)pvFit()});
+window.addEventListener('resize',function(){if(!pv.hidden)pvFit()});if(window.visualViewport)window.visualViewport.addEventListener('resize',function(){if(!pv.hidden)pvFit()});
 document.addEventListener('keydown',function(e){if(e.key==='Escape'&&!pv.hidden)pvClose()});
 if(!load())useTpl('salon');else render();
 })();
