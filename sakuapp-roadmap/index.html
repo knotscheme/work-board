@@ -221,6 +221,22 @@ body.playing{padding-bottom:72px}
 .ng h4 .hi,.card.ng h4 .hi{width:20px;height:20px;padding:7px;border-radius:10px;box-sizing:content-box;max-width:none;color:var(--red);background:#ffe2d4}
 .star{display:inline-flex;gap:2px;vertical-align:-2px;margin-left:4px}.st1{width:13px;height:13px;fill:var(--yel2)}
 .pi{width:16px;height:16px;display:block;margin:auto}
+.how{list-style:none;margin:0;padding:0;display:grid;gap:12px}
+.how .hn{font:800 12px Inter,sans-serif;letter-spacing:.08em;color:#fff;background:var(--brand);border-radius:99px;padding:3px 10px}
+.how h4{font-size:17px;font-weight:900;margin:8px 0 4px;line-height:1.5}
+.how p{font-size:14.5px;color:var(--muted)}.how p b{color:var(--text)}
+.mini{width:100%;border-collapse:collapse;font-size:12.5px;margin-top:10px;font-variant-numeric:tabular-nums}
+.mini th,.mini td{border:1px solid var(--line);padding:6px 6px;text-align:center}.mini th{background:var(--mint);font-weight:700}
+.dots{margin:8px 0 0;padding-left:1.2em;font-size:14px;color:var(--muted)}.dots li{margin:3px 0}.dots b{color:var(--text)}
+.rule{display:grid;grid-template-columns:auto minmax(0,1fr);gap:4px 12px;margin-top:10px;background:var(--bg);border-radius:12px;padding:12px;font-size:13.5px;align-items:center}
+.rule span{color:var(--muted)}.rule b{font-family:Inter,"Noto Sans JP",sans-serif}.rule .warn{color:var(--red)}
+.prompt{position:relative;margin-top:10px;background:#0f2a2e;border-radius:12px;padding:44px 12px 12px}
+.prompt pre{margin:0;color:#d9f1f2;font:500 12.5px/1.7 ui-monospace,Menlo,Consolas,"Noto Sans JP",monospace;white-space:pre-wrap;word-break:break-all}
+.cp{position:absolute;top:8px;right:8px;font:700 12px "Noto Sans JP",sans-serif;background:var(--yel);color:#2b1d00;border:0;border-radius:99px;padding:5px 12px;cursor:pointer}
+.mock{margin-top:10px;border:1px solid var(--line);border-radius:12px;overflow:hidden;font-size:13px}
+.mh{background:var(--dark);color:#fff;padding:8px 12px;font-weight:700}.mh b{color:var(--yel)}
+.mr{padding:10px 12px}.mr .id{font:700 11px Inter,sans-serif;color:var(--muted)}.mr p{font-size:13px!important;color:var(--text)!important;margin:2px 0 8px;line-height:1.6}
+.mb{display:flex;gap:6px;justify-content:flex-end}.mb i{font-style:normal;font-weight:700;font-size:12px;border:1px solid var(--line);border-radius:99px;padding:4px 12px}.mb i.go{background:#06c755;border-color:#06c755;color:#fff}
 @media print{.player,.listen,.herol{display:none!important}}
 @media print{nav.tabs,.calc,.btn{display:none}.sec{padding-top:24px}}
 </style>
@@ -231,7 +247,7 @@ body.playing{padding-bottom:72px}
  <span class="kick">TikTok限定特典　<span class="num">2026</span>年版</span>
  <h1>未経験からの<br><span class="hl">アプリ副業</span><br>収益化ロードマップ</h1>
  <p class="sub">なぜ今アプリなのか。AIで自分で作ると、どこで時間とお金が消えるのか。そして、最初の売上までの5ステップ。迷わず進むための地図をまとめました。</p>
-<div class="herol"><button type="button" class="listen big" data-i="0" data-all="1" aria-label="はじめから全部読み上げる"><span class="ic" aria-hidden="true"></span><span class="lb">はじめから全部聞く</span><span class="du">約9分</span></button><span class="hn">家事や移動中に、耳で読めます</span></div>
+<div class="herol"><button type="button" class="listen big" data-i="0" data-all="1" aria-label="はじめから全部読み上げる"><span class="ic" aria-hidden="true"></span><span class="lb">はじめから全部聞く</span><span class="du">約10分</span></button><span class="hn">家事や移動中に、耳で読めます</span></div>
  <ol class="toc">
   <li><a href="#why">なぜ今、アプリ副業なのか<small>3分</small></a></li>
   <li><a href="#trap">AIで自作する前に知ること<small>計算機つき</small></a></li>
@@ -365,7 +381,7 @@ body.playing{padding-bottom:72px}
 
 <!-- AI -->
 <section class="sec" id="ai">
- <span class="tag">04 ノウハウ</span><button type="button" class="listen" data-i="4" aria-label="この章を聞くを読み上げる"><span class="ic" aria-hidden="true"></span><span class="lb">この章を聞く</span><span class="du">1:28</span></button>
+ <span class="tag">04 ノウハウ</span><button type="button" class="listen" data-i="4" aria-label="この章を聞くを読み上げる"><span class="ic" aria-hidden="true"></span><span class="lb">この章を聞く</span><span class="du">2:53</span></button>
  <h2>最強のアプリは<br><span class="nb">「API連携×AI分析」</span></h2>
  <p class="lead">予約や注文を「受け付けるだけ」のアプリは、まねされやすく値下げ競争になりがちです。いま一番強いのは、<span class="mark">外のサービスとつながり（API）、たまったデータをAIが分析して、次の一手まで提案してくれるアプリ</span>です。</p>
 
@@ -427,6 +443,53 @@ body.playing{padding-bottom:72px}
   </ul>
  </div>
 
+ <h3 id="ai-howto">作り方の6ステップ<br><span class="nb" style="font-size:15px;color:var(--muted);font-weight:700">例：サロンの「離れそうなお客様に、LINEで一声」</span></h3>
+ <p>「来なくなりそうなお客様を見つけて、送るLINEの文面までAIが用意する」機能を例に、作る順番を見ていきます。ほかの業種でも、流れは同じです。</p>
+ <ol class="how">
+  <li><div class="card">
+   <span class="hn">STEP 1</span><h4>ためるデータを決める</h4>
+   <p>AIに何を考えてほしいかから逆算して、記録する項目を決めます。<b>名前や電話番号は分析にいりません</b>。お客様はID（番号）で扱います。</p>
+   <table class="mini"><tr><th>お客様ID</th><th>来店日</th><th>メニュー</th><th>金額</th></tr><tr><td>C012</td><td>8/18</td><td>カラー</td><td>8,800円</td></tr><tr><td>C012</td><td>7/02</td><td>カット</td><td>5,500円</td></tr><tr><td>C031</td><td>9/30</td><td>カット</td><td>5,500円</td></tr></table>
+  </div></li>
+  <li><div class="card">
+   <span class="hn">STEP 2</span><h4>APIでつないで、自動でためる</h4>
+   <p>手で入力させると続きません。予約が入ったら、支払いが終わったら、の<b>「出来事」をきっかけに自動で記録</b>されるようにします。</p>
+   <ul class="dots"><li>予約アプリ → 予約が確定したら記録</li><li>Stripe（決済）→ 支払い完了の通知（Webhook）で金額を記録</li><li>LINE公式アカウント → 友だちとお客様IDをひもづける</li></ul>
+  </div></li>
+  <li><div class="card">
+   <span class="hn">STEP 3</span><h4>計算できることは、先に計算する</h4>
+   <p>いきなりAIに全部を任せないのがコツです。<b>数字で出せることはプログラムで計算</b>し、AIには「考える」部分だけを頼みます。費用も安くなり、結果もぶれにくくなります。</p>
+   <div class="rule"><span>いつもの来店間隔</span><b>45日</b><span>前回からの日数</span><b>72日</b><span>判定</span><b class="warn">1.5倍を超えた → 声かけ候補</b></div>
+  </div></li>
+  <li><div class="card">
+   <span class="hn">STEP 4</span><h4>AIへの指示文（プロンプト）を作る</h4>
+   <p>役割・条件・出力の形をはっきり書きます。<b>出力の形（JSON）を決めておく</b>と、アプリの画面にそのまま出せます。</p>
+   <div class="prompt"><button type="button" class="cp" data-cp="pr1">コピー</button><pre id="pr1">あなたは美容サロンの販促担当です。
+次のお客様データ（名前は伏せています）をもとに、
+再来店をうながすLINEメッセージを1人ずつ作ってください。
+
+# 条件
+・120文字以内、やさしい口調、押しつけない
+・前回のメニューに自然にふれる
+・割引やクーポンの約束はしない（お店が決めます）
+・出力は次のJSONだけ：
+  [{"id": "...", "message": "..."}]
+
+# データ
+[{"id":"C012","last_menu":"カラー","days_since":72,"usual_interval":45},
+ {"id":"C045","last_menu":"カット","days_since":60,"usual_interval":35}]</pre></div>
+  </div></li>
+  <li><div class="card">
+   <span class="hn">STEP 5</span><h4>結果は「提案」として見せる</h4>
+   <p>AIの文面を自動で送ってしまうのはNGです。管理画面に<b>「今週、声をかけたい人」と文面の下書き</b>を出し、お店の人が確認してから送ります。</p>
+   <div class="mock"><div class="mh">今週、声をかけたい人　<b>3人</b></div><div class="mr"><span class="id">C012</span><p>前回のカラーから少し時間が空きましたね。色落ちが気になるころかと思います。ご都合のよい日があれば…</p><div class="mb"><i>直す</i><i class="go">LINEで送る</i></div></div></div>
+  </div></li>
+  <li><div class="card">
+   <span class="hn">STEP 6</span><h4>上限を決めて、小さく試して、育てる</h4>
+   <ul class="dots"><li>AIの実行は<b>週1回</b>などに決める（毎回動かさない）</li><li>AIの利用料に<b>月の上限</b>を設定する</li><li>LINE公式アカウントの<b>月の送信数</b>（料金プラン）も確認する</li><li>送った人が<b>実際に来店したか</b>を記録して、文面や条件を見直す</li></ul>
+  </div></li>
+ </ol>
+ <div class="tip" style="margin-top:4px"><b>使う道具の例：</b>AIのAPI（ChatGPT・Claude・Geminiなど）／決まった時間に動かす仕組み（サーバーの定期実行）／LINE公式アカウントのMessaging API／Stripe。どれも無料枠やお試しから始められます。</div>
  <div class="tip" style="margin-top:14px"><b>最初の一歩：</b>いきなり全部は作りません。まずはステップ3の「最小限のアプリ」でデータをためる。数ヶ月分たまったら、AI分析を1つだけ足す。この順番が、失敗しにくい作り方です。</div>
 </section>
 
@@ -619,6 +682,11 @@ prog();
  a.addEventListener("ended",function(){if(auto)next();else ui()});
  document.querySelector(".pbar").addEventListener("click",function(e){if(a.duration){var r=this.getBoundingClientRect();a.currentTime=(e.clientX-r.left)/r.width*a.duration}});
 })();
+/* copy */
+[].forEach.call(document.querySelectorAll(".cp"),function(b){b.addEventListener("click",function(){var t=document.getElementById(b.dataset.cp).textContent;
+ function ok(){b.textContent="コピーしました";setTimeout(function(){b.textContent="コピー"},1600)}
+ if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(t).then(ok,function(){fb()})}else fb();
+ function fb(){var ta=document.createElement("textarea");ta.value=t;ta.style.position="fixed";ta.style.opacity="0";document.body.appendChild(ta);ta.select();try{document.execCommand("copy");ok()}catch(e){}document.body.removeChild(ta)}})});
 /* tabs highlight */
 var links=[].slice.call(document.querySelectorAll("nav.tabs a"));
 if("IntersectionObserver" in window){var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){links.forEach(function(a){var on=a.getAttribute("href")==="#"+e.target.id;a.classList.toggle("on",on);if(on&&a.scrollIntoView){var p=a.parentNode;p.scrollTo({left:a.offsetLeft-p.clientWidth/2+a.clientWidth/2,behavior:"smooth"})}})}})},{rootMargin:"-45% 0px -50% 0px"});
