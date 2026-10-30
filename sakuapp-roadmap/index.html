@@ -215,6 +215,12 @@ footer a{color:var(--muted);overflow-wrap:anywhere}
 .pt{flex:1;min-width:0;line-height:1.35}.pt b{display:block;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.pt small{font:600 12px Inter,sans-serif;opacity:.8}
 .pchip{flex:none;border:1px solid rgba(255,255,255,.4);background:none;color:#fff;border-radius:99px;font:700 12px Inter,sans-serif;padding:6px 9px;cursor:pointer}
 body.playing{padding-bottom:72px}
+.hi{width:22px;height:22px;flex:none;color:var(--brand)}
+.calc h3 .hi{width:24px;height:24px;padding:6px;border-radius:10px;background:var(--mint);box-sizing:content-box;max-width:none}
+.info .card h4 .hi{width:20px;height:20px;padding:7px;border-radius:10px;background:var(--mint);box-sizing:content-box;max-width:none}
+.ng h4 .hi,.card.ng h4 .hi{width:20px;height:20px;padding:7px;border-radius:10px;box-sizing:content-box;max-width:none;color:var(--red);background:#ffe2d4}
+.star{display:inline-flex;gap:2px;vertical-align:-2px;margin-left:4px}.st1{width:13px;height:13px;fill:var(--yel2)}
+.pi{width:16px;height:16px;display:block;margin:auto}
 @media print{.player,.listen,.herol{display:none!important}}
 @media print{nav.tabs,.calc,.btn{display:none}.sec{padding-top:24px}}
 </style>
@@ -295,7 +301,7 @@ body.playing{padding-bottom:72px}
  <p class="src" style="margin-top:6px">※金額は2026年時点の目安です。最新の料金は各サービスの公式サイトでご確認ください。</p>
 
  <div class="calc" id="calc1">
-  <h3>🧮 自作したら、本当はいくら？</h3>
+  <h3><svg class="hi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M8 6h8M8 10h.01M12 10h.01M16 10h.01M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h4"/></svg>自作したら、本当はいくら？</h3>
   <p class="hint">スライダーを動かすと、その場で計算します。</p>
   <div class="fld"><label for="h">完成・公開までにかかる時間<output id="hO"></output></label><input type="range" id="h" min="50" max="400" step="10" value="150"><p class="src">未経験の方が、ログイン・決済つきのアプリを公開するまでの目安は100〜300時間ほど（作るものと経験によって大きく変わります）</p></div>
   <div class="fld"><label for="wk">1週間に使える時間<output id="wkO"></output></label><input type="range" id="wk" min="2" max="20" step="1" value="7"></div>
@@ -410,7 +416,7 @@ body.playing{padding-bottom:72px}
  <div class="tip"><b>おすすめ：</b>最初は「運営がまとめて持つ」＋月の回数に上限をつけ、AI分析は上位プランに。たとえば<b>基本プラン月2,980円／AI分析つき月4,980円</b>のように分けると、AIの費用を料金でまかなえます。上限を超えて使いたい人向けに「自分のキーを入れる」設定も用意しておくと安心です。</div>
 
  <div class="card ng" style="margin-top:14px">
-  <h4 style="font-size:16px;font-weight:900;color:var(--red);margin-bottom:6px">⚠️ API×AIで、ぜったい守ること</h4>
+  <h4 style="font-size:16px;font-weight:900;color:var(--red);margin-bottom:6px;display:flex;align-items:center;gap:8px"><svg class="hi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m21.7 18-8-14a2 2 0 0 0-3.4 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.7-3Z"/><path d="M12 9v4M12 17h.01"/></svg>API×AIで、ぜったい守ること</h4>
   <ul style="margin:0;padding-left:1.2em;font-size:14.5px;color:var(--muted)">
    <li>APIキーはサーバー側で<b>暗号化して保管</b>し、画面やプログラムに直接書かない</li>
    <li>AIの<b>利用上限（月の金額・回数）</b>を必ず設定する。上限なしは高額請求のもと</li>
@@ -431,15 +437,15 @@ body.playing{padding-bottom:72px}
  <p class="lead">アプリでお金をいただく方法は、大きく5つ。副業なら、毎月入ってくる形がいちばん安定します。</p>
 
  <div class="models">
-  <div class="card md"><h4>月額サブスク</h4><span class="ex">例：月980円</span><p>会員サービスや便利ツールを月額で。積み上がるので副業向き。<span class="star">★★★</span></p></div>
-  <div class="card md"><h4>お店向けに月額で貸す</h4><span class="ex">例：月2,980円/店</span><p>予約・注文アプリを、同じ業種のお店に提供。1店ずつでも安定します。<span class="star">★★★</span></p></div>
-  <div class="card md"><h4>買い切り・都度払い</h4><span class="ex">例：1回500円</span><p>診断、テンプレート、チケットなど。始めやすい反面、毎月の集客が必要。<span class="star">★★</span></p></div>
-  <div class="card md"><h4>手数料モデル</h4><span class="ex">例：売上の10%</span><p>マッチングや予約仲介で、取引ごとに手数料。人が集まるまで時間がかかります。<span class="star">★★</span></p></div>
-  <div class="card md"><h4>自分の商売の売上アップ</h4><span class="ex">例：予約の取りこぼし減</span><p>サロンや教室を自分でしている人は、アプリで本業の売上と時間を増やすのも立派な収益化です。<span class="star">★★★</span></p></div>
+  <div class="card md"><h4>月額サブスク</h4><span class="ex">例：月980円</span><p>会員サービスや便利ツールを月額で。積み上がるので副業向き。<span class="star" aria-label="おすすめ度3"><svg class="st1" viewBox="0 0 24 24" aria-hidden="true"><path d="m12 2 3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1Z"/></svg><svg class="st1" viewBox="0 0 24 24" aria-hidden="true"><path d="m12 2 3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1Z"/></svg><svg class="st1" viewBox="0 0 24 24" aria-hidden="true"><path d="m12 2 3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1Z"/></svg></span></p></div>
+  <div class="card md"><h4>お店向けに月額で貸す</h4><span class="ex">例：月2,980円/店</span><p>予約・注文アプリを、同じ業種のお店に提供。1店ずつでも安定します。<span class="star" aria-label="おすすめ度3"><svg class="st1" viewBox="0 0 24 24" aria-hidden="true"><path d="m12 2 3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1Z"/></svg><svg class="st1" viewBox="0 0 24 24" aria-hidden="true"><path d="m12 2 3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1Z"/></svg><svg class="st1" viewBox="0 0 24 24" aria-hidden="true"><path d="m12 2 3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1Z"/></svg></span></p></div>
+  <div class="card md"><h4>買い切り・都度払い</h4><span class="ex">例：1回500円</span><p>診断、テンプレート、チケットなど。始めやすい反面、毎月の集客が必要。<span class="star" aria-label="おすすめ度2"><svg class="st1" viewBox="0 0 24 24" aria-hidden="true"><path d="m12 2 3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1Z"/></svg><svg class="st1" viewBox="0 0 24 24" aria-hidden="true"><path d="m12 2 3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1Z"/></svg></span></p></div>
+  <div class="card md"><h4>手数料モデル</h4><span class="ex">例：売上の10%</span><p>マッチングや予約仲介で、取引ごとに手数料。人が集まるまで時間がかかります。<span class="star" aria-label="おすすめ度2"><svg class="st1" viewBox="0 0 24 24" aria-hidden="true"><path d="m12 2 3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1Z"/></svg><svg class="st1" viewBox="0 0 24 24" aria-hidden="true"><path d="m12 2 3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1Z"/></svg></span></p></div>
+  <div class="card md"><h4>自分の商売の売上アップ</h4><span class="ex">例：予約の取りこぼし減</span><p>サロンや教室を自分でしている人は、アプリで本業の売上と時間を増やすのも立派な収益化です。<span class="star" aria-label="おすすめ度3"><svg class="st1" viewBox="0 0 24 24" aria-hidden="true"><path d="m12 2 3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1Z"/></svg><svg class="st1" viewBox="0 0 24 24" aria-hidden="true"><path d="m12 2 3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1Z"/></svg><svg class="st1" viewBox="0 0 24 24" aria-hidden="true"><path d="m12 2 3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1Z"/></svg></span></p></div>
  </div>
 
  <div class="calc" id="calc2">
-  <h3>📈 月額モデルの手取りを試算</h3>
+  <h3><svg class="hi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m22 7-8.5 8.5-5-5L2 17"/><path d="M16 7h6v6"/></svg>月額モデルの手取りを試算</h3>
   <p class="hint">月額料金と利用者数を動かしてみてください。</p>
   <div class="fld"><label for="pr">月額料金<output id="prO"></output></label><input type="range" id="pr" min="300" max="10000" step="100" value="2980"></div>
   <div class="fld"><label for="us">利用者（お店）の数<output id="usO"></output></label><input type="range" id="us" min="1" max="100" step="1" value="10"></div>
@@ -482,12 +488,12 @@ body.playing{padding-bottom:72px}
  <h2>税金・手続き・<br><span class="nb">やってはいけないこと</span></h2>
  <p class="lead">始めてから慌てないように、最低限ここだけは押さえておきましょう。</p>
  <div class="info">
-  <div class="card"><h4>🏢 会社のルール</h4><p>会社員の方は、まず就業規則で副業が認められているか確認しましょう。届け出が必要な会社もあります。</p></div>
-  <div class="card"><h4>🧾 税金（会社員の場合）</h4><ul><li>副業の<b>所得</b>（売上から経費を引いた額）が年20万円以下なら、所得税の確定申告は原則不要</li><li>ただし<b>住民税の申告は必要</b>です（お住まいの市区町村へ）</li><li>20万円を超えたら確定申告をします</li></ul><p class="src" style="margin-top:6px">※条件によって変わります。くわしくは税務署・市区町村・税理士にご確認ください。</p></div>
-  <div class="card"><h4>📄 お金をもらうなら必要なページ</h4><ul><li>特定商取引法に基づく表記（販売者の情報）</li><li>プライバシーポリシー（個人情報の扱い）</li><li>利用規約（ルールと返金の扱い）</li></ul></div>
-  <div class="card"><h4>💳 決済のしくみ</h4><p>カード決済は、Stripeなどの決済サービスを使うのが安全です。カード情報を自分で預からずにすみます。手数料は国内カードで売上の3.6%（Stripeの場合）。開設には本人確認と口座の登録が必要です。</p></div>
-  <div class="card"><h4>📱 Webアプリから始める</h4><p>App StoreやGoogle Playに出さなくても、スマホのホーム画面に置けるWebアプリが作れます。審査も登録料もいらないので、最初の一歩に最適です。</p></div>
-  <div class="card ng"><h4>⚠️ やってはいけないこと</h4><ul><li>他社サイトの情報を無断で集めて使う（規約違反になりやすい）</li><li>他人の画像・ロゴ・キャラクターを使う</li><li>「誰でも必ず稼げる」などの大げさな宣伝</li><li>パスワードやAPIキーをプログラムに直接書いて公開する</li><li>お客様の個人情報を、目的外に使う</li></ul></div>
+  <div class="card"><h4><svg class="hi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M9 22v-4h6v4M8 6h.01M16 6h.01M12 6h.01M12 10h.01M12 14h.01M16 10h.01M16 14h.01M8 10h.01M8 14h.01"/></svg>会社のルール</h4><p>会社員の方は、まず就業規則で副業が認められているか確認しましょう。届け出が必要な会社もあります。</p></div>
+  <div class="card"><h4><svg class="hi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"/><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8M12 17.5v-11"/></svg>税金（会社員の場合）</h4><ul><li>副業の<b>所得</b>（売上から経費を引いた額）が年20万円以下なら、所得税の確定申告は原則不要</li><li>ただし<b>住民税の申告は必要</b>です（お住まいの市区町村へ）</li><li>20万円を超えたら確定申告をします</li></ul><p class="src" style="margin-top:6px">※条件によって変わります。くわしくは税務署・市区町村・税理士にご確認ください。</p></div>
+  <div class="card"><h4><svg class="hi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4M10 13h4M10 17h4M10 9h1"/></svg>お金をもらうなら必要なページ</h4><ul><li>特定商取引法に基づく表記（販売者の情報）</li><li>プライバシーポリシー（個人情報の扱い）</li><li>利用規約（ルールと返金の扱い）</li></ul></div>
+  <div class="card"><h4><svg class="hi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20M6 15h4"/></svg>決済のしくみ</h4><p>カード決済は、Stripeなどの決済サービスを使うのが安全です。カード情報を自分で預からずにすみます。手数料は国内カードで売上の3.6%（Stripeの場合）。開設には本人確認と口座の登録が必要です。</p></div>
+  <div class="card"><h4><svg class="hi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="2" width="14" height="20" rx="2"/><path d="M12 18h.01"/></svg>Webアプリから始める</h4><p>App StoreやGoogle Playに出さなくても、スマホのホーム画面に置けるWebアプリが作れます。審査も登録料もいらないので、最初の一歩に最適です。</p></div>
+  <div class="card ng"><h4><svg class="hi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m21.7 18-8-14a2 2 0 0 0-3.4 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.7-3Z"/><path d="M12 9v4M12 17h.01"/></svg>やってはいけないこと</h4><ul><li>他社サイトの情報を無断で集めて使う（規約違反になりやすい）</li><li>他人の画像・ロゴ・キャラクターを使う</li><li>「誰でも必ず稼げる」などの大げさな宣伝</li><li>パスワードやAPIキーをプログラムに直接書いて公開する</li><li>お客様の個人情報を、目的外に使う</li></ul></div>
  </div>
 </section>
 
@@ -547,8 +553,8 @@ body.playing{padding-bottom:72px}
   <button type="button" id="pPlay" class="pbtn" aria-label="一時停止"><span class="ic" aria-hidden="true"></span></button>
   <div class="pt"><b id="pTitle"></b><small id="pTime"></small></div>
   <button type="button" id="pSpeed" class="pchip" aria-label="再生速度">1.0×</button>
-  <button type="button" id="pNext" class="pbtn sm" aria-label="次の章へ">⏭</button>
-  <button type="button" id="pClose" class="pbtn sm" aria-label="閉じる">✕</button>
+  <button type="button" id="pNext" class="pbtn sm" aria-label="次の章へ"><svg class="pi" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M5 5.5v13a1 1 0 0 0 1.5.86L16 13.7V18a1 1 0 0 0 2 0V6a1 1 0 0 0-2 0v4.3L6.5 4.64A1 1 0 0 0 5 5.5Z"/></svg></button>
+  <button type="button" id="pClose" class="pbtn sm" aria-label="閉じる"><svg class="pi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
  </div>
 </div>
 <audio id="aud" preload="none"></audio>
