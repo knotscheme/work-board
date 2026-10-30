@@ -181,6 +181,18 @@ footer{padding:28px 0 40px;font-size:12px;color:var(--muted)}
 footer ol{padding-left:1.3em;margin:8px 0 0}
 footer a{color:var(--muted);overflow-wrap:anywhere}
 @media(min-width:640px){.reasons{grid-template-columns:1fr 1fr}.stat{grid-template-columns:repeat(4,minmax(0,1fr))}.info{grid-template-columns:1fr 1fr}.models{grid-template-columns:1fr 1fr}}
+.flow{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:4px 0 6px;counter-reset:f}
+.flow div{position:relative;background:var(--card);border:1.5px solid var(--brand);border-radius:14px;padding:12px 10px 10px 40px;line-height:1.4}
+.flow div:before{counter-increment:f;content:counter(f);position:absolute;left:10px;top:12px;width:22px;height:22px;border-radius:50%;background:var(--brand);color:#fff;font:800 12px/22px Inter,sans-serif;text-align:center}
+.flow div:last-child{border-color:var(--yel2);background:var(--yl)}.flow div:last-child:before{background:var(--yel2)}
+.flow b{display:block;font-size:14.5px}.flow small{font-size:12px;color:var(--muted)}
+.ai-t th{width:32%!important}
+.apiui{border:1px solid var(--line);border-radius:12px;overflow:hidden;font-size:14px}
+.apih{background:var(--dark);color:#fff;font-weight:700;padding:9px 12px;font-size:13px}
+.apir{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 12px;border-top:1px solid var(--line)}
+.apir span{font-weight:700;line-height:1.4}.apir i{font-style:normal;font-size:12px;color:var(--muted);text-align:right;flex:none;max-width:52%}
+.apir i.on{color:#0a7a3e;background:#e3f6ea;border-radius:99px;padding:2px 10px;font-weight:700}
+@media(min-width:640px){.flow{grid-template-columns:repeat(4,minmax(0,1fr))}}
 @media print{nav.tabs,.calc,.btn{display:none}.sec{padding-top:24px}}
 </style>
 </head>
@@ -194,6 +206,7 @@ footer a{color:var(--muted);overflow-wrap:anywhere}
   <li><a href="#why">なぜ今、アプリ副業なのか<small>3分</small></a></li>
   <li><a href="#trap">AIで自作する前に知ること<small>計算機つき</small></a></li>
   <li><a href="#road">収益化までの5ステップ<small>ロードマップ</small></a></li>
+  <li><a href="#ai">最強のアプリは「API×AI分析」<small>ノウハウ</small></a></li>
   <li><a href="#money">稼ぎ方と、お金の計算<small>試算つき</small></a></li>
   <li><a href="#ideas">副業向けアプリのアイデア10<small>例</small></a></li>
   <li><a href="#info">税金・手続き・NG集<small>保存版</small></a></li>
@@ -202,7 +215,7 @@ footer a{color:var(--muted);overflow-wrap:anywhere}
 </div></header>
 
 <nav class="tabs" aria-label="目次"><div class="w">
- <a href="#why">なぜ今</a><a href="#trap">自作の落とし穴</a><a href="#road">5ステップ</a><a href="#money">お金</a><a href="#ideas">アイデア</a><a href="#info">税金・手続き</a><a href="#check">チェック</a>
+ <a href="#why">なぜ今</a><a href="#trap">自作の落とし穴</a><a href="#road">5ステップ</a><a href="#ai">API×AI</a><a href="#money">お金</a><a href="#ideas">アイデア</a><a href="#info">税金・手続き</a><a href="#check">チェック</a>
 </div></nav>
 
 <main class="w">
@@ -320,9 +333,76 @@ footer a{color:var(--muted);overflow-wrap:anywhere}
  </ol>
 </section>
 
+<!-- AI -->
+<section class="sec" id="ai">
+ <span class="tag">04 ノウハウ</span>
+ <h2>最強のアプリは<br><span class="nb">「API連携×AI分析」</span></h2>
+ <p class="lead">予約や注文を「受け付けるだけ」のアプリは、まねされやすく値下げ競争になりがちです。いま一番強いのは、<span class="mark">外のサービスとつながり（API）、たまったデータをAIが分析して、次の一手まで提案してくれるアプリ</span>です。</p>
+
+ <div class="flow">
+  <div><b>データがたまる</b><small>予約・売上・お客様</small></div>
+  <div><b>APIでつながる</b><small>LINE・カレンダー・決済</small></div>
+  <div><b>AIが分析</b><small>傾向・予兆を見つける</small></div>
+  <div><b>次の一手を提案</b><small>文面・時期・対象</small></div>
+ </div>
+
+ <h3>なぜ「最強」なのか</h3>
+ <div class="reasons">
+  <div class="card rs"><span class="n">1</span><h4>高い値段でも選ばれる</h4><p>「記録するアプリ」は月数百円の世界。「売上を増やす提案をくれるアプリ」なら、月数千円でも払う理由になります。</p></div>
+  <div class="card rs"><span class="n">2</span><h4>やめられにくい</h4><p>使うほどデータがたまり、AIの提案が的確になります。ほかのアプリに乗りかえにくくなり、月額が長く続きます。</p></div>
+  <div class="card rs"><span class="n">3</span><h4>まねされにくい</h4><p>画面はまねできても、「その業種のデータ×分析のしかた」はまねしにくい。あなたの現場の知識が、そのまま差になります。</p></div>
+  <div class="card rs"><span class="n">4</span><h4>お客様の手間がほぼゼロ</h4><p>APIで自動でつながるので、入力し直す必要がありません。LINEや決済の情報が、勝手にたまっていきます。</p></div>
+ </div>
+
+ <h3>業種別：こんなAI分析が作れる</h3>
+ <table class="cost ai-t">
+  <tr><th>サロン</th><td>予約の間隔から<b>「そろそろ来なくなりそうな人」</b>を見つけ、LINEで送る文面まで提案</td></tr>
+  <tr><th>飲食店</th><td>曜日・天気と注文から<b>よく出るメニューと仕込み量</b>を予測</td></tr>
+  <tr><th>教室・スクール</th><td>出欠と振替から<b>退会しそうな生徒</b>を早めに知らせる</td></tr>
+  <tr><th>ネットショップ</th><td>売れ筋と在庫から<b>次に仕入れる商品</b>と、商品説明文を作成</td></tr>
+  <tr><th>クリエイター・講師</th><td>会員の反応から<b>次に作るべきコンテンツ</b>を提案</td></tr>
+ </table>
+
+ <h3>「APIを設定できる画面」を入れておく</h3>
+ <p>管理画面に<b>「連携の設定」</b>を用意して、お客様（お店）が自分でつなぎ先を選べるようにします。あとから機能を足すときも、作り直さずにすみます。</p>
+ <div class="card" style="margin-top:14px">
+  <div class="apiui">
+   <div class="apih">連携の設定</div>
+   <div class="apir"><span>LINE公式アカウント</span><i class="on">接続中</i></div>
+   <div class="apir"><span>Googleカレンダー</span><i class="on">接続中</i></div>
+   <div class="apir"><span>Stripe（決済）</span><i class="on">接続中</i></div>
+   <div class="apir"><span>AI分析（APIキー）</span><i>●●●●●●●● 設定済み</i></div>
+   <div class="apir"><span>AIの月の利用上限</span><i>1,000円まで</i></div>
+  </div>
+ </div>
+
+ <h3>AIの費用、だれが持つ？　2つの作り方</h3>
+ <table class="dec">
+  <tr><th></th><th>お客様が自分のキーを入れる</th><th>運営がまとめて持つ</th></tr>
+  <tr><td>AIの費用</td><td>お客様が直接負担<br>（あなたの原価ゼロ）</td><td>あなたが負担<br>（料金に含める）</td></tr>
+  <tr><td>使いやすさ</td><td>最初の設定が少し手間</td><td>すぐ使える</td></tr>
+  <tr><td>向いている相手</td><td>ITに慣れた人・大口</td><td>個人店・はじめての人</td></tr>
+ </table>
+ <div class="tip"><b>おすすめ：</b>最初は「運営がまとめて持つ」＋月の回数に上限をつけ、AI分析は上位プランに。たとえば<b>基本プラン月2,980円／AI分析つき月4,980円</b>のように分けると、AIの費用を料金でまかなえます。上限を超えて使いたい人向けに「自分のキーを入れる」設定も用意しておくと安心です。</div>
+
+ <div class="card ng" style="margin-top:14px">
+  <h4 style="font-size:16px;font-weight:900;color:var(--red);margin-bottom:6px">⚠️ API×AIで、ぜったい守ること</h4>
+  <ul style="margin:0;padding-left:1.2em;font-size:14.5px;color:var(--muted)">
+   <li>APIキーはサーバー側で<b>暗号化して保管</b>し、画面やプログラムに直接書かない</li>
+   <li>AIの<b>利用上限（月の金額・回数）</b>を必ず設定する。上限なしは高額請求のもと</li>
+   <li>お客様の名前や電話番号は、<b>AIに送る前に伏せる</b>（分析に個人名はいらない）</li>
+   <li>プライバシーポリシーに「AIで分析すること」と「送る先のサービス」を書く</li>
+   <li>AIの提案は「参考」として見せ、最後はお店の人が決める形にする</li>
+   <li>つなぎ先のサービスの利用規約（APIの使い方のルール）を確認する</li>
+  </ul>
+ </div>
+
+ <div class="tip" style="margin-top:14px"><b>最初の一歩：</b>いきなり全部は作りません。まずはステップ3の「最小限のアプリ」でデータをためる。数ヶ月分たまったら、AI分析を1つだけ足す。この順番が、失敗しにくい作り方です。</div>
+</section>
+
 <!-- 4 MONEY -->
 <section class="sec" id="money">
- <span class="tag">04 稼ぎ方</span>
+ <span class="tag">05 稼ぎ方</span>
  <h2>アプリの稼ぎ方と、<br><span class="nb">お金の計算</span></h2>
  <p class="lead">アプリでお金をいただく方法は、大きく5つ。副業なら、毎月入ってくる形がいちばん安定します。</p>
 
@@ -355,7 +435,7 @@ footer a{color:var(--muted);overflow-wrap:anywhere}
 
 <!-- 5 IDEAS -->
 <section class="sec" id="ideas">
- <span class="tag">05 アイデア</span>
+ <span class="tag">06 アイデア</span>
  <h2>副業向けアプリの<br><span class="nb">アイデア10</span></h2>
  <p class="lead">そのまま使っても、組み合わせても。「自分が知っている現場」に近いものから考えるのがおすすめです。</p>
  <div class="ideas">
@@ -374,7 +454,7 @@ footer a{color:var(--muted);overflow-wrap:anywhere}
 
 <!-- 6 INFO -->
 <section class="sec" id="info">
- <span class="tag">06 保存版</span>
+ <span class="tag">07 保存版</span>
  <h2>税金・手続き・<br><span class="nb">やってはいけないこと</span></h2>
  <p class="lead">始めてから慌てないように、最低限ここだけは押さえておきましょう。</p>
  <div class="info">
@@ -389,7 +469,7 @@ footer a{color:var(--muted);overflow-wrap:anywhere}
 
 <!-- 7 CHECK -->
 <section class="sec" id="check">
- <span class="tag">07 チェックリスト</span>
+ <span class="tag">08 チェックリスト</span>
  <h2>スタート前<br><span class="nb">チェックリスト</span></h2>
  <p class="lead">全部にチェックがついたら、準備はばっちりです。</p>
  <div class="chk" id="chk">
@@ -420,7 +500,7 @@ footer a{color:var(--muted);overflow-wrap:anywhere}
  <p class="small">売り込みはしません。相談だけでもOK。ブロックもいつでも自由です。</p>
  <div class="svc">
   <h3>アプリ開発を頼むなら「サクアプ」</h3>
-  <p>個人事業主・副業の方のための、AIを使ったオーダーメイドのアプリ開発です。料金は「基本料金＋追加機能1文字0.5円」。見積もりの時点で総額がわかります。</p>
+  <p>個人事業主・副業の方のための、AIを使ったオーダーメイドのアプリ開発です。料金は「基本料金＋追加機能1文字0.5円」。見積もりの時点で総額がわかります。API連携やAI分析の機能も、追加機能としてお作りできます。</p>
   <div class="pr"><span>基本料金 <b>19,800</b>円〜</span><span>12回払いなら 月々約<b>1,650</b>円〜</span></div>
   <p class="src" style="margin-top:6px">※分割の場合、カード会社の分割手数料が別にかかります。</p>
  </div>
